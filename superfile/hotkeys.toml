@@ -1,5 +1,5 @@
 # =================================================================================================
-# Here is global, all global key can't conflicts with other hotkeys
+# Global hotkeys (cannot conflict with other hotkeys)
 confirm = ['enter', 'l']
 quit = ['ctrl+c', 'leader+q']
 # movement
@@ -29,22 +29,23 @@ compress_file = ['ctrl+a', '']
 # editor
 open_file_with_editor = ['e', '']
 open_current_directory_with_editor = ['E', '']
-# else
+# other
 pinned_directory = ['P', '']
 toggle_dot_file = ['.', '']
 change_panel_mode = ['v', '']
 open_help_menu = ['?', '']
 open_command_line = [':', '']
+copy_path = ['ctrl+p', '']
 # =================================================================================================
-# Here is typing hotkey can conflict with all hotkeys
+# Typing hotkeys (can conflict with all hotkeys)
 confirm_typing = ['enter', '']
 cancel_typing = ['esc', '']
 # =================================================================================================
-# Here is normal mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)
+# Normal mode hotkeys (can conflict with other modes, cannot conflict with global hotkeys)
 parent_directory = ['-', 'h']
 search_bar = ['/', '']
 # =================================================================================================
-# Here is select mode hotkey you can conflicts with other mode (can't conflicts with global hotkey)
+# Select mode hotkeys (can conflict with other modes, cananot conflict with global hotkeys)
 file_panel_select_mode_items_select_down = ['J', '']
 file_panel_select_mode_items_select_up = ['K', '']
 file_panel_select_all_items = ['A', '']
