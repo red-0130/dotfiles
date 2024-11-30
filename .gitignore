@@ -1,2 +1,4 @@
 fonts/.uuid
 nvim/lazy-lock.json
+fonts/.local/share/fonts/.uuid
+nvim/.config/nvim/lazy-lock.json
