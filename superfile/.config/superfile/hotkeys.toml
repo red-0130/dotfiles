@@ -5,6 +5,8 @@ quit = ['ctrl+c', 'leader+q']
 # movement
 list_up = ['k', '']
 list_down = ['j', '']
+page_up = ['pgup', '']
+page_down = ['pgdown', '']
 # file panel control
 close_file_panel = ['q', '']
 create_new_file_panel = ['n', '']
@@ -38,6 +40,8 @@ change_panel_mode = ['v', '']
 open_help_menu = ['?', '']
 open_command_line = [':', '']
 copy_path = ['ctrl+p', '']
+copy_present_working_directory = ['c', '']
+toggle_footer = ['F', '']
 # =================================================================================================
 # Typing hotkeys (can conflict with all hotkeys)
 confirm_typing = ['enter', '']
