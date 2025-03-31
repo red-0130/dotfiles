@@ -1,15 +1,15 @@
 #!/bin/env bash
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-if [[ dpkg -s apt ]]; then
+if [[ "sudo dpkg -s apt" ]]; then
   sudo apt update
 fi
-if ! [[ "sudo dpkg -s stow" ]]; then
+if [[ "sudo dpkg -s stow -eq 0" ]]; then
   echo "Installing GNU Stow"
   sudo apt install stow
 fi
 
-if ! [[ "sudo dpkg -s whiptail" ]]; then
+if [[ "sudo dpkg -s whiptail -eq 0" ]]; then
   sudo apt install whiptail
 fi
 
@@ -51,3 +51,5 @@ whiptail --title "Which config do you want to install?" --checklist --separate-o
     fi
 
   done
+
+echo "Finished installing config"

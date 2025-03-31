@@ -4,13 +4,9 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 if [[ "dpkg -s apt" ]]; then
   sudo apt update
 fi
-if ! [[ "sudo dpkg -s stow" ]]; then
+if [[ "dpkg -s stow -eq 0" ]]; then
   echo "Installing GNU Stow"
   sudo apt install stow
-fi
-
-if ! [[ "sudo dpkg -s whiptail" ]]; then
-  sudo apt install whiptail
 fi
 
 # Install Oh-My-Bash and import config
