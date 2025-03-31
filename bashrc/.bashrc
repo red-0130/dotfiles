@@ -122,11 +122,14 @@ source "$OSH"/oh-my-bash.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-export EDITOR='nvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='nvim'
+else
+  export EDITOR='nvim'
+fi
+
+# Exporting nvim to PATH
+export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
