@@ -30,7 +30,11 @@ whiptail --title "Which config do you want to install?" --checklist --separate-o
     fi
 
     if [[ "sudo dpkg -s stow" ]]; then
+<<<<<<< HEAD
       stow -d "$SCRIPT_DIR" -R "$choice"
+=======
+      stow -R -d "$SCRIPT_DIR/$choice"
+>>>>>>> refs/remotes/origin/main
     fi
 
     if [[ "$choice" -eq "fonts" ]]; then
