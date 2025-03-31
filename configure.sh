@@ -4,12 +4,15 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 main() {
   checkApt
-  installWhiptail
-  startInteractive
+  if installWhiptail; then
+    startInteractive
+  fi
 }
 
 startInteractive() {
-  whiptail --title "Select application/config you want to apply" --checklist --separate-output \
+  echo "Starting interactve script"
+  whiptail --title "DOTFILES Setup" --separate-output \
+    --checklist "Select Application/Config to apply" 20 60 10 \
     "bashrc" "bashrc config" OFF \
     "nvim" "Install Neovim and apply configuration" OFF \
     "kitty" "Kitty terminal configuration" OFF \
@@ -23,28 +26,29 @@ startInteractive() {
       CONFIG_MAIN="$SCRIPT_DIR/$CHOICE"
       CONFIG_LOCAL="$HOME/.config/$CHOICE"
 
-      if [[ "$CHOICE" -eq "bashrc" ]]; then
+      if [[ "$CHOICE" = "bashrc" ]]; then
         echo "bashrc configuration require the installation of 'ohmybash'."
         echo "Installing Oh-My-Bash"
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+        applyConfig "$CONFIG_MAIN/.bashrc" "$HOME"
       fi
 
-      if [[ "$CHOICE" -eq "fonts" ]]; then
+      if [[ "$CHOICE" = "fonts" ]]; then
         echo "Installing fonts"
         fc-cache -v $HOME/.local/share/fonts
       fi
 
-      if [[ "$CHOICE" -eq "nvim" ]]; then
+      if [[ "$CHOICE" = "nvim" ]]; then
         installNeovim
         applyConfig "$CONFIG_MAIN/.config/$CHOICE" "$CONFIG_LOCAL"
       fi
 
-      if [[ "$CHOICE" -eq "superfile" ]]; then
+      if [[ "$CHOICE" = "superfile" ]]; then
         echo "Installing Superfile"
         bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
       fi
 
-      if [[ "$CHOICE" -eq "ssh" ]]; then
+      if [[ "$CHOICE" = "ssh" ]]; then
         appendSshConfig
 
       fi
@@ -57,19 +61,23 @@ startInteractive() {
 
 checkApt() {
   if ! sudo dpkg -s apt &>/dev/null; then
+    echo "ERROR: APT is not installed."
     exit 0
   else
+    echo "Updating apt repositories"
     sudo apt update
-    sudo apt full-upgrade
-    exit 1
+    echo "Proceeding with system upgrade."
+    sudo apt full-upgrade -y
   fi
 }
 
 installWhiptail() {
-  if ! sudo dpkg -s whiptail &>/null/dev; then
+  if ! sudo dpkg -s whiptail &>/dev/null; then
     echo "Whiptail is not installed. Starting installation now."
-    sudo apt install whiptail
+    sudo apt install whiptail -y
     echo "Done."
+  else
+    echo "Whiptail is installed. Proceeding to interactive script."
   fi
 }
 
@@ -81,6 +89,9 @@ applyConfig() {
   CONFIG_DES="$2"
   if [[ -e "$CONFIG_DES" ]]; then
     makeBackup $CONFIG_DES
+  fi
+  if [[ ! -d "$HOME/.config" ]]; then
+    mkdir "$HOME/.config"
   fi
   ln -sf "$CONFIG" "$CONFIG_DES"
   echo "Finished applying config."
