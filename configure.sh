@@ -1,52 +1,59 @@
 #!/bin/env bash
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-checkApt
-installWhiptail
 
-whiptail --title "Which config do you want to install?" --checklist --separate-output \
-  "bashrc" "bashrc config" OFF \
-  "nvim" "Install Neovim and apply configuration" OFF \
-  "kitty" "Kitty terminal configuration" OFF \
-  "mpv" "MPV config" OFF \
-  "superfile" "Superfile config" OFF \
-  "fonts" "Install fonts" OFF \
-  "gitconfig" "Git config" OFF \
-  "ssh" "SSH config" OFF \
-  3>&1 1>&2 2>&3 |
-  while read CHOICE; do
-    CONFIG_MAIN="$SCRIPT_DIR/$CHOICE"
-    CONFIG_LOCAL="$HOME/.config/$CHOICE"
+main() {
+  checkApt
+  installWhiptail
+  startInteractive
+}
 
-    if [[ "$CHOICE" -eq "bashrc" ]]; then
-      echo "bashrc configuration require the installation of 'ohmybash'."
-      echo "Installing Oh-My-Bash"
-      bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
-    fi
+startInteractive() {
+  whiptail --title "Select application/config you want to apply" --checklist --separate-output \
+    "bashrc" "bashrc config" OFF \
+    "nvim" "Install Neovim and apply configuration" OFF \
+    "kitty" "Kitty terminal configuration" OFF \
+    "mpv" "MPV config" OFF \
+    "superfile" "Superfile config" OFF \
+    "fonts" "Install fonts" OFF \
+    "gitconfig" "Git config" OFF \
+    "ssh" "SSH config" OFF \
+    3>&1 1>&2 2>&3 |
+    while read CHOICE; do
+      CONFIG_MAIN="$SCRIPT_DIR/$CHOICE"
+      CONFIG_LOCAL="$HOME/.config/$CHOICE"
 
-    if [[ "$CHOICE" -eq "fonts" ]]; then
-      echo "Installing fonts"
-      fc-cache -v $HOME/.local/share/fonts
-    fi
+      if [[ "$CHOICE" -eq "bashrc" ]]; then
+        echo "bashrc configuration require the installation of 'ohmybash'."
+        echo "Installing Oh-My-Bash"
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+      fi
 
-    if [[ "$CHOICE" -eq "nvim" ]]; then
-      installNeovim
-      applyConfig "$CONFIG_MAIN/.config/$CHOICE" "$CONFIG_LOCAL"
-    fi
+      if [[ "$CHOICE" -eq "fonts" ]]; then
+        echo "Installing fonts"
+        fc-cache -v $HOME/.local/share/fonts
+      fi
 
-    if [[ "$CHOICE" -eq "superfile" ]]; then
-      echo "Installing Superfile"
-      bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
-    fi
+      if [[ "$CHOICE" -eq "nvim" ]]; then
+        installNeovim
+        applyConfig "$CONFIG_MAIN/.config/$CHOICE" "$CONFIG_LOCAL"
+      fi
 
-    if [[ "$CHOICE" -eq "ssh" ]]; then
-      appendSshConfig
+      if [[ "$CHOICE" -eq "superfile" ]]; then
+        echo "Installing Superfile"
+        bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
+      fi
 
-    fi
+      if [[ "$CHOICE" -eq "ssh" ]]; then
+        appendSshConfig
 
-  done
+      fi
 
-echo "Finished installing config"
+    done
+
+  echo "Finished installing config"
+
+}
 
 checkApt() {
   if ! sudo dpkg -s apt &>/dev/null; then
@@ -145,3 +152,6 @@ installFd() {
   sudo apt install fd-find
   echo "Done."
 }
+
+main "$@"
+exit
