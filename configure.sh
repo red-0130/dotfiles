@@ -50,6 +50,19 @@ whiptail --title "Which config do you want to install?" --checklist --separate-o
       bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
     fi
 
+    if [[ "$choice" -eq "ssh" ]]; then
+      appendSshConfig
+
+    fi
+
   done
 
 echo "Finished installing config"
+
+appendSshConfig() {
+  INCLUDES="Include "$HOME"/.config/ssh/config"
+  FILE="$HOME/.ssh/config"
+  if [[ ! -z "$(grep "$INCLUDES" "$FILE")" ]]; then
+    echo -e "$INCLUDES\n$(cat $FILE)" >"$FILE"
+  fi
+}
