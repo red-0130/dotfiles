@@ -1,7 +1,7 @@
 #!/bin/env bash
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-if [[ dpkg -s apt ]]; then
+if [[ "dpkg -s apt" ]]; then
   sudo apt update
 fi
 if ! [[ "sudo dpkg -s stow" ]]; then
@@ -29,6 +29,5 @@ stow -R "$SCRIPT_DIR/nvim"
 echo "Installing Superfile"
 bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
 stow -R "$SCRIPT_DIR/superfile"
-
 
 echo "Script is finished executing"
