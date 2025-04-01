@@ -40,8 +40,7 @@ startInteractive() {
       fi
 
       if [[ "$CHOICE" = "superfile" ]]; then
-        echo "Installing Superfile"
-        bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
+        installSpf
       fi
 
       if [[ "$CHOICE" = "ssh" ]]; then
@@ -53,6 +52,25 @@ startInteractive() {
 
   echo "Finished installing config"
 
+}
+
+installSpf() {
+  echo "Installing Superfile"
+  bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
+  if [[ -d "$HOME/.config/superfile" ]]; then
+    echo "Making backup of local config"
+    makeBackup "$HOME/.config/superfile"
+  fi
+  if [[ ! -d $HOME/.config ]]; then
+    mkdir "$HOME/.config"
+  fi
+  echo "Importing config"
+  ln -s "$SCRIPT_DIR/superfile/.config/superfile" "$HOME/.config/superfile"
+  if ! grep "source $HOME/.config/superfile/cd_on_quit.sh" "$HOME/.bashrc"; then
+    echo "Importing cd_on_quit script from config"
+    echo "source $HOME/.config/superfile/cd_on_quit.sh" >>"$HOME/.bashrc"
+  fi
+  echo "Done."
 }
 
 checkApt() {
