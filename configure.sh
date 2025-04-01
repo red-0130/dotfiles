@@ -68,6 +68,7 @@ installSpf() {
   ln -s "$SCRIPT_DIR/superfile/.config/superfile" "$HOME/.config/superfile"
   if ! grep "source $HOME/.config/superfile/cd_on_quit.sh" "$HOME/.bashrc"; then
     echo "Importing cd_on_quit script from config"
+    echo -e "\n#Superfile cd_on_quit script" >>"$HOME/.bashrc"
     echo "source $HOME/.config/superfile/cd_on_quit.sh" >>"$HOME/.bashrc"
   fi
   echo "Done."
