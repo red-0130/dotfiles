@@ -13,14 +13,9 @@ startInteractive() {
   echo "Starting interactve script"
   whiptail --title "DOTFILES Setup" --separate-output \
     --checklist "Select Application/Config to apply" 20 60 10 \
-    "bashrc" "bashrc config" OFF \
     "nvim" "Install Neovim and apply configuration" OFF \
-    "kitty" "Kitty terminal configuration" OFF \
-    "mpv" "MPV config" OFF \
     "superfile" "Superfile config" OFF \
-    "fonts" "Install fonts" OFF \
-    "gitconfig" "Git config" OFF \
-    "ssh" "SSH config" OFF \
+    "bashrc" "bashrc config" OFF \
     3>&1 1>&2 2>&3 |
     while read CHOICE; do
       CONFIG_MAIN="$SCRIPT_DIR/$CHOICE"
@@ -39,6 +34,7 @@ startInteractive() {
       fi
 
       if [[ "$CHOICE" = "nvim" ]]; then
+        installLazyvimDependencies
         installNeovim
         applyConfig "$CONFIG_MAIN/.config/$CHOICE" "$CONFIG_LOCAL"
       fi
@@ -134,14 +130,22 @@ appendSshConfig() {
 }
 
 installNeovim() {
-  echo "Installing Neovim"
-  curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-  sudo rm -rf /opt/nvim
-  sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-  echo "Finished installing $(nvim -v | head -n 1)"
-  echo "Cleaning up..."
-  rm nvim-linux-x86_64.tar.gz
-  echo "Done."
+  if ! nvim -v &>/dev/null; then
+    echo "Installing Neovim"
+    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+    sudo rm -rf /opt/nvim
+    sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+    echo "Finished installing $(nvim -v | head -n 1)"
+    echo "Cleaning up..."
+    rm nvim-linux-x86_64.tar.gz
+    echo "Done."
+  else
+    echo "Neovim is already installed"
+  fi
+  NVIM_PATH="export PATH=\"$PATH:/opt/nvim-linux-x86_64/bin\""
+  if ! grep -q "$NVIM_PATH" "$HOME/.bashrc"; then
+    echo "export PATH=\"$PATH:/opt/nvim-linux-x86_64/bin\"" >>"$HOME/.bashrc"
+  fi
 }
 
 installLazyvimDependencies() {
