@@ -29,8 +29,8 @@ startInteractive() {
       if [[ "$CHOICE" = "bashrc" ]]; then
         echo "bashrc configuration require the installation of 'ohmybash'."
         echo "Installing Oh-My-Bash"
-        bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
-        applyConfig "$CONFIG_MAIN/.bashrc" "$HOME"
+        installOhMyBash
+        transferBashrc
       fi
 
       if [[ "$CHOICE" = "fonts" ]]; then
@@ -81,6 +81,21 @@ installWhiptail() {
   fi
 }
 
+installOhMyBash() {
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+}
+
+transferBashrc() {
+  echo "Making backup of local bashrc and profile config"
+  makeBackup "$HOME/.bashrc"
+  makeBackup "$HOME/.profile"
+  echo "Transferring bashrc and profile config"
+  ln -s "$SCRIPT_DIR/bashrc/.bashrc" "$HOME/.bashrc"
+  ln -s "$SCRIPT_DIR/bashrc/.profile" "$HOME/.profile"
+  echo "Transfer complete."
+  echo "You may need to restart the terminal for config to apply"
+}
+
 applyConfig() {
   # @param {directory to be applied} $1
   # @param {directory on local} $2
@@ -98,6 +113,7 @@ applyConfig() {
 }
 
 makeBackup() {
+  # @param {directory/file} $1
   BACKUP_DIR="$HOME/.config.bak"
   EXISTING_CONFIG=$1
   if [[ ! -d "$BACKUP_DIR" ]]; then
