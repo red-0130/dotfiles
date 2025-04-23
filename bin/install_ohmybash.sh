@@ -4,9 +4,6 @@ main() {
   if installOhMyBash; then
     echo "Finished installing oh-my-bash"
     changeTheme
-  else
-    echo "There was an error installing oh-my-bash"
-    exit 1
   fi
 }
 installOhMyBash() {
