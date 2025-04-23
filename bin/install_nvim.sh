@@ -62,4 +62,3 @@ installFd() {
 }
 
 main $@
-exit
