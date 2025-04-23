@@ -19,7 +19,7 @@ installNeovim() {
   else
     echo "Neovim is already installed"
   fi
-  NVIM_PATH="export PATH=\"$PATH:/opt/nvim-linux-x86_64/bin\""
+  NVIM_PATH='export PATH="$PATH:/opt/nvim-linux-x86_64/bin"'
   if ! grep -q "$NVIM_PATH" "$HOME/.bashrc"; then
     echo "export PATH=\"$PATH:/opt/nvim-linux-x86_64/bin\"" >>"$HOME/.bashrc"
   fi

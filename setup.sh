@@ -10,10 +10,7 @@ ln -s $SCRIPT_DIR/bashrc/.bashrc $HOME/.bashrc
 
 # Install latest Neovim release and import config
 echo "Installing Neovim"
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-sudo rm -rf /opt/nvim
-sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-ln -s $SCRIPT_DIR/nvim/.config/nvim $HOME/.config/nvim
+source "$SCRIPT_DIR"/bin/install_nvim.sh
 
 # Install Superfile and import config
 echo "Installing Superfile"
