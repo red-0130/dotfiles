@@ -8,3 +8,9 @@ if command -v eza &>/dev/null; then
   alias la="eza --icons -alhg"
   alias tree="eza --icons --tree"
 fi
+
+# git aliases
+if command -v git &>/dev/null; then
+  alias commit="git commit -m"
+  alias checkout="git checkout"
+fi
