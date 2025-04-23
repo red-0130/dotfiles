@@ -49,9 +49,9 @@ installFzf() {
 }
 
 installRipgrep() {
-  echo "Installing Ripgrep"
+  printf "Installing ripgrep"
   sudo apt install ripgrep
-  echo "Done."
+  printf "Done.\n"
 }
 
 installFd() {
