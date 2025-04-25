@@ -156,3 +156,9 @@ export NVM_DIR="$HOME/.nvm"
 
 # Superfile cd_on_quit
 source "$HOME/.config/superfile/cd_on_quit.sh"
+
+# Bash custom alias location
+source "$HOME/.config/bashrc.d/aliases.sh"
+
+# Bash custom PATHS
+source "$HOME/.config/bashrc.d/paths.sh"
