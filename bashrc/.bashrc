@@ -104,6 +104,9 @@ aliases=(
 plugins=(
   git
   bashmarks
+  npm
+  nvm
+  pyenv
 )
 
 # Which plugins would you like to conditionally load? (plugins can be found in ~/.oh-my-bash/plugins/*)
