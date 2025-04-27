@@ -3,6 +3,7 @@ main() {
   if [[ ! -e "$HOME/.oh-my-bash" ]]; then
     installOhMyBash
     changeTheme
+    source $HOME/.bashrc
   fi
 }
 installOhMyBash() {

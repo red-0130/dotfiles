@@ -6,22 +6,22 @@ main() {
 }
 
 installNeovim() {
+  local NVIM_PATH="export PATH=\"$PATH:/opt/nvim-linux-x86_64/bin\""
   if ! command nvim -v &>/dev/null; then
     echo "Installing Neovim"
     curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
     sudo rm -rf /opt/nvim
     sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-    echo "Finished installing $(nvim -v | head -n 1)"
-    echo "Cleaning up..."
-    rm nvim-linux-x86_64.tar.gz
-    echo "Done."
   else
     echo "Neovim is already installed"
   fi
-  NVIM_PATH='export PATH="$PATH:/opt/nvim-linux-x86_64/bin"'
   if ! grep -q "$NVIM_PATH" "$HOME/.bashrc"; then
-    echo "export PATH=\"$PATH:/opt/nvim-linux-x86_64/bin\"" >>"$HOME/.bashrc"
+    echo "$NVIM_PATH" >>"$HOME/.bashrc"
   fi
+  echo "Finished installing $(nvim -v | head -n 1)"
+  echo "Cleaning up..."
+  rm nvim-linux-x86_64.tar.gz
+  echo "Done."
 }
 
 installLazyvimDependencies() {
