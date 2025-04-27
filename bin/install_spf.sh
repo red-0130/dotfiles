@@ -4,11 +4,8 @@ BACKUP_CONFIG=./backup_config.sh
 main() {
   if command spf -v &>/dev/null; then exit 0; fi
 
-  echo "Installing Superfile"
-
   if [[ -L "$HOME/.config/superfile" ]]; then
     echo "Making backup of local config"
-    BACKUP_CONFIG "$HOME/.config/superfile"
     source "$BIN/config_backup.sh" "superfile"
   fi
 
@@ -28,6 +25,7 @@ main() {
 }
 
 installSpf() {
+  echo "Installing Superfile"
   bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"
   ln -s "$SCRIPT_DIR/superfile/.config/superfile" "$HOME/.config/superfile"
   echo "Done."

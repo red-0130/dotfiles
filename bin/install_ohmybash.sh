@@ -11,6 +11,7 @@ main() {
 }
 installOhMyBash() {
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+  exit 0
 }
 changeTheme() {
   BASHRC="$HOME/.bashrc"
