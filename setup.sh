@@ -22,7 +22,7 @@ main() {
   # Update APT repo
   source "$BIN"/update_repo.sh
 
-  if [[ "$1" == "int" ]]; then
+  if [[ "$1" == "-i" ]]; then
     source "$BIN/start_interactive.sh"
   else
     nonInteractive
