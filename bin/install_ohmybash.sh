@@ -3,7 +3,7 @@ main() {
   if [[ ! -e "$HOME/.oh-my-bash" ]]; then
     echo "Installing Oh-My-Bash"
 
-    if installOhMyBash &>/dev/null; then
+    if installOhMyBash; then
       echo "Finished installing oh-my-bash"
       changeTheme
     fi
