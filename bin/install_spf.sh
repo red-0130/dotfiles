@@ -9,6 +9,7 @@ main() {
   if [[ -L "$HOME/.config/superfile" ]]; then
     echo "Making backup of local config"
     BACKUP_CONFIG "$HOME/.config/superfile"
+    source "$BIN/config_backup.sh" "superfile"
   fi
 
   if [[ ! -d $HOME/.config ]]; then

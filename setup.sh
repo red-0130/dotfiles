@@ -1,21 +1,32 @@
 #!/bin/env bash
 
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+BIN="$ROOT_DIR/bin"
 
-# Update APT repo
-printf "Updating APT repo\n"
-sudo apt update &>/dev/null
+nonInteractive() {
 
-# Install Oh-My-Bash and import config
-printf "Installing Oh-My-Bash\n"
-source "$SCRIPT_DIR"/bin/install_ohmybash.sh
+  # Install Oh-My-Bash and import config
+  source "$BIN"/install_ohmybash.sh
 
-# Install latest Neovim release and import config
-printf "Installing Neovim\n"
-source "$SCRIPT_DIR"/bin/install_nvim.sh
+  # Install latest Neovim release and import config
+  source "$BIN"/install_nvim.sh
 
-# Install Superfile and import config
-printf "Installing Superfile\n"
-source "$SCRIPT_DIR"/bin/install_spf.sh
+  # Install Superfile and import config
+  source "$BIN"/install_spf.sh
 
-printf "Script is finished executing\n"
+  printf "Script is finished executing\n"
+
+}
+
+main() {
+  # Update APT repo
+  source "$BIN"/update_repo.sh
+
+  if [[ "$1" = "int" ]]; then
+    interactive
+  else
+    source "$BIN/start_interactive.sh"
+  fi
+}
+
+main $@

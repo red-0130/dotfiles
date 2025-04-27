@@ -1,9 +1,12 @@
 #!/bin/env bash
 main() {
-  echo "Installing Oh-My-Bash"
-  if installOhMyBash; then
-    echo "Finished installing oh-my-bash"
-    changeTheme
+  if [[ ! -e "$HOME/.oh-my-bash" ]]; then
+    echo "Installing Oh-My-Bash"
+
+    if installOhMyBash; then
+      echo "Finished installing oh-my-bash"
+      changeTheme
+    fi
   fi
 }
 installOhMyBash() {

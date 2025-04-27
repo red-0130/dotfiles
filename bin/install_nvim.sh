@@ -3,7 +3,6 @@
 main() {
   installLazyvimDependencies
   installNeovim
-  echo "Making backup of current config."
 }
 
 installNeovim() {
