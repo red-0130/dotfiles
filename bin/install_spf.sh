@@ -1,6 +1,5 @@
 #!/bin/env bash
 
-BACKUP_CONFIG=./backup_config.sh
 main() {
 
   if [[ ! -d $HOME/.config ]]; then
@@ -12,7 +11,6 @@ main() {
   else
     installSpf
   fi
-  echo "Importing config"
   source "$BIN/config_spf.sh"
 
 }
@@ -27,5 +25,5 @@ installSpf() {
   echo "Done."
 }
 
-main $@
+main "$@"
 exit

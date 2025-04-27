@@ -8,14 +8,15 @@ main() {
 
   printf "Making backup of config for "$CONFIG_NAME""
 
-  if [[ ! -L $BACKUP_DIR ]]; then
-    printf "Backup directory not found.\nCreating one now..."
+  if [[ ! -L "$BACKUP_DIR" ]]; then
+    echo "Backup directory not found. Creating one now..."
     mkdir "$BACKUP_DIR"
   else
-    printf "Moving local config to the backup directory...\n"
-    mv "$CONFIG_LOCAL" "$BACKUP_DIR/$CONFIG_NAME-$TIMESTAMP"
-    printf "Done.\n"
+    echo "Backup directory exists. Beginning backup..."
   fi
+    echo "Moving local config to the backup directory..."
+    mv "$CONFIG_LOCAL" "$BACKUP_DIR/$CONFIG_NAME-$TIMESTAMP"
+    echo "Done."
 
 }
 
