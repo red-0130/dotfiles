@@ -1,16 +1,17 @@
 #!/bin/env bash
 main() {
   if [[ ! -e "$HOME/.oh-my-bash" ]]; then
-    echo "Installing Oh-My-Bash"
-
-    if installOhMyBash; then
-      echo "Finished installing oh-my-bash"
-      changeTheme
-    fi
+    installOhMyBash
+    changeTheme
   fi
 }
 installOhMyBash() {
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+  echo "Installing Oh-My-Bash"
+  if bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"; then
+    echo "Finished installing oh-my-bash"
+  else
+    echo "There was error while installing Oh-My-Bash"
+  fi
 }
 changeTheme() {
   BASHRC="$HOME/.bashrc"
