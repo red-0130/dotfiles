@@ -11,3 +11,5 @@ main() {
     echo "Done"
   fi
 }
+
+main "$@"
