@@ -8,11 +8,10 @@ main() {
     mkdir "$HOME/.config"
   fi
 
-  echo "Importing config"
-  source "$BIN/config_spf.sh"
-
   if installSpf; then
     echo "Finished installing Superfile and applying config."
+    echo "Importing config"
+    source "$BIN/config_spf.sh"
   else
     echo "There was an error installing Superfile."
   fi
