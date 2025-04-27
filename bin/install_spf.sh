@@ -12,6 +12,8 @@ main() {
   else
     installSpf
   fi
+  echo "Importing config"
+  source "$BIN/config_spf.sh"
 
 }
 
@@ -19,8 +21,6 @@ installSpf() {
   echo "Installing Superfile"
   if bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"; then
     echo "Finished installing Superfile and applying config."
-    echo "Importing config"
-    source "$BIN/config_spf.sh"
   else
     echo "There was an error installing Superfile."
   fi
