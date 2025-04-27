@@ -7,6 +7,6 @@ if ! sudo dpkg -s apt &>/dev/null; then
 else
   printf "Updating apt repositories\n"
   sudo apt update
-  printf "Proceeding with system upgrade.\n"
-  sudo apt full-upgrade -y
+  # printf "Proceeding with system upgrade.\n"
+  # sudo apt full-upgrade -y
 fi
