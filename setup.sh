@@ -22,10 +22,10 @@ main() {
   # Update APT repo
   source "$BIN"/update_repo.sh
 
-  if [[ "$1" = "int" ]]; then
-    interactive
-  else
+  if [[ "$1" == "int" ]]; then
     source "$BIN/start_interactive.sh"
+  else
+    nonInteractive
   fi
 }
 
