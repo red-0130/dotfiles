@@ -5,6 +5,7 @@ return {
       vim.g.codeium_disable_bindings = 1
       vim.g.codeium_manual = true
     end,
+    enabled = false,
   },
   {
     "nvim-lualine/lualine.nvim",
