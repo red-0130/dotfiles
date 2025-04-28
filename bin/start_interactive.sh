@@ -9,9 +9,10 @@ main() {
 startInteractive() {
   echo "Starting interactve script"
   whiptail --title "DOTFILES Setup" --separate-output \
-    --checklist "Select Application/Config to apply" 20 60 10 \
+    --checklist "Select Application/Config to apply" 25 78 16 \
     "nvim" "Install Neovim" OFF \
     "nvim-config" "Apply Neovim config" OFF \
+    "ssh" "Apply ssh config" OFF \
     "superfile" "Superfile config" OFF \
     "ohmybash" "Install Oh-My-Bash" OFF \
     "bashrc" "Apply bashrc config" OFF \
@@ -35,6 +36,9 @@ startInteractive() {
         ;;
       "nvim-config")
         source "$BIN/config_nvim.sh"
+        ;;
+      "ssh")
+        source "$BIN/config_ssh.sh"
         ;;
       *)
         echo default
