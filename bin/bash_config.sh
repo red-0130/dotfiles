@@ -4,7 +4,7 @@ main() {
   echo "Copying bash config into config directory"
   source "$BIN/config_apply.sh" "bashrc"
 
-  if ! -L "$HOME/.config.bak"; then
+  if [[ ! -L "$HOME/.config.bak" ]]; then
     mkdir "$HOME/.config.bak"
   fi
 
