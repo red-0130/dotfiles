@@ -1,21 +1,22 @@
 #!/bin/env bash
 
-SCRIPT_DIR=$(dirname "$0")
-
 main() {
-  transferBashrc
-}
+  echo "Copying bash config into config directory"
+  source "$BIN/config_apply.sh" "bashrc"
 
-transferBashrc() {
-  echo "Making backup of local bashrc and profile config"
-  makeBackup "$HOME/.bashrc"
-  makeBackup "$HOME/.profile"
-  echo "Transferring bashrc and profile config"
-  ln -s "$SCRIPT_DIR/bashrc/.bashrc" "$HOME/.bashrc"
-  ln -s "$SCRIPT_DIR/bashrc/.profile" "$HOME/.profile"
+  if ! -L "$HOME/.config.bak"; then
+    mkdir "$HOME/.config.bak"
+  fi
+
+  echo "Making backup of current bashrc config"
+  mv "$HOME/.bashrc" "$HOME/.config.bak/bashrc/"
+  mv "$HOME/.profile" "$HOME/.config.bak/bashrc/"
+
+  echo "Applying bashrc file"
+  ln -s "$ROOT_DIR/bashrc/.bashrc" "$HOME/.bashrc"
+  ln -s "$ROOT_DIR/bashrc/.profile" "$HOME/.profile"
   echo "Transfer complete."
   echo "You may need to restart the terminal for config to apply"
 }
 
 main "$@"
-exit
