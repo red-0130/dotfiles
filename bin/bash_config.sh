@@ -4,13 +4,13 @@ main() {
   echo "Copying bash config into config directory"
   source "$BIN/config_apply.sh" "bashrc"
 
-  if [[ ! -L "$HOME/.config.bak" ]]; then
-    mkdir "$HOME/.config.bak"
-  fi
+  local TIMESTAMP=$(date "+%Y%m%d-%H%M%S")
+  local BACKUP_DIR="$HOME/.config.bak/bashrc-$TIMESTAMP"
 
   echo "Making backup of current bashrc config"
-  mv "$HOME/.bashrc" "$HOME/.config.bak/bashrc/"
-  mv "$HOME/.profile" "$HOME/.config.bak/bashrc/"
+  mkdir -p "$BACKUP_DIR"
+  mv "$HOME/.bashrc" "$BACKUP_DIR"
+  mv "$HOME/.profile" "$BACKUP_DIR"
 
   echo "Applying bashrc file"
   ln -s "$ROOT_DIR/bashrc/.bashrc" "$HOME/.bashrc"
