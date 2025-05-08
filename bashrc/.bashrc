@@ -150,7 +150,11 @@ export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 # alias ohmybash="mate ~/.oh-my-bash"
 
 # Node Version Manager Export
-export NVM_DIR="$HOME/.nvm"
+if [[ -d "$HOME/.nvm/nvm" ]]; then
+  export NVM_DIR="$HOME/.nvm/nvm"
+else
+  export NVM_DIR="$HOME/.nvm"
+fi
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
@@ -158,7 +162,7 @@ export NVM_DIR="$HOME/.nvm"
 source "$HOME/.config/superfile/cd_on_quit.sh"
 
 # Bash custom alias location
-source "$HOME/.config/bashrc.d/aliases.sh"
+source "$HOME/.config/bashrc/aliases.sh"
 
 # Bash custom PATHS
-source "$HOME/.config/bashrc.d/paths.sh"
+source "$HOME/.config/bashrc/paths.sh"
