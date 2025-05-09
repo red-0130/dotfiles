@@ -1,6 +1,6 @@
 return {
   {
-    "Exafunction/codeium.vim",
+    "Exafunction/windsurf.vim",
     config = function()
       vim.g.codeium_disable_bindings = 1
       vim.g.codeium_manual = true
