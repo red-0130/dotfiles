@@ -2,8 +2,8 @@
 
 main() {
   if checkConfigFile; then
-    appendIncludes
     applyConfig
+    appendIncludes
   fi
 
   if addScript; then
@@ -24,7 +24,7 @@ checkConfigFile() {
 appendIncludes() {
   local FILE="$HOME/.ssh/config"
   local INCLUDES="Include "$HOME"/.config/ssh/config"
-  if [[ ! -z "$(grep "$INCLUDES" "$FILE")" ]]; then
+  if ! grep "$INCLUDES" "$FILE"; then
     echo -e "$INCLUDES\n$(cat $FILE)" >"$FILE"
   fi
 }
