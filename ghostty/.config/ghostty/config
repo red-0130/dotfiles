@@ -44,7 +44,7 @@
 
 
 # THEME
-theme = dark:Dracula, light:Github-Light-Default
+theme = dark:Apple System Colors, light:GitHub-Light-Default
 background-opacity = 0.7
 
 # FONT
