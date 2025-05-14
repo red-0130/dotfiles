@@ -14,6 +14,9 @@ nonInteractive() {
   # Apply Superfile config
   source "$BIN"/config_spf.sh
 
+  # Apply SSH config
+  source "$BIN"/config_ssh.sh
+
   printf "Script is finished executing\n"
 
 }
