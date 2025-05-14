@@ -2,10 +2,6 @@ Match exec "onsubnet 10.10." host ssh.beltran.cc
  HostName network-unraid
  Port 3222
 
-Match exec "onsubnet 172.16." host ssh.beltran.cc
- HostName network-unraid
- Port 3222
- 
 Match exec "onsubnet --not 10.10.20." host ssh.beltran.cc
  HostName ssh.beltran.cc
  Port 22
