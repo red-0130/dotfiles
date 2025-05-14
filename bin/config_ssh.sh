@@ -1,14 +1,10 @@
 #!/bin/env bash
 
 main() {
-  local INCLUDES="Include "$HOME"/.config/ssh/config"
-  local FILE="$HOME/.ssh/config"
-
-  if [[ ! -z "$(grep "$INCLUDES" "$FILE")" ]]; then
-    echo -e "$INCLUDES\n$(cat $FILE)" >"$FILE"
+  if checkConfigFile; then
+    appendIncludes
+    applyConfig
   fi
-
-  applyConfig
 
   if addScript; then
     echo "SSH script added"
@@ -17,6 +13,22 @@ main() {
   fi
 }
 
+checkConfigFile() {
+  local FILE="$HOME/.ssh/config"
+  if [[ -f "$FILE" ]]; then
+  else
+    touch "$FILE"
+  fi
+  return 0
+}
+
+appendIncludes() {
+  local FILE="$HOME/.ssh/config"
+  local INCLUDES="Include "$HOME"/.config/ssh/config"
+  if [[ ! -z "$(grep "$INCLUDES" "$FILE")" ]]; then
+    echo -e "$INCLUDES\n$(cat $FILE)" >"$FILE"
+  fi
+}
 applyConfig() {
   source "$BIN/config_apply.sh" "ssh"
 }
