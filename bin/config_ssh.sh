@@ -15,8 +15,7 @@ main() {
 
 checkConfigFile() {
   local FILE="$HOME/.ssh/config"
-  if [[ -f "$FILE" ]]; then
-  else
+  if [[ ! -f "$FILE" ]]; then
     touch "$FILE"
   fi
   return 0
