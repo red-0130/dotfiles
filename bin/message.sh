@@ -1,6 +1,6 @@
 #!/bin/env bash
 
-main() {
+message() {
   local NOCOLOR='\e[0m'
   local GREEN='\e[32m'
   local BLUE='\e[34m'
@@ -29,5 +29,3 @@ main() {
   echo -e "$APPLICATION$MESSAGE_TYPE: $MESSAGE"
 
 }
-
-main "$@"

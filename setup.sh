@@ -4,6 +4,7 @@ nonInteractive() {
 
   # Apply bashrc config
   source "$BIN"/bash_config.sh
+  bash_config
 
   # Install latest Neovim release and import config
   source "$BIN"/config_nvim.sh
@@ -21,7 +22,7 @@ nonInteractive() {
 main() {
   local ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
   local BIN="$ROOT_DIR/bin"
-  local message="source $BIN/message.sh"
+  source "$BIN/message.sh"
 
   if [[ "$1" == "-i" ]]; then
     # Update APT repo
