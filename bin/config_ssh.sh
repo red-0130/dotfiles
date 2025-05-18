@@ -1,6 +1,6 @@
 #!/bin/env bash
-
 main() {
+  source "$BIN/message.sh"
   checkConfigFile && applyConfig && appendIncludes && addScript
 }
 

@@ -1,13 +1,14 @@
 #!/bin/env bash
 
 main() {
+  source "$BIN/message.sh"
   if source "$BIN/install_whiptail.sh"; then
     startInteractive
   fi
 }
 
 startInteractive() {
-  echo "Starting interactve script"
+  message info INTERACTIVE "Starting interactive script"
   whiptail --title "DOTFILES Setup" --separate-output \
     --checklist "Select Application/Config to apply" 25 78 16 \
     "nvim" "Install Neovim" OFF \
@@ -27,6 +28,7 @@ startInteractive() {
         ;;
       "bashrc")
         source "$BIN/bash_config.sh"
+        bash_config
         ;;
       "superfile")
         source "$BIN/install_spf.sh"
@@ -52,7 +54,7 @@ startInteractive() {
 
     done
 
-  echo "Finished installing config"
+  message success SETUP "Finished installing config"
 
 }
 
