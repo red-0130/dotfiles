@@ -1,8 +1,5 @@
 #!/bin/env bash
 
-ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-BIN="$ROOT_DIR/bin"
-
 nonInteractive() {
 
   # Apply bashrc config
@@ -22,6 +19,9 @@ nonInteractive() {
 }
 
 main() {
+  local ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+  local BIN="$ROOT_DIR/bin"
+  local message="source $BIN/message.sh"
 
   if [[ "$1" == "-i" ]]; then
     # Update APT repo
