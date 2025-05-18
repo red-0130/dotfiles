@@ -9,7 +9,7 @@ checkConfigFile() {
   if [[ ! -e "$FILE" ]]; then
     message warning SSH "Config file not found"
     message info SSH "Creating config file now"
-    mkidr "$HOME/.ssh"
+    mkdir "$HOME/.ssh"
     touch "$FILE"
   else
     message info SSH "Config file found"
