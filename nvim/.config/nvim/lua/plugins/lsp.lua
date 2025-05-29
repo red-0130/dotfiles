@@ -12,11 +12,12 @@ return {
                 includeCompletionsForImportStatements = true,
                 importModuleSpecifier = "non-relative",
               },
-            javascript = {
-              preferences = {
-                includeCompletionsForModuleExports = true,
-                includeCompletionsForImportStatements = true,
-                importModuleSpecifier = "non-relative",
+              javascript = {
+                preferences = {
+                  includeCompletionsForModuleExports = true,
+                  includeCompletionsForImportStatements = true,
+                  importModuleSpecifier = "non-relative",
+                },
               },
             },
           },
