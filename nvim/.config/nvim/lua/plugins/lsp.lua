@@ -4,7 +4,7 @@ return {
     "neovim/nvim-lspconfig",
     opts = {
       servers = {
-        vtsls = {
+        ts_ls = {
           settings = {
             typescript = {
               preferences = {
@@ -12,12 +12,12 @@ return {
                 includeCompletionsForImportStatements = true,
                 importModuleSpecifier = "non-relative",
               },
-              javascript = {
-                preferences = {
-                  includeCompletionsForModuleExports = true,
-                  includeCompletionsForImportStatements = true,
-                  importModuleSpecifier = "non-relative",
-                },
+            },
+            javascript = {
+              preferences = {
+                includeCompletionsForModuleExports = true,
+                includeCompletionsForImportStatements = true,
+                importModuleSpecifier = "non-relative",
               },
             },
           },
