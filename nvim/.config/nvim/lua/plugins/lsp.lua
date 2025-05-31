@@ -5,6 +5,9 @@ return {
     opts = {
       servers = {
         ts_ls = {
+          enabled = false,
+        },
+        vtsls = {
           settings = {
             typescript = {
               preferences = {
