@@ -13,4 +13,5 @@ fi
 if command -v git &>/dev/null; then
   alias commit="git commit -m"
   alias checkout="git checkout"
+  alias gitlog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 fi
