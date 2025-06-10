@@ -14,8 +14,9 @@ bash_config() {
   mv "$HOME/.profile" "$BACKUP_DIR"
 
   message info BASHRC "Applying bashrc file"
-  ln -s "$ROOT_DIR/bashrc/.bashrc" "$HOME/.bashrc"
-  ln -s "$ROOT_DIR/bashrc/.profile" "$HOME/.profile"
+  ln -sf "$ROOT_DIR/bashrc/.bashrc" "$HOME/.bashrc"
+  ln -sf "$ROOT_DIR/bashrc/.profile" "$HOME/.profile"
+  ln -sf "$ROOT_DIR/bashrc/.bash_profile" "$HOME/.bash_profile"
   message success BASHRC "Transfer complete."
   message warning BASHRC "You may need to restart the terminal for config to apply"
 }
