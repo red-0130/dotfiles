@@ -15,7 +15,7 @@ mkcomp() (
   createComponentFile() {
     if ! touch "$COMPONENT_FILE"; then return 1; fi
     echo "function $COMPONENT_NAME() {" &>/dev/null >>$COMPONENT_FILE
-    echo -e "\treturn (\n<p>This is a component</p>\n);" &>/dev/null >>$COMPONENT_FILE
+    echo -e "\treturn (\n\t\t<p>This is a component</p>\n\t);" &>/dev/null >>$COMPONENT_FILE
     echo "}" &>/dev/null >>$COMPONENT_FILE
     echo -e "\nexport default $COMPONENT_NAME;" &>/dev/null >>$COMPONENT_FILE
     return 0
