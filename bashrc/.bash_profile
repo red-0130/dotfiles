@@ -4,6 +4,7 @@ if [[ -f "$HOME/.profile" ]]; then
 fi
 
 # Change directory on remote connect if workspace is set
-if [[ "$PROJECT_WORKSPACE" != "" ]]; then
+if [[ -f "$HOME/.workspace" ]]; then
+  source "$HOME/.workspace"
   cd "$PROJECT_WORKSPACE"
 fi
