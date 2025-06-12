@@ -1,7 +1,6 @@
-#!/bin/env bash
-
 message() {
   local NOCOLOR='\e[0m'
+  local COLOR="$NOCOLOR"
   local GREEN='\e[32m'
   local BLUE='\e[34m'
   local RED='\e[31m'
@@ -15,19 +14,23 @@ message() {
 
   case "$TYPE" in
   "success")
-    MESSAGE_TYPE="$GREEN[SUCCESS]$RESET"
+    COLOR=$GREEN
+    MESSAGE_TYPE="[SUCCESS]"
     ;;
   "error")
-    MESSAGE_TYPE="$RED[ERROR]$RESET"
+    COLOR=$RED
+    MESSAGE_TYPE="[ERROR]"
     ;;
   "warning")
-    MESSAGE_TYPE="$YELLOW[WARNING]$RESET"
+    COLOR=$YELLOW
+    MESSAGE_TYPE="[WARNING]"
     ;;
   *)
-    MESSAGE_TYPE="$RESET[INFO]"
+    COLOR=$NOCOLOR
+    MESSAGE_TYPE="[INFO]"
     ;;
   esac
 
-  echo -e "$APPLICATION$MESSAGE_TYPE: $MESSAGE"
+  echo -e "$COLOR$APPLICATION$COLOR$MESSAGE_TYPE$RESET: $MESSAGE"
 
 }
