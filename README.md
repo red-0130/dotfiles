@@ -36,6 +36,21 @@ Bash configuration files containing:
 - Functions
 - Environment variables
 
+#### Custom Functions
+Available functions in `bashrc/.config/bashrc/lib/`:
+
+1. `mkcomp` - Creates React components with proper file structure
+   - Usage: `mkcomp <component-name>`
+   - Example: `mkcomp MyComponent`
+   - Creates a component directory with index.js and component file
+   - Requires: `src/components` directory in current project
+
+2. `set-workspace` - Sets project workspace for scripts
+   - Usage: `set-workspace [path]`
+   - Example: `set-workspace /path/to/project` or `set-workspace`
+   - Saves workspace path to `~/.workspace`
+   - Maintains project context across shell sessions
+
 ### Floccus
 Configuration for the Floccus bookmark backup application with:
 - Bookmark organization
