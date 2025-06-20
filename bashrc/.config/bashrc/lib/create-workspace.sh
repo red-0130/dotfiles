@@ -1,4 +1,4 @@
-function set-workspace {
+set_space() {
   local WORKSPACE
   if [[ "$1" != "" ]]; then
     WORKSPACE="$1"
