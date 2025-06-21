@@ -1,12 +1,9 @@
 #!/bin/env bash
 
-printf "Updating APT repo\n"
+log_info apt "Updating APT repo"
 if ! sudo dpkg -s apt &>/dev/null; then
-  printf "ERROR: APT is not installed.\n"
-  exit 0
+  log_error apt "ERROR: APT is not installed.\n"
+  exit 1
 else
-  printf "Updating apt repositories\n"
-  sudo apt update
-  # printf "Proceeding with system upgrade.\n"
-  # sudo apt full-upgrade -y
+  sudo apt update && log_success apt "APT sources updated."
 fi
