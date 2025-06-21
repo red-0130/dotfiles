@@ -23,6 +23,7 @@ main() {
   local ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
   local BIN="$ROOT_DIR/bin"
   source "$BIN/message.sh"
+  source "$BIN/shell_logger.sh"
 
   if [[ "$1" == "-i" ]]; then
     # Update APT repo
