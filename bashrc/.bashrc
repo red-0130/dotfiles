@@ -126,7 +126,7 @@ source "$OSH"/oh-my-bash.sh
 
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='nvim'
+  export EDITOR='vi'
 else
   export EDITOR='nvim'
 fi
@@ -166,3 +166,6 @@ source "$HOME/.config/bashrc/aliases.sh"
 
 # Bash custom PATHS
 source "$HOME/.config/bashrc/paths.sh"
+
+# Environmental Variables
+source "$HOME/.config/bashrc/env.sh"
