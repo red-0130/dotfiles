@@ -16,6 +16,7 @@ startInteractive() {
     "ssh" "Apply ssh config" OFF \
     "superfile" "Superfile config" OFF \
     "ohmybash" "Install Oh-My-Bash" OFF \
+    "starship" "Install Starship Prompt" OFF \
     "bashrc" "Apply bashrc config" OFF \
     3>&1 1>&2 2>&3 |
     while read CHOICE; do
@@ -25,6 +26,9 @@ startInteractive() {
       case "$CHOICE" in
       "ohmybash")
         source "$BIN/install_ohmybash.sh"
+        ;;
+      "starship")
+        source "$BIN/install_starship.sh"
         ;;
       "bashrc")
         source "$BIN/bash_config.sh"
@@ -54,7 +58,7 @@ startInteractive() {
 
     done
 
-  message success SETUP "Finished installing config"
+  log_success SETUP "Finished installing config"
 
 }
 
