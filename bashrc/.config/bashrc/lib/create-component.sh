@@ -1,7 +1,7 @@
 mkcomp() (
   local COMPONENT_NAME="$1"
   local CWD=$(pwd)
-  local COMPONENT_DIR="$CWD/src/components/$COMPONENT_NAME"
+  local COMPONENT_DIR="$CWD/src/$COMPONENT_NAME"
   local INDEXFILE="$COMPONENT_DIR/index.js"
   local COMPONENT_FILE="$COMPONENT_DIR/$COMPONENT_NAME.jsx"
 
@@ -21,14 +21,14 @@ mkcomp() (
     return 0
   }
 
-  if [[ ! -d "$CWD/src/components" ]]; then
-    echo "Components directory not found"
+  if [[ ! -d "$CWD/src" ]]; then
+    echo "Project src/ directory not found."
     exit 1
   fi
 
   mkdir "$COMPONENT_DIR"
 
-  if createIndex; then echo "Barrel file crated"; fi
+  if createIndex; then echo "Barrel file created"; fi
   if createComponentFile; then echo "Component file created"; fi
 
 )
