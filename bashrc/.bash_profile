@@ -7,3 +7,5 @@ fi
 if source "$HOME/.workspace" &>/dev/null; then
   cd "$PROJECT_WORKSPACE"
 fi
+
+export TERM=xterm
