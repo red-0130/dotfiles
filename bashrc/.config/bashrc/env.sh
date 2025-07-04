@@ -10,3 +10,8 @@ fi
 if [[ -r "$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock" ]]; then
   export SSH_AUTH_SOCK="$HOME/snap/bitwarden/current/.bitwarden-ssh-agent.sock"
 fi
+
+# Gemini CLI API key
+if [[ -f "$HOME/.gemini_api"]]; then
+  source "$HOME/.gemini_api"
+fi
