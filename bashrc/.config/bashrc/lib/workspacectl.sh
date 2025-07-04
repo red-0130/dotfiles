@@ -3,7 +3,7 @@
 wsctl() {
   set-workspace() {
     local WORKSPACE
-    if [[ "$1" != "" ]]; then
+    if [[ -n "$1" ]]; then
       WORKSPACE="$1"
     else
       WORKSPACE="$PWD"
@@ -13,16 +13,15 @@ wsctl() {
   }
 
   set-gemini-api() {
-    local API
-    if [[ "$1" != "" ]]; then
-      echo "API not provided"
-      exit 1
+    local API="$1"
+    if [[ -z "$API" ]]; then
+      echo "API key not provided"
+      return 1
     else
-      API="$PWD"
       echo "Setting GEMINI CLI API..."
       echo "export GEMINI_API_KEY=$API" >"$HOME/.gemini_api"
       echo "Done."
-      exit 0
+      return 0
     fi
   }
 
