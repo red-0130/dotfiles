@@ -45,11 +45,19 @@ Available functions in `bashrc/.config/bashrc/lib/`:
    - Creates a component directory with index.js and component file
    - Requires: `src/components` directory in current project
 
-2. `set-workspace` - Sets project workspace for scripts
-   - Usage: `set-workspace [path]`
-   - Example: `set-workspace /path/to/project` or `set-workspace`
+2. `set_space` - DEPRECATED - Use `wsctl` instead
+   - Usage: `set_space [path]`
+   - Example: `set_space /path/to/project` or `set_space`
    - Saves workspace path to `~/.workspace`
    - Maintains project context across shell sessions
+
+3. `wsctl` - Workspace control utility
+   - Usage: `wsctl [command] [args...]`
+   - Commands:
+     - `set-workspace [path]` - Set workspace path
+         - Saves workspace path to `~/.workspace`
+     - `set-gemini-api [key]` - Set Gemini API key
+         - Saves Gemini API key to `~/.gemini_api`
 
 ### Floccus
 Configuration for the Floccus bookmark backup application with:
