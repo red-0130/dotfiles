@@ -15,7 +15,7 @@ main() {
     fi
   }
   modify_config() {
-    if starship preset bracketed-segments -o ~/.config/starship.toml; then
+    if starship preset bracketed-segments -o ~/.config/starship/starship.toml; then
       log_success bashrc "Starship was successfully configured."
       return 0
     else
