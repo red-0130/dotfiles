@@ -12,6 +12,7 @@ bash_config() {
   local SPF_PATH="# Superfile cd_on_quit\nsource "\$HOME/.config/superfile/cd_on_quit.sh""
   local ALIASES_PATH="# Bash custom alias location\nsource "\$HOME/.config/bashrc/aliases.sh""
   local CUSTOM_PATH="# Bash custom PATHS\nsource "\$HOME/.config/bashrc/paths.sh""
+  local ENV_PATH="# Bash custom ENV\nsource "\$HOME/.config/bashrc/env.sh""
 
   log_info BASHRC "Making backup of current bashrc config"
   mkdir -p "$BACKUP_DIR"
@@ -26,6 +27,7 @@ bash_config() {
     echo -e $SPF_PATH >>$BASHRC
     echo -e $ALIASES_PATH >>$BASHRC
     echo -e $CUSTOM_PATH >>$BASHRC
+    echo -e $ENV_PATH >>$BASHRC
     echo -e "\n##################################################" >>$BASHRC
   fi
   ln -sf "$ROOT_DIR/bashrc/.profile" "$HOME/.profile"
