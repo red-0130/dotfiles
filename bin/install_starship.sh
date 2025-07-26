@@ -6,7 +6,7 @@ main() {
   install_starship && modify_config
 
   install_starship() {
-    if sh <(curl -sS https://starship.rs/install.sh) --yes; then
+    if sh $(curl -sS https://starship.rs/install.sh) --yes; then
       log_success bashrc "Starship Prompt installed successfully."
       return 0
     else

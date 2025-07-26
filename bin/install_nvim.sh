@@ -4,7 +4,7 @@ install_nvim() {
 
   installNeovim() {
     log_info nvim "Installing Neovim"
-    local NVIM_PATH="export PATH=\"$PATH:/opt/nvim-linux-x86_64/bin\""
+    local NVIM_PATH="export PATH=\"\$PATH:/opt/nvim-linux-x86_64/bin\""
     if ! command nvim -v &>/dev/null; then
       curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
       sudo rm -rf /opt/nvim
