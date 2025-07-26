@@ -3,10 +3,10 @@
 #ADD ALIASES HERE
 # Replaces ls with eza
 if command -v eza &>/dev/null; then
-  alias ls="eza --icons"
-  alias ll="eza --icons -alhg"
-  alias la="eza --icons -ah"
-  alias tree="eza --icons --tree"
+  alias ls="eza --icons -s type"
+  alias ll="eza --icons -alhgs type"
+  alias la="eza --icons -ahs type"
+  alias tree="eza --icons --tree -as type"
 fi
 
 # git aliases
