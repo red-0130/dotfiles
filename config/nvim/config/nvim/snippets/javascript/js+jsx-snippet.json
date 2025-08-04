@@ -1,0 +1,107 @@
+{
+  "Default Functional Component": {
+    "description": "Create a default exported Functional React Component",
+    "prefix": "dfc",
+    "body": [
+      "function ${1:FunctionalComponent}(${2}) {",
+      "\t$0",
+      "}",
+      "export default ${1:FunctionalComponent};"
+    ]
+  },
+  "Exported Functional Component": {
+    "description": "Create an exported Functional React Component",
+    "prefix": "efc",
+    "body": ["export function ${1:FunctionalComponent}(${2}) {", "\t$0", "}"]
+  },
+  "Functional Component": {
+    "description": "Create a non exported Functional React Component",
+    "prefix": "fc",
+    "body": ["function ${1:FunctionalComponent}(${2}) {", "\t$0", "}"]
+  },
+  "Named arrow function": {
+    "description": "Create a named arrow function",
+    "prefix": "nfn",
+    "body": ["const ${1:functionName} = (${2}) => ${3:{\n\t$4\n\\}}"]
+  },
+  "Named asynchronous arrow function": {
+    "description": "Create an asynchronous arrow function",
+    "prefix": "nfna",
+    "body": ["const ${1:functionName} = async (${2}) => ${3:{\n\t$4\n\\}}"]
+  },
+  "Anonymous arrow function": {
+    "description": "Create an anonymous arrow function",
+    "prefix": "anfn",
+    "body": ["(${1}) => ${2:{\n\t$3\n\\}}"]
+  },
+  "Function": {
+    "description": "Create a function",
+    "prefix": "fn",
+    "body": ["function ${1:functionName} (${2}) {", "\t$0", "}"]
+  },
+  "Asynchronous Function": {
+    "description": "Create an asynchronous function",
+    "prefix": "fna",
+    "body": ["async function ${1:functionName} (${2}) {", "\t$0", "}"]
+  },
+  "useState Hook": {
+    "description": "Declare a state variable",
+    "prefix": "ust",
+    "body": [
+      "const [${1:state}, set${1/(.*)/${1:/capitalize}/}] = useState($2);"
+    ]
+  },
+  "useEffect Hook": {
+    "description": "Call the useEffect hook",
+    "prefix": "uef",
+    "body": ["useEffect(() => {", "\t$3", "}${1:, [$2]})"]
+  },
+  "Import React Hook(s)": {
+    "description": "Import useState and/or useEffect hook(s)",
+    "prefix": "imh",
+    "body": [
+      "import { ${1|useState, useEffect, useState\\, useEffect|} } from 'react';"
+    ]
+  },
+  "Route": {
+    "description": "Create a route element",
+    "prefix": "route",
+    "body": ["<Route path='${1:path}' element={ ${2:element} } />"]
+  },
+  "Nested Route": {
+    "description": "Create a route element",
+    "prefix": "nroute",
+    "body": [
+      "<Route path='${1:path}' element={ ${2:element} } >",
+      "\t${3:// nested-route-here}",
+      "</Route>"
+    ]
+  },
+  "useSearchParams Hook": {
+    "description": "Declare a useParams hook",
+    "prefix": "usp",
+    "body": [
+      "const [${1:params}, set${1/(.*)/${1:/capitalize}/}] = useSearchParams();"
+    ]
+  },
+  "Import React PropTypes": {
+    "description": "Import PropTypes object from prop-types",
+    "prefix": "impt",
+    "body": ["import PropTypes from 'prop-types';"]
+  },
+  "Embedded expression": {
+    "prefix": "lit",
+    "body": ["${${1:expression}}"],
+    "description": "Embedded expression"
+  },
+  "Import React Component": {
+    "description": "Import a React Component",
+    "prefix": "impc",
+    "body": ["import ${2:Component} from '$1';"]
+  },
+  "Insert JSX classname": {
+    "description": "Insert JSX classname",
+    "prefix": "cname",
+    "body": ["className={${1}} $0"]
+  }
+}

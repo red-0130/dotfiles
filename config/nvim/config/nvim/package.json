@@ -1,0 +1,23 @@
+{
+  "name": "vscode-snippets",
+  "engines": {
+    "vscode": "^1.11.0"
+  },
+  "contributes": {
+    "snippets": [
+      {
+        "language": [
+          "javascript",
+          "javascriptreact"
+        ],
+        "path": "./snippets/javascript/js+jsx-snippet.json"
+      },
+      {
+        "language": [
+          "javascript"
+        ],
+        "path": "./snippets/javascript/jest-snippets.json"
+      }
+    ]
+  }
+}
