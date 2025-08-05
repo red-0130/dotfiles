@@ -9,6 +9,7 @@ main() {
   local ALIASES_PATH="# Bash custom alias location\nsource "\$HOME/.config/bashrc/aliases.sh""
   local CUSTOM_PATH="# Bash custom PATHS\nsource "\$HOME/.config/bashrc/paths.sh""
   local ENV_PATH="# Bash custom ENV\nsource "\$HOME/.config/bashrc/env.sh""
+  local STARSHIP='eval "$(starship init bash)"'
 
   log_info BASHRC "Making backup of current bashrc config"
   backup bashrc "$HOME/.bashrc" "$HOME/.profile" "$HOME/.bash_profile"
@@ -20,12 +21,14 @@ main() {
     echo -e $ALIASES_PATH >>$BASHRC
     echo -e $CUSTOM_PATH >>$BASHRC
     echo -e $ENV_PATH >>$BASHRC
+    if ! grep "$STARSHIP" "$BASHRC" && command -v starship &>/dev/null; then
+      echo "$STARSHIP" >>$BASHRC
+    fi
     echo -e "\n##################################################" >>$BASHRC
   fi
   copy_config bashrc
   ln -sf "$CONFIG/bashrc/bash_profile" "$HOME/.bash_profile"
   ln -sf "$CONFIG/bashrc/profile" "$HOME/.profile"
-  ln -sf "$CONFIG/bashrc/bashrc" "$HOME/.bashrc"
   log_success BASHRC "Transfer complete."
   log_warning BASHRC "You may need to restart the terminal for config to apply"
 }
