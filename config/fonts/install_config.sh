@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if source $BIN/path_exist.sh; then return 0; else exit 1; fi
+if ! source "$BIN/path_exist.sh"; then exit 1; fi
 main() {
   if [[ ! -d "$HOME/.local/share/fonts" ]]; then
     log_info fonts "No fonts directory found. Creating one now..."

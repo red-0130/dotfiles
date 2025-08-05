@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 
-if source $BIN/path_exist.sh; then
-  return 0
-else
-  exit 1
-fi
+if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 backup() {
   local APP="$1"

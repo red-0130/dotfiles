@@ -29,9 +29,11 @@ main() {
 
   }
 
-  if [[ "$1" == "--config" ]] | [[ "$1" == "-c" ]]; then
+  if [[ "$1" == "--config" ]] || [[ "$1" == "-c" ]]; then
+    log_info config "Starting interactive config install."
     source "$BIN/interactive_config_install.sh"
-  elif [[ "$1" == "--app" ]] | [[ "$1" == "-a" ]]; then
+  elif [[ "$1" == "--app" ]] || [[ "$1" == "-a" ]]; then
+    log_info app "Starting interactive app install."
     source "$BIN/interactive_app_install.sh"
   else
     nonInteractive

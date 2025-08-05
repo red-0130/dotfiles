@@ -8,6 +8,6 @@ copy_config() {
     exit 1
   fi
 
-  ln -sf "$CUSTOM_CONFIG" "$HOME/.config/$APP"
+  ln -sf "$REMOTE_CONFIG" "$HOME/.config/$APP"
   return 0
 }
