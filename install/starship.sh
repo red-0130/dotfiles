@@ -3,12 +3,9 @@
 if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 main() {
-  log_info starship "Installing Starship Prompt"
-  install_starship && modify_theme &&
-    log_info starship "Starship installation script finished."
 
   install_starship() {
-    if bash -c "$(curl -sSLO- https://starship.rs/install.sh) --yes"; then
+    if curl -sS https://starship.rs/install.sh | sh -s -- --yes; then
       log_success starship "Finished installing."
       return 0
     else
@@ -25,6 +22,10 @@ main() {
       return 1
     fi
   }
+
+  log_info starship "Installing Starship Prompt"
+  install_starship && modify_theme &&
+    log_info starship "Starship installation script finished."
 
 }
 

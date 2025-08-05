@@ -18,6 +18,7 @@ startInteractive() {
     "mpv" "Apply MPV config" OFF \
     "nvim" "Apply Neovim config" OFF \
     "ssh" "Apply SSH config" OFF \
+    "starship" "Append Starship init" OFF \
     "superfile" "Apply Superfile config" OFF \
     3>&1 1>&2 2>&3 |
     while read CHOICE; do

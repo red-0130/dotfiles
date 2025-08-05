@@ -13,7 +13,7 @@ startInteractive() {
     "eza" "A better ls" OFF \
     "flatpak" "Install Flatpak+FlatHub" OFF \
     "nvim" "Modular terminal text editor" OFF \
-    "starship" "The minimal, blazing-fast, and infinitely customizable prompt for any shell!" OFF \
+    "starship" "Fast and customizable prompt shell" OFF \
     "superfile" "A Modern Terminal File Manager" OFF \
     3>&1 1>&2 2>&3 |
     while read CHOICE; do

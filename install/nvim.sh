@@ -3,8 +3,6 @@
 if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 main() {
-  log_info nvim "Starting installation..."
-  installFzf && installFd && installRipgrep && installLazygit && installNeovim && return 0
 
   installFzf() {
     log_info fzf "Installing fzf"
@@ -72,5 +70,8 @@ main() {
     log_info nvim "Residual files removed."
     return 0
   }
+
+  log_info nvim "Starting installation..."
+  installFzf && installFd && installRipgrep && installLazygit && installNeovim && return 0
 }
 if main; then log_success nvim "Neovim is done installing."; fi
