@@ -12,15 +12,17 @@ backup() {
   log_info backup "Creating backup of config files..."
   for ENTRY in "$@"; do
     if [[ ! -e $ENTRY ]]; then
+      log_info $APP "No existing config found."
       ERROR=true
     fi
     if [[ -L $ENTRY ]]; then
+      log_info $APP "Existing config is a symbolic link."
       ERROR=true
     fi
   done
   if $ERROR; then
     log_error "$APP" "There was an error creating a backup of config files."
-    exit 1
+    return 1
   fi
 
   if mv -t $DESTINATION "$@"; then
