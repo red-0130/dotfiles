@@ -16,6 +16,7 @@ startInteractive() {
     "rust" "Install Rust and Cargo Package Manager" OFF \
     "starship" "Fast and customizable prompt shell" OFF \
     "superfile" "A Modern Terminal File Manager" OFF \
+    "thorium" "The fastest browser on Earth" OFF \
     3>&1 1>&2 2>&3 |
     while read CHOICE; do
       source "$INSTALL/$CHOICE.sh"
