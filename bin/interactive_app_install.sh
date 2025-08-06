@@ -13,6 +13,7 @@ startInteractive() {
     "eza" "A better ls" OFF \
     "flatpak" "Install Flatpak+FlatHub" OFF \
     "nvim" "Modular terminal text editor" OFF \
+    "nvm" "Node Version Manager" OFF \
     "rust" "Install Rust and Cargo Package Manager" OFF \
     "starship" "Fast and customizable prompt shell" OFF \
     "superfile" "A Modern Terminal File Manager" OFF \
