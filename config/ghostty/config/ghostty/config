@@ -46,7 +46,7 @@
 # THEME
 # theme = dark:Apple System Colors, light:GitHub-Light-Default
 theme = Apple System Colors 
-background-opacity = 0.7
+background-opacity = 0.9
 
 # FONT
 font-family = "JetBrainsMono Nerd Font"
