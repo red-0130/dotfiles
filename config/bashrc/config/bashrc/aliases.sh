@@ -15,3 +15,8 @@ if command -v git &>/dev/null; then
   alias checkout="git checkout"
   alias gitlog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 fi
+
+# batcat aliases
+if command -v batcat &>/dev/null; then
+  alias cat="batcat"
+fi
