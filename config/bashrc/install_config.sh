@@ -15,14 +15,14 @@ main() {
   backup bashrc "$HOME/.bashrc" "$HOME/.profile" "$HOME/.bash_profile"
 
   log_info BASHRC "Applying bashrc file"
-  if ! grep $CUSTOM_BASH $BASHRC; then
+  if ! grep "$CUSTOM_BASH" "$BASHRC"; then
     echo -e "\n##################################################" >>$BASHRC
-    echo $CUSTOM_BASH >>$BASHRC
-    echo -e $ALIASES_PATH >>$BASHRC
-    echo -e $CUSTOM_PATH >>$BASHRC
-    echo -e $ENV_PATH >>$BASHRC
+    echo $CUSTOM_BASH >>"$BASHRC"
+    echo -e $ALIASES_PATH >>"$BASHRC"
+    echo -e $CUSTOM_PATH >>"$BASHRC"
+    echo -e $ENV_PATH >>"$BASHRC"
     if ! grep "$STARSHIP" "$BASHRC" && command -v starship &>/dev/null; then
-      echo "$STARSHIP" >>$BASHRC
+      echo "$STARSHIP" >>"$BASHRC"
     fi
     echo -e "\n##################################################" >>$BASHRC
   fi
