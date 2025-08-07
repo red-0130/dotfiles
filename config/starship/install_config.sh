@@ -10,7 +10,7 @@ main() {
     echo "#####################" >>"$HOME/.bashrc"
   fi
 
-  if ! -f "$HOME/.profile"; then
+  if [[ ! -f "$HOME/.profile" ]] || [[ ! -L "$HOME/.profile" ]]; then
     echo 'if [[ -f "~/.bashrc" ]]; then' >>"$HOME/.profile"
     echo -e "\tsource ~/.bashrc" >>"$HOME/.profile"
     echo 'fi' >>"$HOME/.profile"
