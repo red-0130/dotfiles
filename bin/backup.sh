@@ -9,7 +9,6 @@ backup() {
   local TIMESTAMP=$(date "+%Y%m%d-%H%M%S")
   local DESTINATION="$HOME/.config.bak/$APP-$TIMESTAMP"
 
-  log_info backup "Creating backup of config files..."
   for ENTRY in "$@"; do
     if [[ ! -e $ENTRY ]]; then
       log_warning $APP "No existing config found."
@@ -21,11 +20,12 @@ backup() {
     fi
   done
   if $ERROR; then
-    log_error "$APP" "There was an error creating a backup of config files."
+    log_warning "$APP" "There was an error creating a backup of config files."
     return 0
   fi
 
   if mv -t $DESTINATION "$@"; then
     log_info "$APP" "Successfully created a backup"
+    return 0
   fi
 }

@@ -8,6 +8,9 @@ copy_config() {
     exit 1
   fi
 
-  ln -sf "$REMOTE_CONFIG" "$HOME/.config/"
-  return 0
+  if ln -sf "$REMOTE_CONFIG" "$HOME/.config/"; then
+    return 0
+  else
+    return 1
+  fi
 }
