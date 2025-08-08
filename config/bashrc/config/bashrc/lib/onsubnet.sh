@@ -32,3 +32,5 @@ onsubnet() {
     exit $off
   fi
 }
+
+export -f onsubnet
