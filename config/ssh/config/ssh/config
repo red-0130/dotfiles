@@ -10,3 +10,42 @@ Match exec "onsubnet --not 10.10.20." host ssh.beltran.cc
 Host unraid.beltran.cc
  HostName network-unraid
  User root
+
+# ---------CODER CONFIG-------------
+Host coder.*
+    ConnectTimeout=0
+    StrictHostKeyChecking=no
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --ssh-host-prefix coder. %h
+
+Host *.coder
+    ConnectTimeout=0
+    StrictHostKeyChecking=no
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+
+Match host *.coder !exec "/usr/local/bin/coder connect exists %h"
+    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --hostname-suffix coder %h
+    
+Host vite.*
+    ConnectTimeout=0
+    StrictHostKeyChecking=no
+    Compression yes
+    CompressionLevel 9
+    LocalForward 5173 localhost:5173
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --ssh-host-prefix coder. %h
+
+Match host *.vite !exec "/usr/local/bin/coder connect exists %h"
+    ConnectTimeout=0
+    StrictHostKeyChecking=no
+    Compression yes
+    CompressionLevel 9
+    LocalForward 5173 localhost:5173
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --hostname-suffix coder %h
+    
+# ------------END-CODER------------
