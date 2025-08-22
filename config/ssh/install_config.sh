@@ -8,12 +8,12 @@ main() {
   checkConfigFile() {
     local FILE="$HOME/.ssh/config"
     if [[ ! -e "$FILE" ]]; then
-      message warning SSH "Config file not found"
-      message info SSH "Creating config file now"
+      log_warning SSH "Config file not found"
+      log_info SSH "Creating config file now"
       mkdir "$HOME/.ssh"
       touch "$FILE"
     else
-      message info SSH "Config file found"
+      log_info SSH "Config file found"
     fi
     return 0
   }
