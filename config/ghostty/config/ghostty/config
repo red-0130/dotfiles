@@ -45,7 +45,7 @@
 
 # THEME
 # theme = dark:Apple System Colors, light:GitHub-Light-Default
-theme = catppuccin-machiato
+theme = catppuccin-macchiato
 background-opacity = 0.9
 
 # FONT
