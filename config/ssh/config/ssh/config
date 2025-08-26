@@ -32,7 +32,6 @@ Host vite.*
     ConnectTimeout=0
     StrictHostKeyChecking=no
     Compression yes
-    CompressionLevel 9
     LocalForward 5173 localhost:5173
     UserKnownHostsFile=/dev/null
     LogLevel ERROR
@@ -42,7 +41,6 @@ Match host *.vite !exec "/usr/local/bin/coder connect exists %h"
     ConnectTimeout=0
     StrictHostKeyChecking=no
     Compression yes
-    CompressionLevel 9
     LocalForward 5173 localhost:5173
     UserKnownHostsFile=/dev/null
     LogLevel ERROR
