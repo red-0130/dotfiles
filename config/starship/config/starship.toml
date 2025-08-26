@@ -4,6 +4,7 @@ format = """
 $container\
 $os\
 $hostname\
+[](fg:orange)\
 $nix_shell\
 $directory\
 $git_branch\
@@ -20,6 +21,7 @@ $golang\
 $c\
 $cmd_duration\
 $time\
+[─](fg:current_line)\
 $sudo\
 $username\
 $line_break\
@@ -50,7 +52,7 @@ format = '(fg:current_line)[](fg:orange)[$symbol ](fg:primary bg:orange)'
 disabled = false
 
 [hostname]
-format = '[$hostname](fg:primary bg:orange)[](fg:orange)'
+format = '[$hostname](fg:primary bg:orange)'
 
 [os.symbols]
 Alpine = ''
@@ -64,7 +66,7 @@ Fedora = ''
 FreeBSD = ''
 Garuda = ''
 Gentoo = ''
-Linux = ''
+Linux = ''
 Macos = ''
 Manjaro = ''
 Mariner = ''
@@ -82,8 +84,8 @@ Redhat = ''
 RedHatEnterprise = ''
 Solus = ''
 SUSE = ''
-Ubuntu = ''
-Unknown = ''
+Ubuntu = ''
+Unknown = ''
 Windows = ''
 
 
@@ -213,7 +215,7 @@ show_always = true
 [sudo]
 disabled = false
 symbol = ''
-format = '[─](fg:current_line)[](fg:red)[$symbol](fg:foreground bg:red)[](fg:red)'
+format = '[](fg:red)[$symbol](fg:foreground bg:red)[](fg:red)[-](fg:current_line)'
 
 [character]
 format = """
