@@ -3,7 +3,7 @@
 main() {
   local STARSHIP='eval "$(starship init bash)"'
   backup starship "$HOME/.config/starship.toml"
-  if ! grep "$STARSHIP"; then
+  if ! grep "$STARSHIP" "$HOME/.bashrc"; then
     log_info starship "Appending Starship startup in bashrc."
     echo "#####################" >>"$HOME/.bashrc"
     echo "###STARSHIP INIT#####" >>"$HOME/.bashrc"
