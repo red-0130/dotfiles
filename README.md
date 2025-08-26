@@ -45,9 +45,6 @@ The repository includes an automated installation script that will set up your e
 
 ## Configuration
 
-
-## Configuration
-
 The following configurations can be applied interactively using the `--config` flag:
 
 - **Bash**: Shell configuration including aliases, functions, and environment variables
@@ -58,6 +55,9 @@ The following configurations can be applied interactively using the `--config` f
 - **Neovim**: Modern Vim-based text editor configuration with plugins
 - **SSH**: Secure shell configuration for remote server access
 - **Superfile**: Terminal file manager configuration
+- **Floccus**: Syncs browser bookmarks across different browsers and devices
+- **Gitconfig**: Git configuration with custom aliases and settings
+- **Starship**: Cross-shell prompt configuration for a customized shell experience
 
 To apply configurations interactively, run:
 
@@ -76,6 +76,11 @@ The following applications can be installed interactively using the `--app` flag
 - **Neovim**: Hyperextensible Vim-based text editor with a rich plugin ecosystem
 - **Starship**: Minimal, blazing-fast, and infinitely customizable shell prompt
 - **Superfile**: Modern terminal file manager with a clean and intuitive interface
+- **batcat**: A `cat` clone with syntax highlighting and Git integration
+- **nvm**: Node Version Manager for managing multiple Node.js versions
+- **rust**: The Rust programming language toolchain for building fast and reliable software
+- **thorium**: A high-performance, privacy-focused web browser
+- **wormhole**: A simple and secure way to send files between computers
 
 To install these applications interactively, run:
 
