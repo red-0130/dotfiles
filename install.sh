@@ -25,8 +25,11 @@ main() {
     # Superfile config
     source "$CONFIG/superfile/install_config.sh"
 
-    log_info setup "Setup script end."
+    # Starship config
+    source "$CONFIG/starship/install_config.sh"
 
+    log_info setup "Setup script end."
+    exit 0
   }
 
   if [[ "$1" == "--config" ]] || [[ "$1" == "-c" ]]; then
