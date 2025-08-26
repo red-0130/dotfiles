@@ -1,6 +1,9 @@
+"$schema" = 'https://starship.rs/config-schema.json'
 format = """
 [╭](fg:current_line)\
+$container\
 $os\
+$hostname\
 $nix_shell\
 $directory\
 $git_branch\
@@ -16,12 +19,11 @@ $lua\
 $golang\
 $c\
 $cmd_duration\
-$shell\
 $time\
+$sudo\
 $username\
 $line_break\
 [╰─](fg:current_line)\
-$docker_context\
 $character
 """
 
@@ -44,8 +46,11 @@ red	= '#eb6f92'
 yellow = '#f6c177'
 
 [os]
-format = '(fg:current_line)[](fg:orange)[$symbol ](fg:primary bg:orange)[](fg:orange)'
+format = '(fg:current_line)[](fg:orange)[$symbol ](fg:primary bg:orange)'
 disabled = false
+
+[hostname]
+format = '[$hostname](fg:primary bg:orange)[](fg:orange)'
 
 [os.symbols]
 Alpine = ''
@@ -202,14 +207,20 @@ time_format = '%H:%M'
 disabled = true
 
 [username]
-format = '[─](fg:current_line)[](fg:yellow)[ ](fg:primary bg:yellow)[](fg:yellow bg:box)[ $user](fg:foreground bg:box)[](fg:box) '
+format = '[](fg:yellow)[ ](fg:primary bg:yellow)[](fg:yellow bg:box)[ $user](fg:foreground bg:box)[](fg:box) '
 show_always = true
 
-[docker_context]
-format = '[](fg:blue)[$context](fg:primary bg:blue bold)[](fg:blue bg:box)'
+[sudo]
+disabled = false
+symbol = ''
+format = '[─](fg:current_line)[](fg:red)[$symbol](fg:foreground bg:red)[](fg:red)'
 
 [character]
 format = """
 [$symbol](fg:current_line) """
 success_symbol = '[❯](fg:bold green)'
 error_symbol = '[×](fg:bold red)'
+
+[container]
+symbol = ''
+format = '[](fg:blue)[$symbol ](fg:foreground bg:blue)[](fg:blue)'
