@@ -221,7 +221,7 @@ format = '[](fg:red)[$symbol](fg:foreground bg:red)[](fg:red)[-](fg:curren
 format = """
 [$symbol](fg:current_line) """
 success_symbol = '[❯](fg:bold green)'
-error_symbol = '[×](fg:bold red)'
+error_symbol = '[](fg:bold red)'
 
 [container]
 symbol = ''
