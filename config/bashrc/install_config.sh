@@ -3,7 +3,7 @@
 if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 main() {
-
+  # TODO: Remove bash_profile + profile symlinking
   local BASHRC="$HOME/.bashrc"
   local CUSTOM_BASH="# Custom bash sourcing"
   local ALIASES_PATH="# Bash custom alias location\nsource "\$HOME/.config/bashrc/aliases.sh""

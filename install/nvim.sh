@@ -8,14 +8,14 @@ main() {
     log_info fzf "Installing fzf..."
     log_info fzf "Downloading install files from repo..."
     rm -rf /tmp/fzf
-    if git clone --depth 1 https://github.com/junegunn/fzf.git /tmp/fzf; then
+    if sudo git clone --depth 1 https://github.com/junegunn/fzf.git /opt/fzf; then
       log_info fzf "Files downloaded /tmp/fzf. Starting installation now."
     else
       log_error fzf "Install files could not be downloaded."
       return 1
     fi
 
-    if /tmp/fzf/install --all; then
+    if /opt/fzf/install --all; then
       log_success fzf "Successfully installed."
       return 0
     else
