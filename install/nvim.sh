@@ -7,6 +7,7 @@ main() {
   installFzf() {
     log_info fzf "Installing fzf..."
     log_info fzf "Downloading install files from repo..."
+    rm -rf /tmp/fzf
     if git clone --depth 1 https://github.com/junegunn/fzf.git /tmp/fzf; then
       log_info fzf "Files downloaded /tmp/fzf. Starting installation now."
     else
@@ -24,21 +25,27 @@ main() {
   }
 
   installFd() {
-    log_info "fd-find" "Installing fd-find"
+    if command -v fdfind &>/dev/null; then
+      log_warning "fd-find" "FD-FIND is already installed."
+      return 0
+    fi
 
-    local FD_VERSION=$(curl -sL "https://api.github.com/repose/sharkdp/fd/releases/latest" | grep -Po '"tag_name": *"v\K[^"]*')
+    log_info "fd-find" "Installing fd-find"
+    rm -rf /tmp/fd
+
+    local VERSION=$(curl -sL "https://api.github.com/repos/sharkdp/fd/releases/latest" | grep -Po '"tag_name": *"v\K[^"]*')
+    local FILE="fd-musl_${VERSION}_amd64.deb"
 
     log_info "fd-find" "Downloading install files from repo..."
     if curl --create-dirs \
-      -sLo /tmp/fd/fdfind.deb \
-      "https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd-musl_${FD_VERSION}_amd64.deb"; then
+      -sLO --output-dir /tmp/fd/ "https://github.com/sharkdp/fd/releases/download/v$VERSION/$FILE"; then
       log_info "fd-find" "Files downloaded. Starting installation..."
     else
       log_error "fd-find" "Install files could not be downloaded."
       return 1
     fi
 
-    if sudo dpkg -i /tmp/fd/fdfind.deb; then
+    if sudo dpkg -i /tmp/fd/$FILE; then
       log_success "fd-find" "Successfully installed."
       return 0
     else
@@ -49,19 +56,20 @@ main() {
   }
   installRipgrep() {
     log_info ripgrep "Installing ripgrep"
-    local RG_VERSION=$(curl -sL "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep "tag_name" | cut -d '"' -f 4)
+    rm -rf /tmp/ripgrep
+    local RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep "tag_name" | cut -d '"' -f 4)
+    local FILE="ripgrep_$RIPGREP_VERSION-1_amd64.deb"
 
     log_info ripgrep "Downloading install files from repo..."
     if curl --create-dirs \
-      -sLo /tmp/ripgrep/ripgrep.deb \
-      -sLo /tmp/dependencies/ripgrep.deb "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep_${RIPGREP_VERSION}-1_amd64.deb"; then
+      -sLO --output-dir /tmp/ripgrep/ "https://github.com/BurntSushi/ripgrep/releases/download/$RIPGREP_VERSION/$FILE"; then
       log_info ripgrep "Files downloaded. Starting installation..."
     else
       log_error ripgrep "Install files could not be downloaded."
       return 1
     fi
 
-    if sudo dpkg -i /tmp/ripgrep/ripgrep.deb; then
+    if sudo dpkg -i /tmp/ripgrep/$FILE; then
       log_success ripgrep "Successfully installed."
       return 0
     else
@@ -73,7 +81,7 @@ main() {
   installLazygit() {
     log_info lazygit "Starting installation..."
     LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | \grep -Po '"tag_name": *"v\K[^"]*') &&
-      curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" &&
+      curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_$LAZYGIT_VERSION_Linux_x86_64.tar.gz" &&
       tar xf lazygit.tar.gz lazygit
     if sudo install lazygit -D -t /usr/local/bin/; then
       log_success lazygit "Finished installing. Beginning cleanup..."
