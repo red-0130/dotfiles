@@ -13,6 +13,8 @@ startInteractive() {
     "batcat" "A cat clone with wings" OFF \
     "eza" "A better ls" OFF \
     "flatpak" "Install Flatpak+FlatHub" OFF \
+    "ghostty" "Fast and feature-rich terminal emulator" OFF \
+    "git" "Latest version of git" OFF \
     "nvim" "Modular terminal text editor" OFF \
     "nvm" "Node Version Manager" OFF \
     "rust" "Install Rust and Cargo Package Manager" OFF \
