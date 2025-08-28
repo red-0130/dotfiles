@@ -80,21 +80,24 @@ main() {
 
   installLazygit() {
     log_info lazygit "Starting installation..."
-    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | \grep -Po '"tag_name": *"v\K[^"]*') &&
-      curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_$LAZYGIT_VERSION_Linux_x86_64.tar.gz" &&
-      tar xf lazygit.tar.gz lazygit
+    rm -rf /tmp/lazygit
+    local LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | \grep -Po '"tag_name": *"v\K[^"]*')
+    local FILE="lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+
+    if curl --create-dirs -sLO --output-dir /tmp/lazygit "https://github.com/jesseduffield/lazygit/releases/download/v$LAZYGIT_VERSION/$FILE"; then
+      log_info lazygit "Filed downloaded. Starting installation..."
+    else
+      log_error lazygit "Install files could not be downloaded."
+    fi
+
+    tar xf "/tmp/lazygit/$FILE" lazygit
+
     if sudo install lazygit -D -t /usr/local/bin/; then
       log_success lazygit "Finished installing. Beginning cleanup..."
+      if rm lazygit; then log_info lazygit "Done."; fi
     else
       log_error lazygit "There was an error installing Lazygit"
       return 1
-    fi
-    if rm lazygit*; then
-      log_success lazygit "Done"
-      return 0
-    else
-      log_warning lazygit "There was an error removing residual files."
-      return 0
     fi
   }
 
