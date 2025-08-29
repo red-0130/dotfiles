@@ -33,10 +33,15 @@ main() {
   copy_config bashrc
 
   tee -a "$HOME/.bash_profile" >/dev/null <<EOF
+# Includes existing profile config
+[[ -f "\$HOME/.profile" ]] && source "\$HOME/.profile"
+
 # Change directory on remote connect if workspace is set
-if source "\$HOME/.workspace" &>/dev/null; then
+[[ -f "\$HOME/.workspace" ]] && \
+  source "\$HOME/.workspace" &&\
   cd "\$PROJECT_WORKSPACE"
-fi
+  
+export TERM=xterm
 EOF
   log_success BASHRC "Transfer complete."
   log_warning BASHRC "You may need to restart the terminal for config to apply"
