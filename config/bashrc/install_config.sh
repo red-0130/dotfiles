@@ -10,6 +10,7 @@ main() {
   local CUSTOM_PATH="# Bash custom PATHS\nsource "\$HOME/.config/bashrc/paths.sh""
   local ENV_PATH="# Bash custom ENV\nsource "\$HOME/.config/bashrc/env.sh""
   local STARSHIP='eval "$(starship init bash)"'
+  local FZF='[ -f ~/.fzf.bash ] && source ~/.fzf.bash'
 
   log_info BASHRC "Making backup of current bashrc config"
   backup bashrc "$HOME/.bashrc" "$HOME/.profile" "$HOME/.bash_profile"
@@ -24,11 +25,19 @@ main() {
     if ! grep "$STARSHIP" "$BASHRC" && command -v starship &>/dev/null; then
       echo "$STARSHIP" >>"$BASHRC"
     fi
+    if ! grep "$FZF" "$BASHRC"; then
+      echo "$FZF" >>"$BASHRC"
+    fi
     echo -e "\n##################################################" >>$BASHRC
   fi
   copy_config bashrc
-  ln -sf "$CONFIG/bashrc/bash_profile" "$HOME/.bash_profile"
-  ln -sf "$CONFIG/bashrc/profile" "$HOME/.profile"
+
+  tee -a "$HOME/.bash_profile" >/dev/null <<EOF
+# Change directory on remote connect if workspace is set
+if source "\$HOME/.workspace" &>/dev/null; then
+  cd "\$PROJECT_WORKSPACE"
+fi
+EOF
   log_success BASHRC "Transfer complete."
   log_warning BASHRC "You may need to restart the terminal for config to apply"
 }
