@@ -53,5 +53,5 @@ font-family = "JetBrainsMono Nerd Font"
 
 
 # KEYBINDINGS
-keybind = ctrl+t=new_split:right
-keybind = ctrl+o=new_split:down
+#keybind = ctrl+t=new_split:right
+#keybind = ctrl+o=new_split:down
