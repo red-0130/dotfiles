@@ -3,7 +3,7 @@
 main() {
   local ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
   local BIN="$ROOT_DIR/bin"
-  local INSTALL="$ROOT_DIR/install"
+  local INSTALL="$ROOT_DIR/install_scripts"
   local CONFIG="$ROOT_DIR/config"
   source "$BIN/shell_logger.sh"
   source "$BIN/backup.sh"
