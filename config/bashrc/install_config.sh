@@ -27,6 +27,9 @@ main() {
     if ! grep "$FZF" "$BASHRC"; then
       echo "$FZF" >>"$BASHRC"
     fi
+    if command -v zellij &>/dev/null; then
+      echo 'eval "$(zellij setup --generate-auto-start bash)"' >>$BASHRC
+    fi
     echo -e "\n##################################################" >>$BASHRC
   fi
   copy_config bashrc
