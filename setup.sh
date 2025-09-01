@@ -6,6 +6,7 @@ main() {
   local INSTALL="$ROOT_DIR/install_scripts"
   local CONFIG="$ROOT_DIR/config"
   source "$BIN/shell_logger.sh"
+  source "$BIN/log.sh"
   source "$BIN/backup.sh"
   source "$BIN/copy_config.sh"
   source "$BIN/apply_config.sh"

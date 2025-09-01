@@ -32,6 +32,7 @@ main() {
     fi
     echo -e "\n##################################################" >>$BASHRC
   fi
+  _startupZellij
   copy_config bashrc
 
   tee -a "$HOME/.bash_profile" >/dev/null <<EOF
@@ -49,4 +50,17 @@ EOF
   log_warning BASHRC "You may need to restart the terminal for config to apply"
 }
 
+_startupZellij() {
+  tee -a "$HOME/.bashrc" >/dev/null <<EOF
+#################################
+# Autostart Zellij on shell start
+#################################
+if command -v zellij &>/dev/null; then
+  eval "\$(zellij setup --generate-auto-start bash)"
+fi
+EOF
+}
+
 main
+
+unset -f _startupZellij

@@ -22,6 +22,7 @@ startInteractive() {
     "superfile" "A Modern Terminal File Manager" OFF \
     "thorium" "The fastest browser on Earth" OFF \
     "wormhole" "A magical way to send files" OFF \
+    "zellij" "A terminal workspace with batteries included" OFF \
     3>&1 1>&2 2>&3 |
     while read CHOICE; do
       source "$INSTALL/$CHOICE.sh"
