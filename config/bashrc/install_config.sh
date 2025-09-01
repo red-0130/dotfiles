@@ -3,39 +3,42 @@
 if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 main() {
+  local APP="bashrc"
   local BASHRC="$HOME/.bashrc"
   local CUSTOM_BASH="# Custom bash sourcing"
   local ALIASES_PATH="# Bash custom alias location\nsource "\$HOME/.config/bashrc/aliases.sh""
   local CUSTOM_PATH="# Bash custom PATHS\nsource "\$HOME/.config/bashrc/paths.sh""
   local ENV_PATH="# Bash custom ENV\nsource "\$HOME/.config/bashrc/env.sh""
-  local STARSHIP='eval "$(starship init bash)"'
+  local STARSHIP='command -v starship &>/dev/null && eval "$(starship init bash)"'
   local FZF='[ -f ~/.fzf.bash ] && source ~/.fzf.bash'
+  local ZELLIJ='command -v zellij &>/dev/null && eval "$(zellij setup --generate-auto-start bash)"'
 
-  log_info BASHRC "Making backup of current bashrc config"
+  log -i "Making backup of current bashrc config"
   backup bashrc "$HOME/.bashrc" "$HOME/.profile" "$HOME/.bash_profile"
 
-  log_info BASHRC "Applying bashrc file"
+  log -i "Applying bashrc file"
   if ! grep "$CUSTOM_BASH" "$BASHRC"; then
     echo -e "\n##################################################" >>$BASHRC
     echo $CUSTOM_BASH >>"$BASHRC"
     echo -e $ALIASES_PATH >>"$BASHRC"
     echo -e $CUSTOM_PATH >>"$BASHRC"
     echo -e $ENV_PATH >>"$BASHRC"
-    if ! grep "$STARSHIP" "$BASHRC" && command -v starship &>/dev/null; then
-      echo "$STARSHIP" >>"$BASHRC"
-    fi
-    if ! grep "$FZF" "$BASHRC"; then
-      echo "$FZF" >>"$BASHRC"
-    fi
-    if command -v zellij &>/dev/null; then
-      echo 'eval "$(zellij setup --generate-auto-start bash)"' >>$BASHRC
-    fi
+    echo "$FZF" >>"$BASHRC"
+    echo "$STARSHIP" >>"$BASHRC"
+    echo "$ZELLIJ" >>"$BASHRC"
     echo -e "\n##################################################" >>$BASHRC
   fi
-  _startupZellij
+
+  _createBashProfile
   copy_config bashrc
 
+  log -s "Transfer complete."
+  log -w "You may need to restart the terminal for config to apply"
+}
+
+_createBashProfile() {
   tee -a "$HOME/.bash_profile" >/dev/null <<EOF
+# BASH_PROFILE
 # Includes existing profile config
 [[ -f "\$HOME/.profile" ]] && source "\$HOME/.profile"
 
@@ -46,21 +49,8 @@ main() {
   
 export TERM=xterm
 EOF
-  log_success BASHRC "Transfer complete."
-  log_warning BASHRC "You may need to restart the terminal for config to apply"
-}
-
-_startupZellij() {
-  tee -a "$HOME/.bashrc" >/dev/null <<EOF
-#################################
-# Autostart Zellij on shell start
-#################################
-if command -v zellij &>/dev/null; then
-  eval "\$(zellij setup --generate-auto-start bash)"
-fi
-EOF
 }
 
 main
 
-unset -f _startupZellij
+unset -f _createBashProfile
