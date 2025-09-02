@@ -25,7 +25,6 @@ main() {
     echo -e $ENV_PATH >>"$BASHRC"
     echo "$FZF" >>"$BASHRC"
     echo "$STARSHIP" >>"$BASHRC"
-    echo "$ZELLIJ" >>"$BASHRC"
     echo -e "\n##################################################" >>$BASHRC
   fi
 
@@ -46,6 +45,8 @@ _createBashProfile() {
 [[ -f "\$HOME/.workspace" ]] && \
   source "\$HOME/.workspace" &&\
   cd "\$PROJECT_WORKSPACE"
+  
+  command -v zellij &>/dev/null && eval "\$(zellij setup --generate-auto-start bash)"
   
 export TERM=xterm
 EOF
