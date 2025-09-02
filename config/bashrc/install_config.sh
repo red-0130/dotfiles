@@ -11,7 +11,6 @@ main() {
   local ENV_PATH="# Bash custom ENV\nsource "\$HOME/.config/bashrc/env.sh""
   local STARSHIP='command -v starship &>/dev/null && eval "$(starship init bash)"'
   local FZF='[ -f ~/.fzf.bash ] && source ~/.fzf.bash'
-  local ZELLIJ='command -v zellij &>/dev/null && eval "$(zellij setup --generate-auto-start bash)"'
 
   log -i "Making backup of current bashrc config"
   backup bashrc "$HOME/.bashrc" "$HOME/.profile" "$HOME/.bash_profile"
@@ -45,8 +44,6 @@ _createBashProfile() {
 [[ -f "\$HOME/.workspace" ]] && \
   source "\$HOME/.workspace" &&\
   cd "\$PROJECT_WORKSPACE"
-  
-  command -v zellij &>/dev/null && eval "\$(zellij setup --generate-auto-start bash)"
   
 export TERM=xterm
 EOF
