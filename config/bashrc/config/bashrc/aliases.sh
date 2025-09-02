@@ -3,16 +3,24 @@
 #ADD ALIASES HERE
 # Replaces ls with eza
 if command -v eza &>/dev/null; then
-  alias ls="eza --icons -s type"
-  alias ll="eza --icons -alhgs type"
-  alias la="eza --icons -ahs type"
-  alias tree="eza --icons --tree -as type"
+  alias ls="eza --icons --group-directories-first"
+  alias ll="eza --icons -alhg --group-directories-first"
+  alias la="eza --icons -ah --group-directories-first"
+  alias tree="eza --icons --tree -a --group-directories-first"
+else
+  alias ls="ls --group-directories-first"
+  alias ll="ls --group-directories-first -al"
+  alias la="ls --group-directories-first -a"
 fi
 
 # git aliases
 if command -v git &>/dev/null; then
   alias commit="git commit -m"
   alias checkout="git checkout"
+  alias pull='git pull'
+  alias push='git push'
+  alias addall='git add -A'
+  alias status='git status'
   alias gitlog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 fi
 
@@ -20,3 +28,12 @@ fi
 if command -v batcat &>/dev/null; then
   alias cat="batcat"
 fi
+
+# cd commands
+alias ..='cd ..'
+alias ...='cd ../..'
+alias home="cd $HOME"
+
+# apt commands
+alias update='sudo apt update'
+alias upgrade='sudo apt full-upgrade -y'
