@@ -35,7 +35,7 @@ Host vite.*
     LocalForward 5173 localhost:5173
     UserKnownHostsFile=/dev/null
     LogLevel ERROR
-    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --ssh-host-prefix coder. %h
+    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --ssh-host-prefix vite. %h
 
 Match host *.vite !exec "/usr/local/bin/coder connect exists %h"
     ConnectTimeout=0
@@ -44,6 +44,6 @@ Match host *.vite !exec "/usr/local/bin/coder connect exists %h"
     LocalForward 5173 localhost:5173
     UserKnownHostsFile=/dev/null
     LogLevel ERROR
-    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --hostname-suffix coder %h
+    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --hostname-suffix vite %h
     
 # ------------END-CODER------------
