@@ -8,9 +8,9 @@ if command -v eza &>/dev/null; then
   alias la="eza --icons -ah --group-directories-first"
   alias tree="eza --icons --tree -a --group-directories-first"
 else
-  alias ls="ls --group-directories-first"
-  alias ll="ls --group-directories-first -al"
-  alias la="ls --group-directories-first -a"
+  alias ls="ls --group-directories-first --color=auto"
+  alias ll="ls --group-directories-first --color=auto -al"
+  alias la="ls --group-directories-first --color=auto -a"
 fi
 
 # git aliases
