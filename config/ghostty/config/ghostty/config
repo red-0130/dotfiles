@@ -7,6 +7,6 @@ window-decoration = none
 window-padding-balance = true
 background-opacity = 0.9
 background-blur = 20
-theme = catppuccin-macchiato
+theme = Catppuccin Macchiato
 font-family = "JetBrainsMono Nerd Font"
 mouse-hide-while-typing = true
