@@ -1,7 +1,13 @@
 {
   "extras": [
     "lazyvim.plugins.extras.coding.luasnip",
-    "lazyvim.plugins.extras.lang.json"
+    "lazyvim.plugins.extras.lang.json",
+    "lazyvim.plugins.extras.formatting.prettier",
+    "lazyvim.plugins.extras.editor.inc-rename",
+    "lazyvim.plugins.extras.coding.luasnip",
+    "lazyvim.plugins.extras.test.core",
+    "lazyvim.plugins.extras.coding.mini-surround",
+    "lazyvim.plugins.extras.linting.eslint"
   ],
   "install_version": 7,
   "news": {
@@ -9,3 +15,4 @@
   },
   "version": 8
 }
+
