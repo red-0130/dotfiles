@@ -107,10 +107,6 @@ EOF
       return 1
       ;;
     *)
-      if [[ -n "$COMPONENT_NAME" ]]; then
-        echo "Extra argument provided: $1"
-        return 1
-      fi
       COMPONENT_NAME="$1"
       shift
       ;;
