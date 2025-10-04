@@ -69,7 +69,7 @@ EOF
   }
 
   while [[ $# -gt 0 ]]; do
-    case "$$1" in
+    case "$1" in
     --css)
       CSS=true
       shift
@@ -111,7 +111,6 @@ EOF
       shift
       ;;
     esac
-
   done
   if [[ ! -d "$SRC" ]]; then
     echo "[MKCOMP][ERROR]: 'src' directory not found. Make sure you are in a React project root."
