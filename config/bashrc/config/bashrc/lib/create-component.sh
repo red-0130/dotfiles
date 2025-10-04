@@ -3,11 +3,9 @@ function mkcomp() {
   local COMPONENT_NAME
   local COMPONENT_TYPE
   local SRC="$(pwd)/src"
-  local COMPONENT_DIR="$SRC/$COMPONENT_TYPE$COMPONENT_NAME"
-  local COMPONENT_FILE="$COMPONENT_DIR/$COMPONENT_NAME.jsx"
 
   showHelp() {
-    cat <<-EOF >/dev/null
+    cat <<-EOF
 mkcomp NAME [OPTIONS...]
 
 Create a jsx component bundle
@@ -49,11 +47,11 @@ EOF
 
   createComponentFile() {
     cat <<-EOF >>$COMPONENT_FILE
-function $COMPONENT_NAME() \{
+function $COMPONENT_NAME() {
   return (
     <p>This is the $COMPONENT_NAME component</p>
   )
-\}
+}
 
 export default $COMPONENT_NAME;
 EOF
@@ -62,8 +60,8 @@ EOF
 
   createIndex() {
     cat <<-EOF >"$COMPONENT_DIR/index.js"
-export * from \"./$COMPONENT_NAME.jsx\";
-export { default } from \"./$COMPONENT_NAME.jsx\";
+export * from "./$COMPONENT_NAME.jsx";
+export { default } from "./$COMPONENT_NAME.jsx";
 EOF
     return 0
   }
@@ -112,6 +110,10 @@ EOF
       ;;
     esac
   done
+
+  local COMPONENT_DIR="$SRC/$COMPONENT_TYPE$COMPONENT_NAME"
+  local COMPONENT_FILE="$COMPONENT_DIR/$COMPONENT_NAME.jsx"
+
   if [[ ! -d "$SRC" ]]; then
     echo "[MKCOMP][ERROR]: 'src' directory not found. Make sure you are in a React project root."
     return 1
