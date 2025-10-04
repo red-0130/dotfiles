@@ -1,68 +1,128 @@
-mkcomp() (
-  local COMPONENT_NAME="$1"
-  local CWD=$(pwd)
-  local SRC="$CWD/src"
-  local COMPONENT_DIR="$CWD/src/$COMPONENT_NAME"
-  local INDEXFILE="$COMPONENT_DIR/index.js"
+function mkcomp() {
+  local CSS
+  local COMPONENT_NAME
+  local COMPONENT_TYPE
+  local SRC="$(pwd)/src"
+  local COMPONENT_DIR="$SRC/$COMPONENT_TYPE$COMPONENT_NAME"
   local COMPONENT_FILE="$COMPONENT_DIR/$COMPONENT_NAME.jsx"
 
-  createIndex() {
-    if ! touch "$INDEXFILE"; then return 1; fi
-    echo "export * from './$COMPONENT_NAME';" &>/dev/null >>$INDEXFILE
-    echo "export { default } from './$COMPONENT_NAME';" &>/dev/null >>$INDEXFILE
+  showHelp() {
+    cat <<-EOF >/dev/null
+mkcomp NAME [OPTIONS...]
+
+Create a jsx component bundle
+
+Options:
+  --css           Create and import a css stylesheet
+  --ui            Create a UI component
+  --features      Create a FEATURE component
+  --context       Create a CONTEXT component
+  --layout        Create a LAYOUT component
+  --pages         Create a PAGE component
+  --common        Create a COMMON component
+  
+  --help          Show this help
+
+See https://github.com/red-0130/frontend-mentor-template
+to see how to use the template
+EOF
+
+  }
+
+  createDir() {
+    if mkdir --parent "$COMPONENT_DIR"; then
+      echo "[MKCOMP][SUCCESS]: Component directory created."
+      return 0
+    fi
+    echo "[MKCOMP][ERROR]: Component directory not created."
+    return 1
+  }
+
+  createCss() {
+    touch "$COMPONENT_DIR/$COMPONENT_NAME.module.css" && return 0
+  }
+
+  importCss() {
+    echo -e "import styled from \"./$COMPONENT_NAME.module.css\"\n\n$(cat "$COMPONENT_FILE")" >"$COMPONENT_FILE"
     return 0
   }
 
   createComponentFile() {
-    if ! touch "$COMPONENT_FILE"; then return 1; fi
-    echo "function $COMPONENT_NAME() {" &>/dev/null >>$COMPONENT_FILE
-    echo -e "\treturn (\n\t\t<p>This is the $COMPONENT_NAME component</p>\n\t);" &>/dev/null >>$COMPONENT_FILE
-    echo "}" &>/dev/null >>$COMPONENT_FILE
-    echo -e "\nexport default $COMPONENT_NAME;" &>/dev/null >>$COMPONENT_FILE
+    cat <<-EOF >>$COMPONENT_FILE
+function $COMPONENT_NAME() \{
+  return (
+    <p>This is the $COMPONENT_NAME component</p>
+  )
+\}
+
+export default $COMPONENT_NAME;
+EOF
     return 0
   }
 
-  createDir() {
-    local TARGET_DIR="$SRC/$1"
-    [[ ! -d "$TARGET_DIR" ]] && mkdir -p "$TARGET_DIR"
+  createIndex() {
+    cat <<-EOF >"$COMPONENT_DIR/index.js"
+export * from \"./$COMPONENT_NAME.jsx\";
+export { default } from \"./$COMPONENT_NAME.jsx\";
+EOF
+    return 0
   }
 
-  if [[ ! -d "$CWD/src" ]]; then
-    echo "Project src/ directory not found."
-    exit 1
+  while [[ $# -gt 0 ]]; do
+    case "$$1" in
+    --css)
+      CSS=true
+      shift
+      ;;
+    --context)
+      COMPONENT_TYPE="context/"
+      shift
+      ;;
+    --features)
+      COMPONENT_TYPE="features/"
+      shift
+      ;;
+    --layout)
+      COMPONENT_TYPE="layout/"
+      shift
+      ;;
+    --pages)
+      COMPONENT_TYPE="pages/"
+      shift
+      ;;
+    --ui)
+      COMPONENT_TYPE="ui/"
+      shift
+      ;;
+    --common)
+      COMPONENT_TYPE="common/"
+      shift
+      ;;
+    --help | -h)
+      showHelp
+      return 0
+      ;;
+    -*)
+      echo "Unknown flag provided"
+      return 1
+      ;;
+    *)
+      if [[ -n "$COMPONENT_NAME" ]]; then
+        echo "Extra argument provided: $1"
+        return 1
+      fi
+      COMPONENT_NAME="$1"
+      shift
+      ;;
+    esac
+
+  done
+  if [[ ! -d "$SRC" ]]; then
+    echo "[MKCOMP][ERROR]: 'src' directory not found. Make sure you are in a React project root."
+    return 1
   fi
 
-  mkdir "$COMPONENT_DIR"
+  createDir && createComponentFile && createIndex && echo "[MKCOMP][SUCCESS]: Component created."
+  $CSS && createCss && importCss && echo "[MKCOMP][SUCCESS]: Stylesheet created and imported."
 
-  if createIndex; then echo "Barrel file created"; fi
-  if createComponentFile; then echo "Component file created"; fi
-
-  case "$2" in
-  --ui)
-    createDir "ui"
-    mv "$COMPONENT_DIR" "$SRC/ui"
-    ;;
-  --context)
-    createDir "context"
-    mv "$COMPONENT_DIR" "$SRC/context"
-    ;;
-  --features)
-    createDir "features"
-    mv "$COMPONENT_DIR" "$SRC/features"
-    ;;
-  --layout)
-    createDir "layout"
-    mv "$COMPONENT_DIR" "$SRC/layout"
-    ;;
-  --pages)
-    createDir "pages"
-    mv "$COMPONENT_DIR" "$SRC/pages"
-    ;;
-  2 | 3)
-    echo 2 or 3
-    ;;
-  *)
-    echo "Unknown component directory. Keeping component in 'src' directory"
-    ;;
-  esac
-)
+}
