@@ -15,3 +15,9 @@ fi
 if [[ -f "$HOME/.gemini_api" ]]; then
   source "$HOME/.gemini_api"
 fi
+
+# Export Bun if it exist
+if [[ -d "$HOME/.bun" ]]; then
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+fi
