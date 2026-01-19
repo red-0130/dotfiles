@@ -11,6 +11,7 @@ startInteractive() {
   log_info setup "Starting interactive App install..."
   whiptail --title "DOTFILES Setup" --separate-output --checklist "Select Config to apply" 25 78 16 \
     "batcat" "A cat clone with wings" OFF \
+    "bun" "Bun Package Manager" OFF \
     "eza" "A better ls" OFF \
     "flatpak" "Install Flatpak+FlatHub" OFF \
     "ghostty" "Fast and feature-rich terminal emulator" OFF \
@@ -31,3 +32,4 @@ startInteractive() {
   log_success SETUP "Finished installing apps."
 }
 main
+

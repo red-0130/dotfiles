@@ -77,6 +77,7 @@ The following applications can be installed interactively using the `--app` flag
 - **Starship**: Minimal, blazing-fast, and infinitely customizable shell prompt
 - **Superfile**: Modern terminal file manager with a clean and intuitive interface
 - **batcat**: A `cat` clone with syntax highlighting and Git integration
+- **bun**: A fast, all-in-one JavaScript runtime
 - **nvm**: Node Version Manager for managing multiple Node.js versions
 - **rust**: The Rust programming language toolchain for building fast and reliable software
 - **thorium**: A high-performance, privacy-focused web browser
