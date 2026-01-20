@@ -37,3 +37,7 @@ alias home="cd $HOME"
 # apt commands
 alias update='sudo apt update'
 alias upgrade='sudo apt full-upgrade -y'
+
+# project commands
+alias personal="cd $HOME/Codespace/projects/personal"
+alias playground="cd $HOME/Codespace/projects/playground"
