@@ -1,11 +1,21 @@
-Match exec "onsubnet 10.10." host ssh.beltran.cc
- HostName network-unraid
- Port 3222
+# CONDITION 1: Docker Container
+# Priority: Check if we are inside a container first
+Match host ssh.beltran.cc exec "[ -f /.dockerenv ]"
+    HostName network-unraid
+    Port 3222
 
-Match exec "onsubnet --not 10.10.20." host ssh.beltran.cc
- HostName ssh.beltran.cc
- Port 22
- ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h  
+# CONDITION 2: Local Reachability
+# If NOT in a container, check if the local host responds to a ping
+Match host ssh.beltran.cc exec "ping -c 1 -W 1 network-unraid > /dev/null 2>&1"
+    HostName network-unraid
+    Port 3222
+
+# CONDITION 3: WAN Fallback
+# If neither of the above matched, use the public route via Cloudflare
+Host ssh.beltran.cc
+    HostName ssh.beltran.cc
+    Port 22
+    ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h  
   
 Host unraid.beltran.cc
  HostName network-unraid
