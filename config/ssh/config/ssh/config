@@ -12,7 +12,7 @@ Match host ssh.beltran.cc exec "ping -c 1 -W 1 network-unraid > /dev/null 2>&1"
 
 # CONDITION 3: WAN Fallback
 # If neither of the above matched, use the public route via Cloudflare
-Host ssh.beltran.cc
+Match host ssh.beltran.cc !exec "ping -c 1 -W 1 network-unraid > /dev/null 2>&1 || [ -f /.dockerenv ]"
     HostName ssh.beltran.cc
     Port 22
     ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h  
