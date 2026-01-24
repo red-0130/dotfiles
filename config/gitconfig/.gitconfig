@@ -1,7 +1,15 @@
-[email]
-	user = Ephraim Beltran
-[user]
-	name = Ephraim Beltran
-	email = 100506096+red-0130@users.noreply.github.com
 [init]
-	defaultBranch = main
+    defaultBranch = main
+
+[user]
+    name = red-0130
+    email = 100506096+red-0130@users.noreply.github.com
+
+[push]
+    autoSetupRemote = true
+
+[alias]
+    st = status
+    co = checkout
+    br = branch
+    lg = log --oneline --graph --all

@@ -1,6 +1,7 @@
 #!/bin/env bash
 
 main() {
+  local APP="setup"
   local ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
   local BIN="$ROOT_DIR/bin"
   local INSTALL="$ROOT_DIR/install_scripts"
@@ -12,7 +13,7 @@ main() {
   source "$BIN/apply_config.sh"
 
   nonInteractive() {
-    log_info setup "Starting config installation"
+    log -i "Starting config installation"
 
     # bashrc config
     source "$CONFIG/bashrc/install_config.sh"
@@ -29,7 +30,11 @@ main() {
     # Starship config
     source "$CONFIG/starship/install_config.sh"
 
-    log_info setup "Setup script end."
+    # Git config
+    source "$CONFIG/gitconfig/install_config.sh"
+
+    log -i "Setup script end."
+    
     exit 0
   }
 
