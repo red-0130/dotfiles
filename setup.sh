@@ -27,14 +27,11 @@ main() {
     # Superfile config
     source "$CONFIG/superfile/install_config.sh"
 
-    # Starship config
-    source "$CONFIG/starship/install_config.sh"
-
     # Git config
     source "$CONFIG/gitconfig/install_config.sh"
 
     log -i "Setup script end."
-    
+
     exit 0
   }
 

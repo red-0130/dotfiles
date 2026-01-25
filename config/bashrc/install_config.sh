@@ -9,7 +9,6 @@ main() {
   local ALIASES_PATH="# Bash custom alias location\nsource "\$HOME/.config/bashrc/aliases.sh""
   local CUSTOM_PATH="# Bash custom PATHS\nsource "\$HOME/.config/bashrc/paths.sh""
   local ENV_PATH="# Bash custom ENV\nsource "\$HOME/.config/bashrc/env.sh""
-  local STARSHIP='command -v starship &>/dev/null && eval "$(starship init bash)"'
   local FZF='[ -f ~/.fzf.bash ] && source ~/.fzf.bash'
 
   log -i "Making backup of current bashrc config"
@@ -23,7 +22,6 @@ main() {
     echo -e $CUSTOM_PATH >>"$BASHRC"
     echo -e $ENV_PATH >>"$BASHRC"
     echo "$FZF" >>"$BASHRC"
-    echo "$STARSHIP" >>"$BASHRC"
     echo -e "\n##################################################" >>$BASHRC
   fi
 
