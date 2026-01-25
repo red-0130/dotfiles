@@ -41,4 +41,5 @@ alias upgrade='sudo apt full-upgrade -y'
 # project commands
 alias personal="cd $HOME/Codespace/projects/personal"
 alias playground="cd $HOME/Codespace/projects/playground"
-[ -n "$PROJECT_WORKSPACE" ] && alias workspace="cd $PROJECT_WORKSPACE"
+! [ -z ${PROJECT_WORKSPACE+x} ] && alias workspace="cd $PROJECT_WORKSPACE"
+
