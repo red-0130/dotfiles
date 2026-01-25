@@ -8,6 +8,9 @@
 [push]
     autoSetupRemote = true
 
+[pull]
+    rebase = true
+
 [alias]
     st = status
     co = checkout
