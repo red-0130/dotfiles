@@ -14,6 +14,9 @@ main() {
 
   nonInteractive() {
     log -i "Starting config installation"
+    log -i "Checking for config directory..."
+
+    ! [ -d "$HOME/.config" ] && mkdir "$HOME/.config"
 
     # bashrc config
     source "$CONFIG/bashrc/install_config.sh"
