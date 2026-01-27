@@ -22,39 +22,24 @@ Host unraid.beltran.cc
  User root
 
 # ---------CODER CONFIG-------------
-Host coder.*
-    ConnectTimeout=0
-    StrictHostKeyChecking=no
-    UserKnownHostsFile=/dev/null
-    LogLevel ERROR
-    ForwardAgent yes
-    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --ssh-host-prefix coder. %h
-
 Host *.coder
     ConnectTimeout=0
     StrictHostKeyChecking=no
     UserKnownHostsFile=/dev/null
     ForwardAgent yes
+    EnableEscapeCommandline yes
     LogLevel ERROR
 
 Match host *.coder !exec "/usr/local/bin/coder connect exists %h"
     ForwardAgent yes
+    EnableEscapeCommandline yes
     ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --hostname-suffix coder %h
     
-Host vite.*
-    ForwardAgent yes
-    ConnectTimeout=0
-    StrictHostKeyChecking=no
-    Compression yes
-    LocalForward 5173 localhost:5173
-    UserKnownHostsFile=/dev/null
-    LogLevel ERROR
-    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --ssh-host-prefix vite. %h
-
 Match host *.vite !exec "/usr/local/bin/coder connect exists %h"
     ConnectTimeout=0
     StrictHostKeyChecking=no
     Compression yes
+    EnableEscapeCommandline yes
     LocalForward 5173 localhost:5173
     UserKnownHostsFile=/dev/null
     LogLevel ERROR
