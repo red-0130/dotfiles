@@ -89,11 +89,6 @@
     "prefix": "impt",
     "body": ["import PropTypes from 'prop-types';"]
   },
-  "Embedded expression": {
-    "prefix": "lit",
-    "body": ["${${1:expression}}"],
-    "description": "Embedded expression"
-  },
   "Import React Component": {
     "description": "Import a React Component",
     "prefix": "impc",

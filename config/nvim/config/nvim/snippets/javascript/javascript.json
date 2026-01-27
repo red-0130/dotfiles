@@ -1,0 +1,90 @@
+{
+  "Function": {
+    "description": "Create a function",
+    "prefix": "fn",
+    "body": [
+      "function ${1:name}(${2}) {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "Async Function": {
+    "description": "Create an async function",
+    "prefix": "fna",
+    "body": [
+      "async function ${1:name}(${2}) {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "Named arrow function": {
+    "description": "Create a named arrow function",
+    "prefix": "nfn",
+    "body": ["const ${1:functionName} = (${2}) => ${3:{\n\t$4\n\\}}"]
+  },
+  "Anonymous arrow function": {
+    "description": "Create an anonymous arrow function",
+    "prefix": "anfn",
+    "body": ["(${1}) => ${2:{\n\t$3\n\\}}"]
+  },
+  "Async named arrow function": {
+    "description": "Create a named async arrow function",
+    "prefix": "nfna",
+    "body": ["const ${1:functionName} = async (${2}) => ${3:{\n\t$4\n\\}}"]
+  },
+  "Async anonymous arrow function": {
+    "description": "Create an anonymous async arrow function",
+    "prefix": "anfna",
+    "body": ["(${1}) => async ${2:{\n\t$3\n\\}}"]
+  },
+  "Embedded expression": {
+    "prefix": "lit",
+    "body": ["${${1:expression}}"],
+    "description": "Embedded expression"
+  },
+  "If statement": {
+    "description": "Create an if statement",
+    "prefix": "if",
+    "body": ["if (${1:condition}) {", "\t$0", "}"]
+  },
+  "Else statement": {
+    "description": "Create an else statement",
+    "prefix": "els",
+    "body": ["else {", "\t$0", "}"]
+  },
+  "Else if statement": {
+    "description": "Create an else if statement",
+    "prefix": "elif",
+    "body": ["else if (${1:condition}) {", "\t$0", "}"]
+  },
+  "While loop": {
+    "description": "Create a while loop",
+    "prefix": "while",
+    "body": ["while (${1:condition}) {", "\t$0", "}"]
+  },
+  "Do while loop": {
+    "description": "Create a do while loop",
+    "prefix": "dowhile",
+    "body": ["do {", "\t$0", "} while (${1:condition});"]
+  },
+  "For loop": {
+    "description": "Create a for loop",
+    "prefix": "for",
+    "body": ["for (let ${1:i} = 0; ${1:i} < ${2:length}; ${1:i}++) {", "\t$0", "}"]
+  },
+  "For...In Loop": {
+    "description": "Create a for...in loop",
+    "prefix": "forin",
+    "body": ["for (let ${1:key} in ${2:object}) {", "\t$0", "}"]
+  },
+  "For..Of Loop": {
+    "description": "Create a for..of loop",
+    "prefix": "forof",
+    "body": ["for (let ${1:element} of ${2:iterable}) {", "\t$0", "}"]
+  },
+  "Try Catch Block": {
+    "description": "Create a try catch block",
+    "prefix": "try",
+    "body": ["try {", "\t$0", "} catch (${1:error}) {", "}"]
+  }
+}
