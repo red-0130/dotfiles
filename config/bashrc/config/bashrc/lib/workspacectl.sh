@@ -25,5 +25,12 @@ wsctl() {
     fi
   }
 
+  get-workspace() {
+    [ -z "$PROJECT_WORKSPACE" ] && echo "Default workspace is not set" && exit 1
+    echo "$PROJECT_WORKSPACE"
+  }
+
   "$@"
 }
+
+complete -W "set-workspace set-gemini-api get-workspace" wsctl
