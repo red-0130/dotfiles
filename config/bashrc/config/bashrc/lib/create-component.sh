@@ -1,5 +1,5 @@
 function mkcomp() {
-  local CSS
+  local CSS=false
   local COMPONENT_NAME
   local COMPONENT_TYPE
   local SRC="$(pwd)/src"
@@ -123,3 +123,5 @@ EOF
   $CSS && createCss && importCss && echo "[MKCOMP][SUCCESS]: Stylesheet created and imported."
 
 }
+
+complete -W "--css --context --features --layout --pages --ui --common --help" mkcomp
