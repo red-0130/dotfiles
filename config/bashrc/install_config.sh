@@ -10,7 +10,7 @@ main() {
   local CUSTOM_PATH="# Bash custom PATHS\nsource "\$HOME/.config/bashrc/paths.sh""
   local ENV_PATH="# Bash custom ENV\nsource "\$HOME/.config/bashrc/env.sh""
   local FZF='[ -f ~/.fzf.bash ] && source ~/.fzf.bash'
-  local FZF_EVAL='[[ command -v fzf &>/dev/null ]] && eval "$(fzf --bash)"'
+  local FZF_EVAL='command -v fzf &>/dev/null && eval "$(fzf --bash)"'
 
   log -i "Making backup of current bashrc config"
   backup bashrc "$HOME/.bashrc" "$HOME/.profile" "$HOME/.bash_profile"
