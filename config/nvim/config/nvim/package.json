@@ -31,6 +31,14 @@
           "javascriptreact"
         ],
         "path": "./snippets/javascript/jsdoc.json"
+      },
+      {
+        "language": [
+          "javascript",
+          "typescript"
+        ],
+        "path": "./snippets/javascript/redux.json",
+        "when": "filename =~ /^.*\\.slice\\.js$/"
       }
     ]
   }

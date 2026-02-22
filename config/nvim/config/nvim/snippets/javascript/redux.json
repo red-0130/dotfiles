@@ -1,0 +1,26 @@
+{
+    "Redux Toolkit Slice": {
+        "prefix": "rxslice",
+        "body": [
+            "import { createSlice${1:, PayloadAction} } from '@reduxjs/toolkit';",
+            "",
+            "const initialState = {",
+            "  ${2:value}: ${3:null},",
+            "};",
+            "",
+            "export const ${4:name}Slice = createSlice({",
+            "  name: '${4:name}',",
+            "  initialState,",
+            "  reducers: {",
+            "    ${5:increment}: (state, action${1:}) => {",
+            "      ${6:state.value += 1;}",
+            "    },",
+            "  },",
+            "});",
+            "",
+            "export const { ${5:increment} } = ${4:name}Slice.actions;",
+            "export default ${4:name}Slice.reducer;"
+        ],
+        "description": "Create a Redux Toolkit Slice"
+    }
+}
