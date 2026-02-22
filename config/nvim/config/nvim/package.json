@@ -6,7 +6,10 @@
   "contributes": {
     "snippets": [
       {
-        "language": ["javascript", "javascriptreact"],
+        "language": [
+          "javascript",
+          "javascriptreact"
+        ],
         "path": "./snippets/javascript/javascript.json"
       },
       {
@@ -21,6 +24,13 @@
       {
         "language": "css",
         "path": "./snippets/css/css-snippets.json"
+      },
+      {
+        "language": [
+          "javascript",
+          "javascriptreact"
+        ],
+        "path": "./snippets/javascript/jsdoc.json"
       }
     ]
   }
