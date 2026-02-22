@@ -65,6 +65,10 @@ export { default } from "./$COMPONENT_NAME.jsx";
 EOF
     return 0
   }
+  if [[ -z "$1" ]]; then
+    showHelp
+    return 0
+  fi
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
