@@ -30,6 +30,13 @@ wsctl() {
     echo "$PROJECT_WORKSPACE"
   }
 
+  --reset() {
+    if [[ -f "$HOME/.workspace" ]]; then rm "$HOME/.workspace"; fi
+    if [[ -f "$HOME/.gemini_api" ]]; then rm "$HOME/.gemini_api"; fi
+    unset PROJECT_WORKSPACE
+    unset GEMINI_API_KEY
+  }
+
   "$@"
 }
 
