@@ -2,20 +2,12 @@
   "Function": {
     "description": "Create a function",
     "prefix": "fn",
-    "body": [
-      "function ${1:name}(${2}) {",
-      "\t$0",
-      "}"
-    ]
+    "body": ["function ${1:name}(${2}) {", "\t$0", "}"]
   },
   "Async Function": {
     "description": "Create an async function",
     "prefix": "fna",
-    "body": [
-      "async function ${1:name}(${2}) {",
-      "\t$0",
-      "}"
-    ]
+    "body": ["async function ${1:name}(${2}) {", "\t$0", "}"]
   },
   "Named arrow function": {
     "description": "Create a named arrow function",
@@ -44,7 +36,7 @@
   },
   "If statement": {
     "description": "Create an if statement",
-    "prefix": "if",
+    "prefix": "ifs",
     "body": ["if (${1:condition}) {", "\t$0", "}"]
   },
   "Else statement": {
@@ -59,18 +51,22 @@
   },
   "While loop": {
     "description": "Create a while loop",
-    "prefix": "while",
+    "prefix": "whi",
     "body": ["while (${1:condition}) {", "\t$0", "}"]
   },
   "Do while loop": {
     "description": "Create a do while loop",
-    "prefix": "dowhile",
+    "prefix": "dowhi",
     "body": ["do {", "\t$0", "} while (${1:condition});"]
   },
   "For loop": {
     "description": "Create a for loop",
-    "prefix": "for",
-    "body": ["for (let ${1:i} = 0; ${1:i} < ${2:length}; ${1:i}++) {", "\t$0", "}"]
+    "prefix": "forl",
+    "body": [
+      "for (let ${1:i} = 0; ${1:i} < ${2:length}; ${1:i}++) {",
+      "\t$0",
+      "}"
+    ]
   },
   "For...In Loop": {
     "description": "Create a for...in loop",
@@ -84,7 +80,8 @@
   },
   "Try Catch Block": {
     "description": "Create a try catch block",
-    "prefix": "try",
+    "prefix": "tcb",
     "body": ["try {", "\t$0", "} catch (${1:error}) {", "}"]
   }
 }
+
