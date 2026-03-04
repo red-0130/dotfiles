@@ -5,8 +5,8 @@
       "/**",
       " * ${1:Description}",
       " *",
-      " * @param {${2:type}} ${1:name} - ${3:description}",
-      " * @returns {${4:type}} ${5:description}",
+      " * @param {${2:type}} ${3:name} - ${4:description}",
+      " * @returns {${5:type}} ${6:description}",
       " */"
     ],
     "description": "Creates a comprehensive JSDoc block with typed params and return values"
@@ -23,8 +23,7 @@
   },
   "JSDoc @return": {
     "prefix": "jsreturn",
-    "body": ["@returns {${1:string|number|boolean|Object}} ${2:description}"],
+    "body": ["@returns {${1:type}} ${2:description}"],
     "description": "Creates a JSDoc @returns line"
   }
 }
-
