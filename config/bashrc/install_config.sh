@@ -27,7 +27,9 @@ main() {
     echo -e "\n##################################################" >>$BASHRC
   fi
 
-  _createBashProfile
+  if ! grep '# BASH_PROFILE' "$HOME/.bash_profile"; then
+    _createBashProfile
+  fi
   copy_config bashrc
 
   log -s "Transfer complete."
