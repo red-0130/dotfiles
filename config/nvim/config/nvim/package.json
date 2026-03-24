@@ -39,7 +39,15 @@
         ],
         "path": "./snippets/javascript/redux.json",
         "when": "filename =~ /^.*\\.slice\\.js$/"
+      },
+      {
+        "language": [
+          "javascript",
+          "typescript"
+        ],
+        "path": "./snippets/javascript/expressjs.json"
       }
     ]
   }
 }
+

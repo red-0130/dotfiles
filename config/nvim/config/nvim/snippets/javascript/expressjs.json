@@ -1,0 +1,50 @@
+{
+  "app.create": {
+    "description": "This method quickly set up a minimal express app.",
+    "prefix": "app.create",
+    "body": [
+      "const express = require('express');",
+      "const app = express();",
+      "",
+      "const PORT = ${1:4001}",
+      "app.listen(PORT, () => {",
+      "\tconsole.log(`App listening on port ${PORT}.`",
+      "}"
+    ]
+  },
+  "app.all": {
+    "description": "This method is like the standard app.METHOD() methods, except it matches all HTTP verbs.",
+    "prefix": "app.all",
+    "body": ["${2:app}.all(${1:\"/\"}, (req, res) => {", "\t$0", "}"]
+  },
+  "app.get": {
+    "description": "Express GET request",
+    "prefix": "app.get",
+    "body": ["${2:app}.get(${1:\"/\"}, (req, res) => {", "\t$0", "}"]
+  },
+  "app.patch": {
+    "description": "Routes HTTP PATCH request to the specified path with the specified callback functions.",
+    "prefix": "app.patch",
+    "body": ["${2:app}.patch(${1:\"/\"}, (req, res) => {", "\t$0", "}"]
+  },
+  "app.post": {
+    "description": "Express POST request",
+    "prefix": "app.post",
+    "body": ["${2:app}.post(${1:\"/\"}, (req, res) => {", "\t$0", "}"]
+  },
+  "app.put": {
+    "description": "Express PUT request",
+    "prefix": "app.put",
+    "body": ["${2:app}.post(${1:\"/\"}, (req, res) => {", "\t$0", "}"]
+  },
+  "app.delete": {
+    "description": "Express DELETE request",
+    "prefix": "app.delete",
+    "body": ["${2:app}.delete(${1:\"/\"}, (req, res) => {", "\t$0", "}"]
+  },
+  "app.put": {
+    "description": "Express PUT request",
+    "prefix": "app.put",
+    "body": ["${2:app}.post(${1:\"/\"}, (req, res) => {", "\t$0", "}"]
+  }
+}
