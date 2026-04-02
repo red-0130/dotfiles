@@ -1,5 +1,8 @@
 #!/bin/env bash
 
+# TODO: refactor `backup` script
+# TODO: refactor `install_config` script
+
 main() {
   local APP="setup"
   local ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
@@ -32,6 +35,9 @@ main() {
 
     # Git config
     source "$CONFIG/gitconfig/install_config.sh"
+
+    # Zellij config
+    source "$CONFIG/zellij/install_config.sh"
 
     log -i "Setup script end."
 

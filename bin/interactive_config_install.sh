@@ -20,6 +20,7 @@ startInteractive() {
     "ssh" "Apply SSH config" OFF \
     "starship" "Append Starship init" OFF \
     "superfile" "Apply Superfile config" OFF \
+    "zellij" "Apply Zellij config" OFF \
     3>&1 1>&2 2>&3 |
     while read CHOICE; do
       apply_config $CHOICE
