@@ -76,3 +76,27 @@ EOF
     return 1
   fi
 }
+
+log_info() {
+  local -u APP="$1"
+  local MESSAGE="$2"
+  log -i $MESSAGE -a $APP
+}
+
+log_error() {
+  local -u APP="$1"
+  local MESSAGE="$2"
+  log -e $MESSAGE -a $APP
+}
+
+log_success() {
+  local -u APP="$1"
+  local MESSAGE="$2"
+  log -s $MESSAGE -a $APP
+}
+
+log_warning() {
+  local -u APP="$1"
+  local MESSAGE="$2"
+  log -w $MESSAGE -a $APP
+}

@@ -1,31 +1,58 @@
 #!/usr/bin/env bash
 
-if ! source "$BIN/path_exist.sh"; then exit 1; fi
+createBackup() {
+  local TARGET="$1"
+  local APP=$(basename $TARGET)
+  local TIMESTAMP=$(date "+%Y%m%d-%H%M%S")
+  local DESTINATION="$HOME/.config.bak/"
+
+  if mv -t $DESTINATION "$@" -b --suffix="-$TIMESTAMP"; then
+    return 0
+  fi
+  return 1
+}
+
+checkExistingConfig() {
+  local TARGET="$1"
+
+  if [[ ! -e "$TARGET" ]]; then
+    return 1
+  fi
+
+  if [[ -L "$TARGET" ]]; then
+    return 1
+  fi
+
+  return 0
+}
+
+createBackupDirectory() {
+  if [[ ! -d $HOME/.config.bak ]]; then
+    mkdir -p $HOME/.config.back
+    return 0
+  fi
+  return 0
+}
 
 backup() {
   local APP="$1"
   shift
-  local ERROR=false
   local TIMESTAMP=$(date "+%Y%m%d-%H%M%S")
-  local DESTINATION="$HOME/.config.bak/$APP-$TIMESTAMP"
+
+  createBackupDirectory
 
   for ENTRY in "$@"; do
-    if [[ ! -e $ENTRY ]]; then
-      log_warning $APP "No existing config found."
-      ERROR=true
+    if ! checkExistingConfig $ENTRY; then
+      log -w "No config found skipping backup"
+      return
     fi
-    if [[ -L $ENTRY ]]; then
-      log_warning $APP "Existing config is a symbolic link."
-      ERROR=true
+
+    if createBackup $ENTRY; then
+      log -s "Backup successfully created."
+    else
+      log -e "There was an error creating a backup."
+      return 1
     fi
   done
-  if $ERROR; then
-    log_warning "$APP" "There was an error creating a backup of config files."
-    return 0
-  fi
-
-  if mv -t $DESTINATION "$@"; then
-    log_info "$APP" "Successfully created a backup"
-    return 0
-  fi
+  return 0
 }

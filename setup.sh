@@ -1,19 +1,16 @@
 #!/bin/env bash
 
-# TODO: refactor `backup` script
-# TODO: refactor `install_config` script
-
 main() {
   local APP="setup"
   local ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
   local BIN="$ROOT_DIR/bin"
   local INSTALL="$ROOT_DIR/install_scripts"
   local CONFIG="$ROOT_DIR/config"
-  source "$BIN/shell_logger.sh"
   source "$BIN/log.sh"
   source "$BIN/backup.sh"
-  source "$BIN/copy_config.sh"
   source "$BIN/apply_config.sh"
+
+  createBackupDirectory
 
   nonInteractive() {
     log -i "Starting config installation"
@@ -22,22 +19,22 @@ main() {
     ! [ -d "$HOME/.config" ] && mkdir "$HOME/.config"
 
     # bashrc config
-    source "$CONFIG/bashrc/install_config.sh"
+    apply_config "bashrc"
 
     # NVIM config
-    source "$CONFIG/nvim/install_config.sh"
+    apply_config "nvim"
 
     # SSH config
-    source "$CONFIG/ssh/install_config.sh"
+    apply_config "ssh"
 
     # Superfile config
-    source "$CONFIG/superfile/install_config.sh"
+    apply_config "superfile"
 
     # Git config
-    source "$CONFIG/gitconfig/install_config.sh"
+    apply_config "gitconfig"
 
     # Zellij config
-    source "$CONFIG/zellij/install_config.sh"
+    apply_config "zellij"
 
     log -i "Setup script end."
 
@@ -45,10 +42,10 @@ main() {
   }
 
   if [[ "$1" == "--config" ]] || [[ "$1" == "-c" ]]; then
-    log_info config "Starting interactive config install."
+    log -i "Starting interactive config install." -a "setup"
     source "$BIN/interactive_config_install.sh"
   elif [[ "$1" == "--app" ]] || [[ "$1" == "-a" ]]; then
-    log_info app "Starting interactive app install."
+    log -i "Starting interactive app install." -a "setup"
     source "$BIN/interactive_app_install.sh"
   else
     nonInteractive
