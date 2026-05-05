@@ -29,6 +29,7 @@ Host *.coder
     ForwardAgent yes
     EnableEscapeCommandline yes
     LogLevel ERROR
+    SetEnv TERM=xterm-256color
 
 Match host *.coder !exec "/usr/local/bin/coder connect exists %h"
     ForwardAgent yes
@@ -44,6 +45,7 @@ Match host *.vite !exec "/usr/local/bin/coder connect exists %h"
     UserKnownHostsFile=/dev/null
     LogLevel ERROR
     ForwardAgent yes
+    SetEnv TERM=xterm-256color
     ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --hostname-suffix vite %h
     
 # ------------END-CODER------------

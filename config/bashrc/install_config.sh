@@ -47,7 +47,6 @@ _createBashProfile() {
   source "\$HOME/.workspace" &&\
   cd "\$PROJECT_WORKSPACE"
   
-export TERM=xterm
 EOF
 }
 
