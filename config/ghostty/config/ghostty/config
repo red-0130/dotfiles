@@ -10,4 +10,4 @@ background-blur = 20
 theme = Catppuccin Macchiato
 font-family = "JetBrainsMono Nerd Font"
 mouse-hide-while-typing = true
-shell-integration-features = ssh-env,ssh-terminfo
+shell-integration-features = ssh-env,ssh-terminfo,path
