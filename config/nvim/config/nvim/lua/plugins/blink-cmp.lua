@@ -37,8 +37,6 @@ return {
 
       ["<Tab>"] = { "snippet_forward", "fallback" },
       ["<S-Tab>"] = { "snippet_backward", "fallback" },
-
-      ["<leader>cs"] = { "show_signature", "hide_signature", "fallback" },
     },
 
     appearance = {
