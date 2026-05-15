@@ -1,10 +1,10 @@
 keybinds clear-defaults=true {
     shared {
       //Navigation
-      bind "Ctrl left" "Ctrl h" { MoveFocus "left"; }
-      bind "Ctrl down" "Ctrl j" { MoveFocus "down"; }
-      bind "Ctrl up" "Ctrl k" { MoveFocus "up"; }
-      bind "Ctrl right" "Ctrl l" { MoveFocus "right"; }
+      bind "Ctrl left" { MoveFocus "left"; }
+      bind "Ctrl down" { MoveFocus "down"; }
+      bind "Ctrl up" { MoveFocus "up"; }
+      bind "Ctrl right" { MoveFocus "right"; }
 
       // Tab controls
       bind "Ctrl t" { NewTab; }
