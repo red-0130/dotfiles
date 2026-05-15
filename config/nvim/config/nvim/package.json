@@ -6,10 +6,7 @@
   "contributes": {
     "snippets": [
       {
-        "language": [
-          "javascript",
-          "javascriptreact"
-        ],
+        "language": "javascript",
         "path": "./snippets/javascript/javascript.json"
       },
       {
@@ -50,4 +47,3 @@
     ]
   }
 }
-

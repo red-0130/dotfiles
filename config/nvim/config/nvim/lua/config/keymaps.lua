@@ -1,12 +1,115 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
--- Add any additional keymaps here
---
---
---NOTE: Inc-Rename Keymaps
-vim.keymap.set("n", "<leader>rn", function()
-  return ":IncRename " .. vim.fn.expand("<cword>")
-end, { expr = true, desc = "Rename variable" })
+-- QoL keybindings
+vim.keymap.set("n", "<leader>qq", ":qa<CR>", { silent = true, desc = "Quit" })
+-- Yanking and Putting to and from clipboard
+vim.keymap.set("v", "<leader>yy", '"+y', { desc = "Yank to registry" })
+vim.keymap.set("n", "<leader>pp", '"+p', { desc = "Put from clipboard" })
+-- Save in normal, visual, and insert mode
+vim.keymap.set("n", "<C-s>", ":update<CR>", { silent = true, desc = "Save file while in normal mode" })
+vim.keymap.set("v", "<C-s>", ":update<CR>", { silent = true, desc = "Save file while in visual mode" })
+vim.keymap.set("i", "<C-s>", "<Esc>:update<CR>", { silent = true, desc = "Save file while in insert mode" })
 
---NOTE: Buffer Control Keymaps
-vim.keymap.set("n", "<C-w>", "<Cmd>bd<CR>", { silent = true, desc = "Delete buffer" })
+-- Lazygit keymaps
+vim.keymap.set("n", "<leader>gg", function()
+  Snacks.lazygit({ cwd = vim.fn.argv(0) })
+end, { desc = "Open Lazygit" })
+
+-- Picker keymaps
+-- root directory detector
+local root_dir = vim.fn.getcwd()
+for _, marker in ipairs({ "init.lua", "package.json", ".git" }) do
+  local path = vim.fs.find(marker, { upward = true, limit = 1, path = vim.fn.expand("%:p:h") })[1]
+  if path then
+    root_dir = vim.fs.dirname(path)
+    break
+  end
+end
+
+vim.keymap.set("n", "<leader>e", function()
+  Snacks.explorer({ cwd = root_dir })
+end, { desc = "Open Explorer(root)" })
+
+vim.keymap.set("n", "<leader>E", function()
+  Snacks.explorer()
+end, { desc = "Open Explorer(CWD)" })
+
+vim.keymap.set("n", "<leader>fs", function()
+  Snacks.picker.smart()
+end, { desc = "Smart Find Files" })
+
+vim.keymap.set("n", "<leader>ff", function()
+  Snacks.picker.files({ cwd = root_dir })
+end, { desc = "Find files" })
+
+vim.keymap.set("n", "<leader><space>", function()
+  Snacks.picker.files({ cwd = root_dir })
+end, { desc = "Find files" })
+
+vim.keymap.set("n", "<leader>sg", function()
+  Snacks.picker.grep({ cwd = root_dir })
+end, { desc = "Grep" })
+
+vim.keymap.set("n", "<leader>/", function()
+  Snacks.picker.grep({ cwd = root_dir })
+end, { desc = "Grep" })
+
+vim.keymap.set("n", "<leader>sb", function()
+  Snacks.picker.buffers()
+end, { desc = "Search Buffers" })
+
+vim.keymap.set("n", "<leader>fc", function()
+  Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
+end, { desc = "Find Config File" })
+
+vim.keymap.set("n", "<leader>st", function()
+  Snacks.picker.todo_comments({ cwd = root_dir })
+end, { desc = "Search for TODOs" })
+
+vim.keymap.set("n", "<leader>sk", function()
+  Snacks.picker.keymaps()
+end, { desc = "Search for keymaps" })
+
+vim.keymap.set("n", "<leader>gb", function()
+  Snacks.picker.git_branches({
+    cwd = root_dir,
+    layout = {
+      preset = "ivy", -- or "select", "vscode", etc.
+      preview = false,
+    },
+  })
+end, { desc = "Show git branches" })
+
+vim.keymap.set("n", "gd", function()
+  Snacks.picker.lsp_definitions()
+end, { desc = "Go to [d]efinition" })
+
+vim.keymap.set("n", "gr", function()
+  Snacks.picker.lsp_references()
+end, { desc = "Go to [r]eference" })
+
+vim.keymap.set("n", "gi", function()
+  Snacks.picker.lsp_implementations()
+end, { desc = "Go to [i]mplementation" })
+
+vim.keymap.set("n", "gy", function()
+  Snacks.picker.lsp_type_definitions()
+end, { desc = "Go to T[y]pe definition" })
+
+vim.keymap.set("n", "<leader>sd", function()
+  Snacks.picker.diagnostics()
+end, { desc = "Search for diagnostics" })
+
+-- Diagnostics keymap
+vim.keymap.set("n", "<leader>cd", function()
+  vim.diagnostic.open_float()
+end, { desc = "Open diagnostics" })
+
+-- Code actions
+vim.keymap.set({ "n", "x" }, "<leader>cc", vim.lsp.buf.code_action, { desc = "Show available code actions" })
+vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Code action rename" })
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Code action rename" })
+vim.keymap.set("n", "<leader>cf", function()
+  require("conform").format({ async = true })
+end, { desc = "Format code" })
+
+-- Buffer keymaps
+vim.keymap.set("n", "<leader>bd", ":bd<Enter>", { desc = "[b]uffer [d]elete" })

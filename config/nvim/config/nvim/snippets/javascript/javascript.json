@@ -31,7 +31,7 @@
   },
   "Embedded expression": {
     "prefix": "lit",
-    "body": ["${${1:expression}}"],
+    "body": ["\\${${1:expression}}"],
     "description": "Embedded expression"
   },
   "If statement": {
