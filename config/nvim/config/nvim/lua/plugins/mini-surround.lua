@@ -1,15 +1,6 @@
 return {
   "nvim-mini/mini.surround",
   version = false,
-  keys = {
-    { "gsa" },
-    { "gsd" },
-    { "gsf" },
-    { "gsF" },
-    { "gsh" },
-    { "gsr" },
-    { "gsn" },
-  },
   opts = {
     mappings = {
       add = "gsa", -- Add surrounding in Normal and Visual modes
