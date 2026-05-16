@@ -1,12 +1,38 @@
 return {
-  "ahmedkhalf/project.nvim",
-  config = function()
-    require("project_nvim").setup({
-      -- your configuration comes here
-      -- or leave it empty to use the default settings
-      -- refer to the configuration section below
-      detection_methods = { "lsp", "pattern" },
-      patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn", "Makefile", "package.json", "Cargo.toml" },
-    })
-  end,
+  "DrKJeff16/project.nvim",
+  dependencies = { -- OPTIONAL. Choose any of the following
+    "folke/snacks.nvim",
+  },
+  opts = {
+    patterns = {
+      ".git",
+      ".github",
+      "_darcs",
+      ".hg",
+      ".bzr",
+      ".svn",
+      "Pipfile",
+      "pyproject.toml",
+      ".pre-commit-config.yaml",
+      ".pre-commit-config.yml",
+      ".csproj",
+      ".sln",
+      ".nvim.lua",
+      ".neoconf.json",
+      "neoconf.json",
+      "Cargo.toml",
+      "package.json",
+    },
+    snacks = {
+      enabled = true, -- Will enable the `:Project snacks` command
+      opts = {
+        sort = "newest",
+        hidden = false,
+        title = "Select Project",
+        layout = "select",
+        -- icon = {},
+        -- path_icons = {},
+      },
+    },
+  },
 }
