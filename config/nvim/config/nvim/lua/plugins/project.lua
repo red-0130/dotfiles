@@ -4,6 +4,7 @@ return {
     "folke/snacks.nvim",
   },
   opts = {
+    detection_methods = { "lsp", "pattern" },
     patterns = {
       ".git",
       ".github",
