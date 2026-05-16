@@ -9,42 +9,28 @@ vim.keymap.set("v", "<C-s>", ":update<CR>", { silent = true, desc = "Save file w
 vim.keymap.set("i", "<C-s>", "<Esc>:update<CR>", { silent = true, desc = "Save file while in insert mode" })
 
 -- Picker keymaps
--- root directory detector
-local root_dir = vim.fn.getcwd()
-for _, marker in ipairs({ "init.lua", "package.json", "Cargo.toml", "Cargo.lock", ".git" }) do
-  local path = vim.fs.find(marker, { upward = true, limit = 1, path = vim.fn.expand("%:p:h") })[1]
-  if path then
-    root_dir = vim.fs.dirname(path)
-    break
-  end
-end
-
 vim.keymap.set("n", "<leader>e", function()
-  Snacks.explorer({ cwd = root_dir })
-end, { desc = "Open Explorer(root)" })
-
-vim.keymap.set("n", "<leader>E", function()
   Snacks.explorer()
-end, { desc = "Open Explorer(CWD)" })
+end, { desc = "Open Explorer" })
 
 vim.keymap.set("n", "<leader>fs", function()
   Snacks.picker.smart()
 end, { desc = "Smart Find Files" })
 
 vim.keymap.set("n", "<leader>ff", function()
-  Snacks.picker.files({ cwd = root_dir })
+  Snacks.picker.files()
 end, { desc = "Find files" })
 
 vim.keymap.set("n", "<leader><space>", function()
-  Snacks.picker.files({ cwd = root_dir })
+  Snacks.picker.files()
 end, { desc = "Find files" })
 
 vim.keymap.set("n", "<leader>sg", function()
-  Snacks.picker.grep({ cwd = root_dir })
+  Snacks.picker.grep()
 end, { desc = "Grep" })
 
 vim.keymap.set("n", "<leader>/", function()
-  Snacks.picker.grep({ cwd = root_dir })
+  Snacks.picker.grep()
 end, { desc = "Grep" })
 
 vim.keymap.set("n", "<leader>sb", function()
@@ -56,7 +42,7 @@ vim.keymap.set("n", "<leader>fc", function()
 end, { desc = "Find Config File" })
 
 vim.keymap.set("n", "<leader>st", function()
-  Snacks.picker.todo_comments({ cwd = root_dir })
+  Snacks.picker.todo_comments()
 end, { desc = "Search for TODOs" })
 
 vim.keymap.set("n", "<leader>sk", function()
@@ -65,13 +51,15 @@ end, { desc = "Search for keymaps" })
 
 vim.keymap.set("n", "<leader>gb", function()
   Snacks.picker.git_branches({
-    cwd = root_dir,
     layout = {
       preset = "ivy", -- or "select", "vscode", etc.
-      preview = false,
     },
   })
 end, { desc = "Show git branches" })
+
+vim.keymap.set("n", "<leader>sp", function()
+  Snacks.picker.projects()
+end, { desc = "Search projects" })
 
 vim.keymap.set("n", "gd", function()
   Snacks.picker.lsp_definitions()
@@ -95,7 +83,7 @@ end, { desc = "Search for diagnostics" })
 
 -- Lazygit keymaps
 vim.keymap.set("n", "<leader>gg", function()
-  Snacks.lazygit({ cwd = root_dir })
+  Snacks.lazygit()
 end, { desc = "Open Lazygit" })
 
 -- Diagnostics keymap
@@ -113,3 +101,7 @@ end, { desc = "Format code" })
 
 -- Buffer keymaps
 vim.keymap.set("n", "<leader>bd", ":bd<Enter>", { desc = "[b]uffer [d]elete" })
+
+-- Package manager keymaps
+vim.keymap.set("n", "<leader>ll", ":Lazy<Enter>", { desc = "Open Lazy plugin manager" })
+vim.keymap.set("n", "<leader>lm", ":Mason<Enter>", { desc = "Open Mason LSP package manager" })
