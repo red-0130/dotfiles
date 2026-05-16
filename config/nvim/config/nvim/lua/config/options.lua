@@ -14,9 +14,6 @@ vim.g.autoformat = true
 -- Snacks animation
 vim.g.snacks_animate = true
 
--- Root dir detection
-vim.g.root_spec = { "lsp", { ".git", "lua", "Makefile", "package.json" }, "cwd" }
-
 -- Show the current document symbols location from Trouble in lualine
 -- You can disable this for a buffer by setting `vim.b.trouble_lualine = false`
 vim.g.trouble_lualine = false

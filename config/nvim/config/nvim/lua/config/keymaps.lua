@@ -8,15 +8,10 @@ vim.keymap.set("n", "<C-s>", ":update<CR>", { silent = true, desc = "Save file w
 vim.keymap.set("v", "<C-s>", ":update<CR>", { silent = true, desc = "Save file while in visual mode" })
 vim.keymap.set("i", "<C-s>", "<Esc>:update<CR>", { silent = true, desc = "Save file while in insert mode" })
 
--- Lazygit keymaps
-vim.keymap.set("n", "<leader>gg", function()
-  Snacks.lazygit({ cwd = vim.fn.argv(0) })
-end, { desc = "Open Lazygit" })
-
 -- Picker keymaps
 -- root directory detector
 local root_dir = vim.fn.getcwd()
-for _, marker in ipairs({ "init.lua", "package.json", ".git" }) do
+for _, marker in ipairs({ "init.lua", "package.json", "Cargo.toml", "Cargo.lock", ".git" }) do
   local path = vim.fs.find(marker, { upward = true, limit = 1, path = vim.fn.expand("%:p:h") })[1]
   if path then
     root_dir = vim.fs.dirname(path)
@@ -97,6 +92,11 @@ end, { desc = "Go to T[y]pe definition" })
 vim.keymap.set("n", "<leader>sd", function()
   Snacks.picker.diagnostics()
 end, { desc = "Search for diagnostics" })
+
+-- Lazygit keymaps
+vim.keymap.set("n", "<leader>gg", function()
+  Snacks.lazygit({ cwd = root_dir })
+end, { desc = "Open Lazygit" })
 
 -- Diagnostics keymap
 vim.keymap.set("n", "<leader>cd", function()
