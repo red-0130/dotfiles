@@ -12,22 +12,21 @@
   "Named arrow function": {
     "description": "Create a named arrow function",
     "prefix": "nfn",
-    "body": ["const ${1:functionName} = (${2}) => ${3:{\n\t$4\n\\}}"]
+    "body": ["const ${1:functionName} = (${2}) => {", "\t${3:// body}", "};"]
   },
   "Anonymous arrow function": {
     "description": "Create an anonymous arrow function",
-    "prefix": "anfn",
-    "body": ["(${1}) => ${2:{\n\t$3\n\\}}"]
+    "prefix": "afn",
+    "body": ["(${1}) => {", "\t${2:// logic}", "}"]
   },
   "Async named arrow function": {
     "description": "Create a named async arrow function",
-    "prefix": "nfna",
-    "body": ["const ${1:functionName} = async (${2}) => ${3:{\n\t$4\n\\}}"]
-  },
-  "Async anonymous arrow function": {
-    "description": "Create an anonymous async arrow function",
-    "prefix": "anfna",
-    "body": ["(${1}) => async ${2:{\n\t$3\n\\}}"]
+    "prefix": "afna",
+    "body": [
+      "const ${1:functionName} = async (${2}) => {",
+      "\t${3:// logic}",
+      "}"
+    ]
   },
   "Embedded expression": {
     "prefix": "lit",
@@ -81,7 +80,12 @@
   "Try Catch Block": {
     "description": "Create a try catch block",
     "prefix": "tcb",
-    "body": ["try {", "\t$0", "} catch (${1:error}) {", "}"]
+    "body": [
+      "try {",
+      "\t$0",
+      "} catch (${1:error}) {",
+      "\t${2:// error handling}",
+      "}"
+    ]
   }
 }
-

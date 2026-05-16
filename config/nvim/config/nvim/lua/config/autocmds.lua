@@ -20,3 +20,11 @@ vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete", "BufEnter" }, {
   end,
   group = vim.api.nvim_create_augroup("TablineAutoHide", { clear = true }),
 })
+
+-- Disable conceal in JSON files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "json", "jsonc" },
+  callback = function()
+    vim.wo.conceallevel = 0
+  end,
+})

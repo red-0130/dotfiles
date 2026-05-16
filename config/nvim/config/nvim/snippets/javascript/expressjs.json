@@ -11,20 +11,5 @@
       "\tconsole.log(`App listening on port ${PORT}.`",
       "}"
     ]
-  },
-  "ExpressJS HTTP Request": {
-    "description": "Insert an ExpressJS HTTP handler",
-    "prefix": "app.x",
-    "body": ["${2:app}.${1:get}(${3:\"/\"}, (req, res, next) => {", "\t$0", "}"]
-  },
-  "app.use": {
-    "description": "Application middleware",
-    "prefix": "app.use",
-    "body": [
-      "${2:app}.post(${1:\"/\"}, (req, res, next) => {",
-      "\t$0",
-      "\tnext()",
-      "}"
-    ]
   }
 }
