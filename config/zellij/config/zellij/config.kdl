@@ -31,11 +31,11 @@ keybinds clear-defaults=true {
       bind "Ctrl Space" { SwitchToMode "scroll"; }
 
       // Tmux mode
-      bind "Ctrl f" { SwitchToMode "Tmux"; }
+      bind "Ctrl Alt f" { SwitchToMode "Tmux"; }
     }
 
     tmux {
-      bind "Ctrl f" { SwitchToMode "locked"; }
+      bind "Ctrl Alt f" { SwitchToMode "locked"; }
     }
 
     scroll {
