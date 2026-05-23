@@ -19,6 +19,7 @@ startInteractive() {
     "fzf" "A command-line fuzzy finder" OFF \
     "ghostty" "Fast and feature-rich terminal emulator" OFF \
     "git" "Latest version of git" OFF \
+    "helium" "Private and secured chromium-based browser" OFF \
     "lazygit" "Simple terminal UI for git commands" OFF \
     "nvim" "Modular terminal text editor" OFF \
     "nvm" "Node Version Manager" OFF \
