@@ -8,6 +8,7 @@ return { -- Autoformat
     format_on_save = {
       timeout_ms = 500,
       lsp_format = "fallback",
+      lsp_fallback = true,
     },
     default_format_opts = {
       lsp_format = "fallback", -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
@@ -31,6 +32,8 @@ return { -- Autoformat
       css = prettier,
       lua = { "stylua" },
       sh = { "shfmt" },
+      -- Fallback to lsp if file is not defined above
+      ["_"] = { "lsp" },
     },
   },
 }
