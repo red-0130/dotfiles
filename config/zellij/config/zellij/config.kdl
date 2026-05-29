@@ -21,7 +21,7 @@ keybinds clear-defaults=true {
       bind "Ctrl /" { ToggleFloatingPanes; }
       bind "Ctrl p" { NewPane; }
       bind "Ctrl q" { CloseFocus; }
-      bind "Shift Ctrl /" { TogglePaneEmbedOrFloating; }
+      bind "Ctrl g" { TogglePaneEmbedOrFloating; }
 
       // Layout
       bind "Ctrl ]" { NextSwapLayout; }
