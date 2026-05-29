@@ -3,7 +3,7 @@ if ! source "$BIN/path_exist.sh"; then exit 1; fi
 main() {
   local APP=lazygit
   log -i lazygit "Starting installation..."
-  [[ -d "/tmp/lazygit"]] && rm -rf /tmp/lazygit
+  [[ -d "/tmp/lazygit" ]] && rm -rf /tmp/lazygit
   local LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | \grep -Po '"tag_name": *"v\K[^"]*')
   local FILE="lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
 
@@ -19,7 +19,7 @@ main() {
     log -s "Finished installing. Beginning cleanup..."
     if rm lazygit; then log -i "Done."; fi
   else
-    log -r "There was an error installing Lazygit"
+    log -e "There was an error installing Lazygit"
     return 1
   fi
 }
