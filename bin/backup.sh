@@ -27,9 +27,9 @@ checkExistingConfig() {
 }
 
 createBackupDirectory() {
-  if [[ ! -d $HOME/.config.bak ]]; then
-    mkdir -p $HOME/.config.back
-    return 0
+  if [[ ! -d "$HOME/.config.bak" ]]; then
+    log -i "Backup directoru not found. It will now be created."
+    mkdir $HOME/.config.back
   fi
   return 0
 }
