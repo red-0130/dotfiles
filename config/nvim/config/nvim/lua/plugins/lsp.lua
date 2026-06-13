@@ -121,6 +121,7 @@ return {
 
       -- Special Lua Config, as recommended by neovim help docs
       lua_ls = {
+        mason = false,
         on_init = function(client)
           client.server_capabilities.documentFormattingProvider = false -- Disable formatting (formatting is done by stylua)
 
