@@ -63,7 +63,7 @@ function parse_git_dirty {
 }
 
 function test_container() {
-  [[ -f "/.dockerenv" ]] || [[ -n $CONTAINER ]] && echo "[$USER@$HOSTNAME]"
+  [[ -f "/.dockerenv" ]] || [[ -n $CONTAINER ]] && echo "[$(id -un)@$HOSTNAME]"
 }
 
 function get_short_path() {
