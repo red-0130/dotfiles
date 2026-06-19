@@ -39,8 +39,8 @@ alias update='sudo apt update'
 alias upgrade='sudo apt full-upgrade -y'
 
 # project commands
-alias personal="cd $HOME/Codespace/projects/personal"
-alias playground="cd $HOME/Codespace/projects/playground"
+alias personal="cd $HOME/Projects/personal"
+alias playground="cd $HOME/Projects/playground"
 ! [ -z ${PROJECT_WORKSPACE+x} ] && alias workspace="cd $PROJECT_WORKSPACE"
 
 # podman commands
