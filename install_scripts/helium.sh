@@ -14,7 +14,7 @@ main() {
   log -i "Adding Helium Browser apt repo"
   if addHeliumRepo; then
     log -s "Helium Browser repo added."
-    elelse
+  else
     log -e "There was an error adding the repo APT sources."
     return 1
   fi
