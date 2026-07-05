@@ -2,10 +2,11 @@
 if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 main() {
+  local APP=ghostty
   backup ghostty "$HOME/.config/ghostty"
-  log_info ghostty "Applying config..."
+  log -i "Applying config..."
   if copy_config ghostty; then
-    log_success ghostty "Finished applying config."
+    log -s "Finished applying config."
   fi
 }
 main

@@ -4,12 +4,12 @@ if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 main() {
   local APP="ghostty"
-  log_info ghostty "Starting installation..."
+  log -i "Starting installation..."
   if curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh | bash; then
-    log_success ghostty "Successfully installed."
+    log -s "Successfully installed."
     return 0
   else
-    log_error ghostty "There was an error installing."
+    log -e "There was an error installing."
     log -w "Downloading universal AppImage as an alternative"
     if download; then
       log -s "AppImage downloaded to the user\'s Downloads directory."

@@ -9,7 +9,7 @@ path_exist() {
     echo -e "\e[39;1m$COLOR[$APP][$MESSAGE_TYPE]:\e[0m $MESSAGE"
   }
   if [[ -z $ROOT_DIR ]] | [[ -z $BIN ]]; then
-    log_error "PATH CHECK" "Install script "root" directory not detected. This could mean that the install script was executed directly or environmental variables were not properly set."
+    log_error "PATH CHECK" 'Install script "root" directory not detected. This could mean that the install script was executed directly or environmental variables were not properly set.'
     return 1
   else
     return 0

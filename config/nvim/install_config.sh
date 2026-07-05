@@ -3,9 +3,10 @@
 if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 main() {
-  log_info nvim "Applying Neovim config..."
+  local APP=nvim
+  log -i "Applying Neovim config..."
   backup nvim "$HOME/.config/nvim"
   copy_config nvim
-  log_success nvim "Finished applying Neovim config."
+  log -s "Finished applying Neovim config."
 }
 main

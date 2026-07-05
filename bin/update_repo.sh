@@ -1,9 +1,14 @@
 #!/bin/env bash
 
-log_info apt "Updating APT repo"
-if ! sudo dpkg -s apt &>/dev/null; then
-  log_error apt "ERROR: APT is not installed.\n"
-  exit 1
-else
-  sudo apt update && log_success apt "APT sources updated."
-fi
+main () {
+  local APP=apt
+  log -i "Updating APT repo"
+  if ! sudo dpkg -s apt &>/dev/null; then
+    log -e "APT is not installed.\n"
+    exit 1
+  else
+    sudo apt update && log -s "APT sources updated."
+  fi
+}
+
+main

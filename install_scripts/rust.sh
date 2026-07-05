@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 main() {
+  local APP=rust
 
   if curl https://sh.rustup.rs -sSf | sh; then
-    log_success rust "Successfully installed Rust+Cargo."
+    log -s "Successfully installed Rust+Cargo."
   fi
 }
 

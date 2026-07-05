@@ -9,7 +9,8 @@ main() {
 }
 
 startInteractive() {
-  log_info setup "Starting interactive script"
+  local APP=setup
+  log -i "Starting interactive script"
   whiptail --title "DOTFILES Setup" --separate-output --checklist "Select Config to apply" 25 78 16 \
     "bashrc" "Apply bashrc config" OFF \
     "fonts" "Copy font files" OFF \
@@ -26,7 +27,7 @@ startInteractive() {
       apply_config $CHOICE
     done
 
-  log_success SETUP "Finished installing config"
+  log -s "Finished installing config"
 
 }
 

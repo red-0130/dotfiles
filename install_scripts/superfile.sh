@@ -3,12 +3,12 @@
 if ! source "$BIN/path_exist.sh"; then exit 1; fi
 
 main() {
-  log_info superfile "Starting installation."
+  log -i "Starting installation."
 
   if bash -c "$(curl -sLo- https://superfile.netlify.app/install.sh)"; then
-    log_success superfile "Finished installing."
+    log -s "Finished installing."
   else
-    log_error superfile "There was an error installing."
+    log -e "There was an error installing."
   fi
 }
 
