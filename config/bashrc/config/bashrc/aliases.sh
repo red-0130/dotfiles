@@ -41,10 +41,18 @@ alias upgrade='sudo apt full-upgrade -y'
 # project commands
 alias personal="cd $HOME/Projects/personal"
 alias playground="cd $HOME/Projects/playground"
-! [ -z ${PROJECT_WORKSPACE+x} ] && alias workspace="cd $PROJECT_WORKSPACE"
+! [[ -z ${PROJECT_WORKSPACE+x} ]] && alias workspace="cd $PROJECT_WORKSPACE"
 
 # podman commands
 if command -v podman &>/dev/null && command -v fzf &>/dev/null; then
   alias image-rm='podman image rm $(podman image ls | fzf --accept-nth=3)'
   alias container-rm='podman rm $(podman ps -a | fzf --accept-nth=1)'
+fi
+
+# coder commands
+if command -v coder; then
+  alias cls="coder list --columnd workspace,status,healthy,outdated"
+  alias cstart="coder start"
+  alias crm="coder delete"
+  alias cmk="coder create"
 fi
