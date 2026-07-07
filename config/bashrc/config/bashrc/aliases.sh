@@ -51,7 +51,7 @@ fi
 
 # coder commands
 if command -v coder; then
-  alias cls="coder list --columnd workspace,status,healthy,outdated"
+  alias cls="coder list --column workspace,status,healthy,outdated"
   alias cstart="coder start"
   alias crm="coder delete"
   alias cmk="coder create"
