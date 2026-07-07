@@ -13,7 +13,7 @@ To perform a non-interactive installation that applies essential configurations 
 ```
 
 This will install the following configurations by default:
-- Bash configuration (`bashrc` - aliases, functions, environment variables)
+- Bash configuration (`bashrc` - aliases including Coder CLI, functions, environment variables)
 - Neovim configuration (`nvim`)
 - SSH configuration (`ssh`)
 - Superfile configuration (`superfile`)
@@ -49,7 +49,7 @@ The repository includes an automated setup script that will set up your environm
 
 The following configurations can be applied interactively using the `--config` or `-c` flag:
 
-- **bashrc**: Shell configuration including aliases, functions, and environment variables
+- **bashrc**: Shell configuration including aliases (e.g., Coder CLI, Git, eza, and Podman), functions, and environment variables
 - **fonts**: Custom font files for improved terminal and application appearance
 - **ghostty**: Configuration for the Ghostty terminal emulator
 - **kitty**: Configuration for the Kitty terminal emulator with advanced features
@@ -84,6 +84,7 @@ The following applications can be installed interactively using the `--app` or `
 - **fzf**: A command-line fuzzy finder
 - **Ghostty**: Fast and feature-rich terminal emulator
 - **git**: Installs the latest version of Git
+- **helium**: Private and secured chromium-based browser
 - **lazygit**: Simple terminal UI for git commands
 - **Neovim**: Hyperextensible Vim-based text editor with a rich plugin ecosystem
 - **nvm**: Node Version Manager for managing multiple Node.js versions
