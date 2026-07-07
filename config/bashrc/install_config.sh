@@ -46,7 +46,6 @@ _createBashProfile() {
 [[ -f "\$HOME/.workspace" ]] && \
   source "\$HOME/.workspace" &&\
   cd "\$PROJECT_WORKSPACE"
-  
 EOF
 }
 
