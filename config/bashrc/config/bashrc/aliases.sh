@@ -50,7 +50,7 @@ if command -v podman &>/dev/null && command -v fzf &>/dev/null; then
 fi
 
 # coder commands
-if command -v coder; then
+if command -v coder &>/dev/null; then
   alias cls="coder list --column workspace,status,healthy,outdated"
   alias cstart="coder start"
   alias crm="coder delete"
