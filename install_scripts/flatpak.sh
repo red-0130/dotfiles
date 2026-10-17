@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+if ! source "$BIN/path_exist.sh"; then exit 1; fi
+
+main() {
+  local APP=flatpak
+  log -i "Starting installation..."
+  if sudo apt install flatpak -y; then
+    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    log -s "Successfully installed."
+  else
+    log -e "There was an error in installation."
+  fi
+  if command -v gnome-software &>/dev/null; then
+    sudo apt install gnome-software-flatpak -y
+  fi
+}
+main
