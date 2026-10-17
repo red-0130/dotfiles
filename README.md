@@ -71,7 +71,7 @@ To apply configurations interactively, run:
 ./setup.sh -c
 ```
 
-All application configurations are stored in the [config/](file:///home/coder/dotfiles/config) directory, organized by application name.
+All application configurations are stored in the `config/` directory, organized by application name.
 
 ## Available Applications
 
