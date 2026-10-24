@@ -1,138 +1,17 @@
-# Dotfiles
+# Dotfiles Installer
 
-A modular, automated dotfiles and development environment setup for Linux. Features an interactive terminal UI for picking applications and configurations, as well as one-command non-interactive defaults.
-
----
-
-## Quick Start
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/red-0130/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
-```
-
-### 2. Run the setup script
-
-```bash
-./setup.sh
-```
+A modular, robust, and extensible dotfiles installer compliant with the [GitHub Codespaces and Dev Containers dotfiles standard](https://docs.github.com/en/codespaces/customizing-your-codespace/personalizing-github-codespaces-for-your-account).
 
 ---
 
-## Usage
+## Features
 
-The `./setup.sh` script provides several ways to install configurations and applications:
-
-### 1. Default Non-Interactive Installation
-
-Running `./setup.sh` with no arguments applies essential core configurations automatically (making automatic backups of existing configs first in `~/.config.bak`):
-
-```bash
-./setup.sh
-```
-
-**Configurations applied by default:**
-* `bashrc` — Shell aliases, functions, environment variables, and workspace utilities
-* `nvim` — Modern Neovim configuration with LSP and plugins
-* `ssh` — SSH client configuration (including Coder CLI integration)
-* `superfile` — Modern terminal file manager configuration
-* `gitconfig` — Git global aliases and defaults
-* `zellij` — Terminal multiplexer configuration
-
----
-
-### 2. Interactive Configuration Selector (`-c` / `--config`)
-
-Launch an interactive terminal multi-select menu to choose exactly which configurations to apply:
-
-```bash
-./setup.sh --config
-# or
-./setup.sh -c
-```
-
----
-
-### 3. Interactive Application Installer (`-a` / `--app`)
-
-Launch an interactive terminal multi-select menu to choose applications, package managers, and development tools to install on your system:
-
-```bash
-./setup.sh --app
-# or
-./setup.sh -a
-```
-
----
-
-### 4. Direct Configuration by Name
-
-Apply one or multiple specific configurations directly by passing their names:
-
-```bash
-./setup.sh nvim zellij
-./setup.sh fonts ghostty starship
-```
-
-### 5. Help
-
-View all available flags and usage instructions:
-
-```bash
-./setup.sh --help
-```
-
----
-
-## Available Configurations
-
-All configuration files are stored in the `config/` directory:
-
-| Configuration | Description | Key Details |
-| :--- | :--- | :--- |
-| `bashrc` | Shell aliases, functions & environment | Aliases (`eza`, `git`, `batcat`, `coder`, `podman`), workspace switcher (`wsctl`), subnet matcher (`onsubnet`), custom PS1 prompt |
-| `fonts` | Nerd Fonts collection | JetBrains Mono Nerd Font suite (Regular, Bold, Light, Mono, Propo) installed to `~/.local/share/fonts` |
-| `ghostty` | Terminal emulator configuration | GPU-accelerated terminal config with JetBrains Mono Nerd Font, GitHub Dark theme, window padding, and blur |
-| `gitconfig` | Global Git configuration | Common aliases (`st`, `co`, `br`, `lg`), `pull.rebase = true`, `push.autoSetupRemote = true` |
-| `kitty` | Terminal emulator configuration | Dracula theme, transparency, JetBrains Mono Nerd Font |
-| `mpv` | Media player configuration | Custom ModernZ UI (`modernz.lua`), seekbar thumbnail previews (`thumbfast.lua`), and YouTube downloader (`youtube-download.lua`) |
-| `nvim` | Modern Neovim IDE configuration | Lazy.nvim package manager, LSP support, conform.nvim formatting, blink.cmp completion, snacks.nvim, treesitter, and which-key |
-| `ssh` | SSH client configuration | Coder CLI SSH workspace integration |
-| `starship` | Cross-shell prompt | Custom Rose Pine palette, git branch & status indicators, runtime versions, command duration |
-| `superfile` | Terminal file manager | OneDark theme, Nerd Font icons, automatic directory changes on quit |
-| `zellij` | Terminal workspace multiplexer | Session management, custom keybindings, floating windows, Catppuccin styling |
-
----
-
-## Available Applications
-
-The installer scripts in `install_scripts/` can be run interactively (`./setup.sh --app`) or individually:
-
-| Application | Description | Category |
-| :--- | :--- | :--- |
-| **batcat** | A `cat` clone with syntax highlighting and Git integration | CLI Tools |
-| **eza** | A modern, maintained replacement for `ls` with colors and icons | CLI Tools |
-| **fd** | Simple, fast, and user-friendly alternative to `find` | CLI Tools |
-| **fzf** | Command-line interactive fuzzy finder | CLI Tools |
-| **ripgrep** | Extremely fast search tool respecting gitignore rules | CLI Tools |
-| **superfile** | Modern, elegant terminal file manager | CLI Tools |
-| **wormhole** | Securely send files between computers via Magic Wormhole | CLI Tools |
-| **zellij** | Fast, extensible terminal multiplexer with batteries included | Terminal & Workspace |
-| **ghostty** | Fast, feature-rich, GPU-accelerated terminal emulator | Terminal & Workspace |
-| **starship** | Minimal, blazing-fast, and infinitely customizable shell prompt | Shell & Prompts |
-| **git** | Installs latest version of Git | Development |
-| **lazygit** | Simple and intuitive terminal UI for Git commands | Development |
-| **nvim** | Extensible Neovim editor with full Lua ecosystem | Development |
-| **treesitter** | Incremental parsing system CLI for programming languages | Development |
-| **bun** | Fast, all-in-one JavaScript runtime, bundler, and package manager | Languages & Runtimes |
-| **nvm** | Node Version Manager for managing multiple Node.js versions | Languages & Runtimes |
-| **rust** | Rust programming language toolchain and Cargo package manager | Languages & Runtimes |
-| **uv** | Extremely fast Python package manager and resolver | Languages & Runtimes |
-| **flatpak** | Universal Linux package management system with FlatHub | Package Managers |
-| **helium** | Privacy-focused and hardened Chromium-based web browser | Browsers |
-| **thorium** | High-performance, compiler-optimized Chromium-based browser | Browsers |
+- **GitHub Codespaces & Dev Containers Compliant**: When executed without flags (unattended), it non-interactively installs predefined configurations (`git`, `bash`, `tmux`), creates backups of conflicting files, and exits cleanly with code `0`.
+- **Interactive Configuration Selector (`-c`, `--config`)**: Terminal checkbox interface where you can navigate, toggle, and install select configurations.
+- **Interactive Application Installer (`-a`, `--app`)**: Terminal interface allowing you to choose which development tools and CLI utilities to install on the system.
+- **Safe & Idempotent**: Conflicting files are automatically backed up with timestamps to `~/.dotfiles_backup/`. Existing identical symlinks are recognized and left untouched.
+- **Zero-Dependency Interactive TUI**: Pure Bash checklist with arrow key navigation, Space toggling, 'a' toggle-all, and Enter confirmation, with fallback to numbered prompts on dumb/piped terminals.
+- **Extensible Architecture**: Modular scripts in `lib/`, simple folder-based configs in `configs/`, and standalone installation scripts in `apps/`.
 
 ---
 
@@ -140,33 +19,133 @@ The installer scripts in `install_scripts/` can be run interactively (`./setup.s
 
 ```text
 dotfiles/
-├── bin/                          # Helper scripts (logging, backup, TUI multiselect)
-│   ├── apply_config.sh
-│   ├── backup.sh
-│   ├── interactive_app_install.sh
-│   ├── interactive_config_install.sh
-│   ├── log.sh
-│   ├── multiselect.sh
-│   ├── path_exist.sh
-│   └── update_repo.sh
-├── config/                       # Application configuration files
-│   ├── bashrc/
-│   ├── fonts/
-│   ├── ghostty/
-│   ├── gitconfig/
-│   ├── kitty/
-│   ├── mpv/
-│   ├── nvim/
-│   ├── ssh/
-│   ├── starship/
-│   ├── superfile/
-│   └── zellij/
-├── install_scripts/              # Automated installation scripts for tools & apps
-└── setup.sh                      # Main entrypoint script
+├── install.sh                  # Main executable entry point
+├── dotfiles.conf               # User configuration (predefined apps, backup dir)
+├── configs/                    # Application configurations (named after app)
+│   ├── bash/                   # Bash config (.bash_aliases, .bashrc)
+│   ├── git/                    # Git config (.gitconfig, .gitignore_global)
+│   ├── tmux/                   # Tmux config (.tmux.conf)
+│   ├── nvim/                   # Neovim config (init.lua)
+│   └── starship/               # Starship prompt config (starship.toml)
+├── apps/                       # Application installation scripts
+│   ├── git.sh
+│   ├── tmux.sh
+│   ├── ripgrep.sh
+│   ├── fzf.sh
+│   ├── bat.sh
+│   ├── neovim.sh
+│   ├── starship.sh
+│   ├── zsh.sh
+│   └── gh.sh
+└── lib/                        # Core installer libraries
+    ├── utils.sh                # Logging, styling, and OS/package detection
+    ├── backup.sh               # Conflicting files backup manager
+    ├── link.sh                 # Safe symlink creator
+    ├── config_installer.sh     # Configuration installer & resolver
+    ├── app_installer.sh        # Application installer & executor
+    └── ui.sh                   # Interactive checklist terminal UI
 ```
 
 ---
 
-## Backups
+## Usage
 
-Before applying configurations, the setup script automatically creates backups of any existing configurations in `~/.config.bak/`, keeping your previous settings safe.
+### 1. Default (GitHub Dotfiles Mode)
+When invoked without arguments (such as during GitHub Codespaces container startup), the script installs the predefined configurations configured in `dotfiles.conf` (`git`, `bash`, `tmux`):
+
+```bash
+./install.sh
+```
+
+### 2. Interactive Configuration Selection
+Launch the interactive checklist to select which configurations to link:
+
+```bash
+./install.sh -c
+# or
+./install.sh --config
+```
+
+**Controls in Interactive Terminal:**
+- `↑` / `↓` or `k` / `j`: Move up and down
+- `Space`: Toggle selected item
+- `a`: Toggle all items on/off
+- `Enter`: Confirm and install selected items
+- `q` or `Esc`: Cancel without installing
+
+### 3. Interactive Application Installation
+Launch the interactive checklist to select CLI applications to install:
+
+```bash
+./install.sh -a
+# or
+./install.sh --app
+```
+
+### 4. Direct / Scriptable Installation
+Install specific configurations or applications directly without interactive prompts:
+
+```bash
+# Install specific configs
+./install.sh -c git bash nvim
+
+# Install specific apps
+./install.sh -a ripgrep fzf starship
+
+# Install all available configurations
+./install.sh --all
+```
+
+### 5. Listing Available Items
+List all discovered configurations in `configs/` and installable applications in `apps/`:
+
+```bash
+./install.sh --list
+```
+
+---
+
+## Adding Configurations
+
+Configs are stored in the `configs/` directory and named after the app it belongs to.
+
+### Automatic Linking Rules:
+1. **Custom `install.sh`**: If `configs/<app>/install.sh` exists, it will be executed.
+2. **Explicit Target `.target`**: If `configs/<app>/.target` exists, you can specify destination paths:
+   ```text
+   # In configs/<app>/.target:
+   ~/.config/<app>
+   # Or file-by-file mapping:
+   custom.conf:~/.custom.conf
+   ```
+3. **Dotfiles**: Files starting with `.` (e.g., `.bashrc`, `.tmux.conf`) are symlinked directly to `$HOME/<filename>`.
+4. **Known Core Tools**:
+   - `git` -> `~/.gitconfig`, `~/.gitignore_global`
+   - `bash` -> `~/.bashrc`, `~/.bash_aliases`
+   - `tmux` -> `~/.tmux.conf`
+   - `zsh` -> `~/.zshrc`
+5. **Modern XDG Apps**: Any folder (e.g. `configs/nvim`, `configs/alacritty`) is symlinked to `~/.config/<app>`.
+
+---
+
+## Adding Applications
+
+To add an application installer:
+1. Create a script `apps/<app_name>.sh` (make it executable: `chmod +x`).
+2. Add metadata comments at the top:
+   ```bash
+   #!/usr/bin/env bash
+   # description: High-performance command runner
+   # command: runner
+   set -e
+   DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+   source "$DIR/lib/utils.sh"
+
+   if has_cmd runner; then
+       log_success "runner is already installed"
+       exit 0
+   fi
+
+   # Installation commands here (apt, brew, curl, etc.)
+   ```
+3. It will automatically show up in the interactive menu and `--list`.

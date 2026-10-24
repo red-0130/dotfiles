@@ -1,0 +1,37 @@
+# ~/.config/starship.toml - Cross-shell prompt configuration
+
+add_newline = false
+
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$python\
+$golang\
+$rust\
+$cmd_duration\
+$line_break\
+$character"""
+
+[character]
+success_symbol = "[➜](bold green) "
+error_symbol = "[✗](bold red) "
+
+[directory]
+truncation_length = 3
+truncation_symbol = "…/"
+style = "bold cyan"
+
+[git_branch]
+symbol = " "
+style = "bold yellow"
+
+[git_status]
+style = "bold red"
+
+[cmd_duration]
+min_time = 2_000
+format = "took [$duration](bold yellow) "
