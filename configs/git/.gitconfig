@@ -29,3 +29,6 @@
     lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
     unstage = reset HEAD --
     last = log -1 HEAD
+[user]
+	email = 100506096+red-0130@users.noreply.github.com
+	name = red-0130
