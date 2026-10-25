@@ -1,7 +1,0 @@
-{
-  "Css Variable": {
-    "description": "Utilize a css variable",
-    "prefix": "--",
-    "body": ["var(--${1:variable});"]
-  }
-}
