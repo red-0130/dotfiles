@@ -1,0 +1,29 @@
+{
+  "JSDoc Comment Block": {
+    "prefix": "jsdoc",
+    "body": [
+      "/**",
+      " * ${1:Description}",
+      " *",
+      " * @param {${2:type}} ${3:name} - ${4:description}",
+      " * @returns {${5:type}} ${6:description}",
+      " */"
+    ],
+    "description": "Creates a comprehensive JSDoc block with typed params and return values"
+  },
+  "Simple JSDoc Comment Block": {
+    "prefix": "jsdoc_simple",
+    "body": ["/**", " * ${1:Description}", " */"],
+    "description": "Creates a simple JSDoc block"
+  },
+  "JSDoc @param": {
+    "prefix": "jsparam",
+    "body": ["@param {${2:type}} ${1:name} - ${3:description}"],
+    "description": "Creates a JSDoc @param line"
+  },
+  "JSDoc @return": {
+    "prefix": "jsreturn",
+    "body": ["@returns {${1:type}} ${2:description}"],
+    "description": "Creates a JSDoc @returns line"
+  }
+}

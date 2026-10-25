@@ -4,7 +4,7 @@
 
 - [x] ghostty
 - [x] mpv
-- [ ] nvim
+- [x] nvim
 - [ ] ssh
 - [ ] superfile
 - [ ] zellij

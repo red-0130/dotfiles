@@ -1,0 +1,49 @@
+{
+  "name": "vscode-snippets",
+  "engines": {
+    "vscode": "^1.11.0"
+  },
+  "contributes": {
+    "snippets": [
+      {
+        "language": "javascript",
+        "path": "./snippets/javascript/javascript.json"
+      },
+      {
+        "language": "javascriptreact",
+        "path": "./snippets/javascript/js+jsx-snippet.json"
+      },
+      {
+        "language": "javascript",
+        "path": "./snippets/javascript/jest-snippets.json",
+        "when": "filename =~ /^.*\\.test\\.js$/"
+      },
+      {
+        "language": "css",
+        "path": "./snippets/css/css-snippets.json"
+      },
+      {
+        "language": [
+          "javascript",
+          "javascriptreact"
+        ],
+        "path": "./snippets/javascript/jsdoc.json"
+      },
+      {
+        "language": [
+          "javascript",
+          "typescript"
+        ],
+        "path": "./snippets/javascript/redux.json",
+        "when": "filename =~ /^.*\\.slice\\.js$/"
+      },
+      {
+        "language": [
+          "javascript",
+          "typescript"
+        ],
+        "path": "./snippets/javascript/expressjs.json"
+      }
+    ]
+  }
+}
