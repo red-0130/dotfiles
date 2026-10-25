@@ -6,7 +6,7 @@
 - [x] mpv
 - [x] nvim
 - [x] ssh
-- [ ] superfile
+- [x] superfile
 - [ ] zellij
 
 ## App installers to add
