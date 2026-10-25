@@ -14,7 +14,7 @@
 - [x] batcat
 - [x] bun
 - [x] eza
-- [ ] fd
+- [x] fd
 - [ ] flatpak
 - [ ] fzf
 - [ ] ghostty
