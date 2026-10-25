@@ -7,7 +7,7 @@
 - [x] nvim
 - [x] ssh
 - [x] superfile
-- [ ] zellij
+- [x] zellij
 
 ## App installers to add
 
