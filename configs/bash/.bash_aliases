@@ -11,14 +11,14 @@ alias home="cd $HOME"
 
 # Listing
 if command -v eza >/dev/null 2>&1; then
-    alias ls="eza --icons --group-directories-first"
-    alias ll="eza --icons -alg --git --group-directories-first"
-    alias la="eza --icons -a --group-directories-first"
-    alias tree="eza --icons --tree -a --group-directories-first"
+  alias ls="eza --icons --group-directories-first"
+  alias ll="eza --icons -alg --git --group-directories-first"
+  alias la="eza --icons -a --group-directories-first"
+  alias tree="eza --icons --tree -a --group-directories-first"
 else
-    alias ls="ls --group-directories-first --color=auto"
-    alias ll="ls --group-directories-first --color=auto -al"
-    alias la="ls --group-directories-first --color=auto -a"
+  alias ls="ls --group-directories-first --color=auto"
+  alias ll="ls --group-directories-first --color=auto -al"
+  alias la="ls --group-directories-first --color=auto -a"
 fi
 
 # Git shortcuts
@@ -48,7 +48,7 @@ alias reload="source ~/.bashrc"
 alias myip="curl -s https://ifconfig.me"
 
 # batcat aliases
-if command -v batcat &>/dev/null; then
+if command -v batcat &>/dev/null || command -v bat &>/dev/null; then
   alias cat="batcat"
 fi
 

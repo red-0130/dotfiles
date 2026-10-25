@@ -11,7 +11,7 @@
 
 ## App installers to add
 
-- [ ] batcat
+- [x] batcat
 - [ ] bun
 - [ ] eza
 - [ ] fd
