@@ -15,7 +15,7 @@
 - [x] bun
 - [x] eza
 - [x] fd
-- [ ] flatpak
+- [x] flatpak
 - [ ] fzf
 - [ ] ghostty
 - [ ] git
