@@ -1,13 +1,16 @@
 # List of TODOs
+
 ## Configs to add
-- [ ] ghostty
-- [ ] mpv
+
+- [x] ghostty
+- [x] mpv
 - [ ] nvim
 - [ ] ssh
 - [ ] superfile
 - [ ] zellij
 
 ## App installers to add
+
 - [ ] batcat
 - [ ] bun
 - [ ] eza
