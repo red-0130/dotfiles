@@ -16,7 +16,7 @@
 - [x] eza
 - [x] fd
 - [x] flatpak
-- [ ] fzf
+- [x] fzf
 - [ ] ghostty
 - [ ] git
 - [ ] helium browser
