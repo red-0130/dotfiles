@@ -1,0 +1,51 @@
+# CONDITION 1: Docker Container
+# Priority: Check if we are inside a container first
+Match host ssh.beltran.cc exec "[ -f /.dockerenv ]"
+    HostName network-unraid
+    Port 3222
+
+# CONDITION 2: Local Reachability
+# If NOT in a container, check if the local host responds to a ping
+Match host ssh.beltran.cc exec "ping -c 1 -W 1 network-unraid > /dev/null 2>&1"
+    HostName network-unraid
+    Port 3222
+
+# CONDITION 3: WAN Fallback
+# If neither of the above matched, use the public route via Cloudflare
+Match host ssh.beltran.cc !exec "ping -c 1 -W 1 network-unraid > /dev/null 2>&1 || [ -f /.dockerenv ]"
+    HostName ssh.beltran.cc
+    Port 22
+    ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h  
+  
+Host unraid.beltran.cc
+ HostName network-unraid
+ User root
+
+# ---------CODER CONFIG-------------
+Host *.coder
+    ConnectTimeout=0
+    StrictHostKeyChecking=no
+    UserKnownHostsFile=/dev/null
+    ForwardAgent yes
+    EnableEscapeCommandline yes
+    LogLevel ERROR
+    SetEnv TERM=xterm-256color
+
+Match host *.coder !exec "/usr/local/bin/coder connect exists %h"
+    ForwardAgent yes
+    EnableEscapeCommandline yes
+    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --hostname-suffix coder %h
+    
+Match host *.vite !exec "/usr/local/bin/coder connect exists %h"
+    ConnectTimeout=0
+    StrictHostKeyChecking=no
+    Compression yes
+    EnableEscapeCommandline yes
+    LocalForward 5173 localhost:5173
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+    ForwardAgent yes
+    SetEnv TERM=xterm-256color
+    ProxyCommand /usr/local/bin/coder --global-config /home/ephraim/.config/coderv2 ssh --stdio --hostname-suffix vite %h
+    
+# ------------END-CODER------------
