@@ -13,7 +13,7 @@
 
 - [x] batcat
 - [x] bun
-- [ ] eza
+- [x] eza
 - [ ] fd
 - [ ] flatpak
 - [ ] fzf
