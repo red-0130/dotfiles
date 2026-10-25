@@ -12,7 +12,7 @@
 ## App installers to add
 
 - [x] batcat
-- [ ] bun
+- [x] bun
 - [ ] eza
 - [ ] fd
 - [ ] flatpak
