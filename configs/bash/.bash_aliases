@@ -7,36 +7,30 @@ alias ....="cd ../../.."
 alias .....="cd ../../../.."
 alias ~="cd ~"
 alias -- -="cd -"
+alias home="cd $HOME"
 
 # Listing
 if command -v eza >/dev/null 2>&1; then
-    alias ls="eza"
-    alias ll="eza -la --git"
-    alias la="eza -a"
-    alias lt="eza --tree"
+    alias ls="eza --icons --group-directories-first"
+    alias ll="eza --icons -alg --git --group-directories-first"
+    alias la="eza --icons -a --group-directories-first"
+    alias tree="eza --icons --tree -a --group-directories-first"
 else
-    alias ls="ls --color=auto"
-    alias ll="ls -lah --color=auto"
-    alias la="ls -A --color=auto"
-    alias l="ls -CF --color=auto"
+    alias ls="ls --group-directories-first --color=auto"
+    alias ll="ls --group-directories-first --color=auto -al"
+    alias la="ls --group-directories-first --color=auto -a"
 fi
 
 # Git shortcuts
-alias g="git"
-alias gs="git status"
-alias ga="git add"
-alias gaa="git add --all"
-alias gc="git commit"
-alias gcm="git commit -m"
-alias gca="git commit --amend"
-alias gco="git checkout"
-alias gcb="git checkout -b"
-alias gd="git diff"
-alias gds="git diff --staged"
-alias gp="git push"
-alias gpl="git pull"
-alias gl="git log --oneline --graph --decorate -n 20"
-alias gb="git branch"
+if command -v git &>/dev/null; then
+  alias commit="git commit -m"
+  alias checkout="git checkout"
+  alias pull='git pull'
+  alias push='git push'
+  alias addall='git add -A'
+  alias status='git status'
+  alias gitlog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+fi
 
 # Safety nets
 alias cp="cp -i"
@@ -52,3 +46,31 @@ alias egrep="egrep --color=auto"
 alias path='echo -e ${PATH//:/\\n}'
 alias reload="source ~/.bashrc"
 alias myip="curl -s https://ifconfig.me"
+
+# batcat aliases
+if command -v batcat &>/dev/null; then
+  alias cat="batcat"
+fi
+
+# apt commands
+alias update='sudo apt update'
+alias upgrade='sudo apt full-upgrade -y'
+
+# project commands
+alias personal="cd $HOME/Projects/personal"
+alias playground="cd $HOME/Projects/playground"
+! [[ -z ${PROJECT_WORKSPACE+x} ]] && alias workspace="cd $PROJECT_WORKSPACE"
+
+# podman commands
+if command -v podman &>/dev/null && command -v fzf &>/dev/null; then
+  alias image-rm='podman image rm $(podman image ls | fzf --accept-nth=3)'
+  alias container-rm='podman rm $(podman ps -a | fzf --accept-nth=1)'
+fi
+
+# coder commands
+if command -v coder &>/dev/null; then
+  alias cls="coder list --column workspace,status,healthy,outdated"
+  alias cstart="coder start"
+  alias crm="coder delete"
+  alias cmk="coder create"
+fi
