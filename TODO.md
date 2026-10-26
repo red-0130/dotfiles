@@ -18,7 +18,7 @@
 - [x] flatpak
 - [x] fzf
 - [x] ghostty
-- [ ] git
+- [x] git
 - [ ] helium browser
 - [ ] lazygit
 - [ ] neovim
