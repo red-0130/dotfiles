@@ -26,8 +26,7 @@
 - [x] ripgrep
 - [x] rust + cargo
 - [x] superfile
-- [ ] thorium browser
-- [ ] treesitter
+- [x] treesitter
 - [ ] uv
 - [ ] wormhole
 - [ ] zellij
