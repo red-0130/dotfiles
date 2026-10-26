@@ -19,7 +19,7 @@
 - [x] fzf
 - [x] ghostty
 - [x] git
-- [ ] helium browser
+- [x] helium browser
 - [ ] lazygit
 - [ ] neovim
 - [ ] Node Version Manager
