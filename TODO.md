@@ -25,7 +25,7 @@
 - [x] Node Version Manager
 - [x] ripgrep
 - [x] rust + cargo
-- [ ] superfile
+- [x] superfile
 - [ ] thorium browser
 - [ ] treesitter
 - [ ] uv
