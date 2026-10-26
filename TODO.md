@@ -22,7 +22,7 @@
 - [x] helium browser
 - [x] lazygit
 - [x] neovim
-- [ ] Node Version Manager
+- [x] Node Version Manager
 - [ ] ripgrep
 - [ ] rust + cargo
 - [ ] superfile
