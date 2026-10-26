@@ -20,7 +20,7 @@
 - [x] ghostty
 - [x] git
 - [x] helium browser
-- [ ] lazygit
+- [x] lazygit
 - [ ] neovim
 - [ ] Node Version Manager
 - [ ] ripgrep
