@@ -6,7 +6,7 @@ A modular, robust, and extensible dotfiles installer compliant with the [GitHub 
 
 ## Features
 
-- **GitHub Codespaces & Dev Containers Compliant**: When executed without flags (unattended), it non-interactively installs predefined configurations (`git`, `bash`, `tmux`), creates backups of conflicting files, and exits cleanly with code `0`.
+- **GitHub Codespaces & Dev Containers Compliant**: When executed without flags (unattended), it non-interactively installs predefined configurations (`bash`, `bash_scripts`, `git`), creates backups of conflicting files, and exits cleanly with code `0`.
 - **Interactive Configuration Selector (`-c`, `--config`)**: Terminal checkbox interface where you can navigate, toggle, and install select configurations.
 - **Interactive Application Installer (`-a`, `--app`)**: Terminal interface allowing you to choose which development tools and CLI utilities to install on the system.
 - **Safe & Idempotent**: Conflicting files are automatically backed up with timestamps to `~/.dotfiles_backup/`. Existing identical symlinks are recognized and left untouched.
@@ -23,20 +23,37 @@ dotfiles/
 ├── dotfiles.conf               # User configuration (predefined apps, backup dir)
 ├── configs/                    # Application configurations (named after app)
 │   ├── bash/                   # Bash config (.bash_aliases, .bashrc)
-│   ├── git/                    # Git config (.gitconfig, .gitignore_global)
-│   ├── tmux/                   # Tmux config (.tmux.conf)
-│   ├── nvim/                   # Neovim config (init.lua)
-│   └── starship/               # Starship prompt config (starship.toml)
+│   ├── bash_scripts/           # Custom shell helper scripts & tools
+│   ├── ghostty/                # Ghostty terminal emulator config
+│   ├── git/                    # Git config (config, ignore)
+│   ├── mpv/                    # MPV media player config & scripts
+│   ├── nvim/                   # Neovim config (init.lua, LazyVim)
+│   ├── ssh/                    # SSH client config & setup script
+│   ├── starship/               # Starship prompt config (starship.toml)
+│   ├── superfile/              # Superfile terminal file manager config
+│   └── zellij/                 # Zellij terminal workspace config (config.kdl)
 ├── apps/                       # Application installation scripts
-│   ├── git.sh
-│   ├── tmux.sh
-│   ├── ripgrep.sh
-│   ├── fzf.sh
 │   ├── bat.sh
+│   ├── bun.sh
+│   ├── eza.sh
+│   ├── fd.sh
+│   ├── flatpak.sh
+│   ├── fzf.sh
+│   ├── gh.sh
+│   ├── ghostty.sh
+│   ├── git.sh
+│   ├── helium.sh
+│   ├── lazygit.sh
 │   ├── neovim.sh
+│   ├── nvm.sh
+│   ├── ripgrep.sh
+│   ├── rust.sh
 │   ├── starship.sh
-│   ├── zsh.sh
-│   └── gh.sh
+│   ├── superfile.sh
+│   ├── tree-sitter.sh
+│   ├── uv.sh
+│   ├── zellij.sh
+│   └── zsh.sh
 └── lib/                        # Core installer libraries
     ├── utils.sh                # Logging, styling, and OS/package detection
     ├── backup.sh               # Conflicting files backup manager
@@ -51,7 +68,7 @@ dotfiles/
 ## Usage
 
 ### 1. Default (GitHub Dotfiles Mode)
-When invoked without arguments (such as during GitHub Codespaces container startup), the script installs the predefined configurations configured in `dotfiles.conf` (`git`, `bash`, `tmux`):
+When invoked without arguments (such as during GitHub Codespaces container startup), the script installs the predefined configurations configured in `dotfiles.conf` (`bash`, `bash_scripts`, `git`):
 
 ```bash
 ./install.sh
@@ -118,13 +135,12 @@ Configs are stored in the `configs/` directory and named after the app it belong
    # Or file-by-file mapping:
    custom.conf:~/.custom.conf
    ```
-3. **Dotfiles**: Files starting with `.` (e.g., `.bashrc`, `.tmux.conf`) are symlinked directly to `$HOME/<filename>`.
+3. **Dotfiles**: Files starting with `.` (e.g., `.bashrc`, `.zshrc`) are symlinked directly to `$HOME/<filename>`.
 4. **Known Core Tools**:
    - `git` -> `~/.gitconfig`, `~/.gitignore_global`
    - `bash` -> `~/.bashrc`, `~/.bash_aliases`
-   - `tmux` -> `~/.tmux.conf`
    - `zsh` -> `~/.zshrc`
-5. **Modern XDG Apps**: Any folder (e.g. `configs/nvim`, `configs/alacritty`) is symlinked to `~/.config/<app>`.
+5. **Modern XDG Apps**: Any folder (e.g. `configs/nvim`, `configs/zellij`, `configs/ghostty`, `configs/superfile`) is symlinked to `~/.config/<app>`.
 
 ---
 
