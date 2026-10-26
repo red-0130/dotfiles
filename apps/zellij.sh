@@ -160,6 +160,7 @@ install_zellij_prebuilt_binary() {
     install -m 755 "$bin_src" "$HOME/.local/bin/zellij"
 
     if [[ $EUID -eq 0 ]] || has_cmd sudo; then
+        run_privileged mkdir -p /usr/local/bin
         run_privileged install -m 755 "$bin_src" /usr/local/bin/zellij 2>/dev/null || true
     fi
 
@@ -182,6 +183,7 @@ if has_cmd cargo; then
         if [[ -f "$HOME/.cargo/bin/zellij" ]]; then
             ln -sf "$HOME/.cargo/bin/zellij" "$HOME/.local/bin/zellij"
             if [[ $EUID -eq 0 ]] || has_cmd sudo; then
+                run_privileged mkdir -p /usr/local/bin
                 run_privileged ln -sf "$HOME/.cargo/bin/zellij" /usr/local/bin/zellij 2>/dev/null || true
             fi
         fi
