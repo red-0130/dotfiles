@@ -24,7 +24,7 @@
 - [x] neovim
 - [x] Node Version Manager
 - [x] ripgrep
-- [ ] rust + cargo
+- [x] rust + cargo
 - [ ] superfile
 - [ ] thorium browser
 - [ ] treesitter
