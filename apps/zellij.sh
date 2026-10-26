@@ -114,7 +114,9 @@ install_zellij_prebuilt_binary() {
     fi
 
     local tar_file="zellij-${target}.tar.gz"
-    local tmp_dir="$(mktemp -d)"
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    trap "rm -rf '$tmp_dir'" EXIT INT TERM
     local tar_path="$tmp_dir/$tar_file"
 
     local download_urls=(
@@ -165,6 +167,7 @@ install_zellij_prebuilt_binary() {
     fi
 
     rm -rf "$tmp_dir"
+    trap - EXIT INT TERM
 }
 
 # ------------------------------------------------------------------------------
