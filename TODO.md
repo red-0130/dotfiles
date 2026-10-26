@@ -17,7 +17,7 @@
 - [x] fd
 - [x] flatpak
 - [x] fzf
-- [ ] ghostty
+- [x] ghostty
 - [ ] git
 - [ ] helium browser
 - [ ] lazygit
