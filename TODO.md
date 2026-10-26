@@ -21,7 +21,7 @@
 - [x] git
 - [x] helium browser
 - [x] lazygit
-- [ ] neovim
+- [x] neovim
 - [ ] Node Version Manager
 - [ ] ripgrep
 - [ ] rust + cargo
