@@ -23,7 +23,7 @@
 - [x] lazygit
 - [x] neovim
 - [x] Node Version Manager
-- [ ] ripgrep
+- [x] ripgrep
 - [ ] rust + cargo
 - [ ] superfile
 - [ ] thorium browser
