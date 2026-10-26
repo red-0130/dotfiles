@@ -27,6 +27,6 @@
 - [x] rust + cargo
 - [x] superfile
 - [x] treesitter
-- [ ] uv
+- [x] uv
 - [ ] wormhole
 - [ ] zellij
