@@ -15,28 +15,3 @@ if [ -n "$BASH_VERSION" ]; then
     . "$HOME/.bashrc"
   fi
 fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ]; then
-  PATH="$HOME/bin:$PATH"
-fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ]; then
-  PATH="$HOME/.local/bin:$PATH"
-fi
-
-# set ENV file
-if [[ -f "$HOME/.env" ]]; then
-  . "$HOME/.env"
-fi
-
-# Custom scripts
-if [[ -d "$HOME/.config/bash_scripts" ]]; then
-  source "$HOME/.config/bash_scripts/create-component.sh"
-  source "$HOME/.config/bash_scripts/workspacectl.sh"
-  source "$HOME/.config/bash_scripts/onsubnet.sh"
-  source "$HOME/.config/bash_scripts/cd-on-quit.sh"
-  source "$HOME/.config/bash_scripts/magic-shell.sh"
-fi
-
