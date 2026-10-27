@@ -7,4 +7,6 @@ if [[ -f "$HOME/.workspace" ]]; then
   source "$HOME/.workspace"
   export ZELLIJ_AUTO_EXIT=true
   cd "$PROJECT_WORKSPACE"
+else
+  [ -d "/workspaces" ] && cd "/workspaces"
 fi
