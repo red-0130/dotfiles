@@ -32,11 +32,8 @@ get_config_description() {
   case "$app" in
   bash) echo "Bash shell configuration and aliases (~/.bashrc, ~/.bash_aliases)" ;;
   git) echo "Git configuration and global ignore rules (~/.gitconfig)" ;;
-  nvim) echo "Neovim editor configuration (~/.config/nvim)" ;;
+  neovim | nvim) echo "Neovim editor configuration (~/.config/nvim)" ;;
   starship) echo "Cross-shell customizable prompt (~/.config/starship.toml)" ;;
-  zsh) echo "Zsh shell configuration and theme (~/.zshrc)" ;;
-  gh) echo "GitHub CLI configuration (~/.config/gh)" ;;
-  bat) echo "Bat cat-clone syntax highlighter configuration" ;;
   *) echo "Configuration files for ${app}" ;;
   esac
 }

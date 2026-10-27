@@ -27,7 +27,7 @@ dotfiles/
 │   ├── ghostty/                # Ghostty terminal emulator config
 │   ├── git/                    # Git config (config, ignore)
 │   ├── mpv/                    # MPV media player config & scripts
-│   ├── nvim/                   # Neovim config (init.lua, LazyVim)
+│   ├── neovim/                 # Neovim config (init.lua, LazyVim)
 │   ├── ssh/                    # SSH client config & setup script
 │   ├── starship/               # Starship prompt config (starship.toml)
 │   ├── superfile/              # Superfile terminal file manager config
@@ -105,7 +105,7 @@ Install specific configurations or applications directly without interactive pro
 
 ```bash
 # Install specific configs
-./install.sh -c git bash nvim
+./install.sh -c git bash neovim
 
 # Install specific apps
 ./install.sh -a ripgrep fzf starship
@@ -141,7 +141,7 @@ Configs are stored in the `configs/` directory and named after the app it belong
    - `git` -> `~/.gitconfig`, `~/.gitignore_global`
    - `bash` -> `~/.bashrc`, `~/.bash_aliases`
    - `zsh` -> `~/.zshrc`
-5. **Modern XDG Apps**: Any folder (e.g. `configs/nvim`, `configs/zellij`, `configs/ghostty`, `configs/superfile`) is symlinked to `~/.config/<app>`.
+5. **Modern XDG Apps**: Any folder (e.g. `configs/zellij`, `configs/ghostty`, `configs/superfile`) is symlinked to `~/.config/<app>`.
 
 ---
 
