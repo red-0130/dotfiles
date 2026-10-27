@@ -33,6 +33,7 @@ dotfiles/
 │   ├── superfile/              # Superfile terminal file manager config
 │   └── zellij/                 # Zellij terminal workspace config (config.kdl)
 ├── apps/                       # Application installation scripts
+│   ├── antigravity.sh
 │   ├── bat.sh
 │   ├── bun.sh
 │   ├── eza.sh
