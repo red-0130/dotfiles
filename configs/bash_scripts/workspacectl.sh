@@ -279,10 +279,51 @@ wsctl() {
     echo "Git configuration completed successfully."
   }
 
-  "$@"
+  help() {
+    cat <<'EOF'
+Usage: wsctl <command> [arguments]
+
+Workspace and development environment management helper.
+
+Commands:
+  set-workspace [PATH]    Set PROJECT_WORKSPACE in ~/.workspace (defaults to $PWD)
+  get-workspace           Print current PROJECT_WORKSPACE
+  set-gemini-api <KEY>    Save GEMINI_API_KEY to ~/.gemini_api
+  set-gitconfig           Interactively configure Git settings (user, branch, provider email)
+  --reset                 Reset workspace and Gemini API configuration files and variables
+  help, -h, --help        Show this help message
+
+Examples:
+  wsctl set-workspace ~/projects/dotfiles
+  wsctl get-workspace
+  wsctl set-gemini-api "AIzaSy..."
+  wsctl set-gitconfig
+  wsctl --reset
+  wsctl help
+EOF
+  }
+
+  if [[ $# -eq 0 ]]; then
+    help
+    return 0
+  fi
+
+  case "$1" in
+    set-workspace|set-gemini-api|get-workspace|set-gitconfig|--reset)
+      "$@"
+      ;;
+    help|--help|-h)
+      help
+      ;;
+    *)
+      echo "Error: Unknown command '$1'" >&2
+      echo "Run 'wsctl help' for usage information." >&2
+      return 1
+      ;;
+  esac
 }
 
-complete -W "set-workspace set-gemini-api get-workspace set-gitconfig" wsctl
+complete -W "set-workspace set-gemini-api get-workspace set-gitconfig --reset help --help" wsctl
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   wsctl "$@"
