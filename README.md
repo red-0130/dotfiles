@@ -6,7 +6,7 @@ A modular, robust, and extensible dotfiles installer compliant with the [GitHub 
 
 ## Features
 
-- **GitHub Codespaces & Dev Containers Compliant**: When executed without flags (unattended), it non-interactively installs predefined configurations (`bash`, `bash_scripts`, `git`), creates backups of conflicting files, and exits cleanly with code `0`.
+- **GitHub Codespaces & Dev Containers Compliant**: When executed without flags (unattended), it non-interactively installs predefined configurations (`bash`, `bash_scripts`), creates backups of conflicting files, and exits cleanly with code `0`.
 - **Interactive Configuration Selector (`-c`, `--config`)**: Terminal checkbox interface where you can navigate, toggle, and install select configurations.
 - **Interactive Application Installer (`-a`, `--app`)**: Terminal interface allowing you to choose which development tools and CLI utilities to install on the system.
 - **Safe & Idempotent**: Conflicting files are automatically backed up with timestamps to `~/.dotfiles_backup/`. Existing identical symlinks are recognized and left untouched.
@@ -25,7 +25,6 @@ dotfiles/
 │   ├── bash/                   # Bash config (.bash_aliases, .bashrc)
 │   ├── bash_scripts/           # Custom shell helper scripts & tools
 │   ├── ghostty/                # Ghostty terminal emulator config
-│   ├── git/                    # Git config (config, ignore)
 │   ├── mpv/                    # MPV media player config & scripts
 │   ├── neovim/                 # Neovim config (init.lua, LazyVim)
 │   ├── ssh/                    # SSH client config & setup script
@@ -69,13 +68,15 @@ dotfiles/
 ## Usage
 
 ### 1. Default (GitHub Dotfiles Mode)
-When invoked without arguments (such as during GitHub Codespaces container startup), the script installs the predefined configurations configured in `dotfiles.conf` (`bash`, `bash_scripts`, `git`):
+
+When invoked without arguments (such as during GitHub Codespaces container startup), the script installs the predefined configurations configured in `dotfiles.conf` (`bash`, `bash_scripts`):
 
 ```bash
 ./install.sh
 ```
 
 ### 2. Interactive Configuration Selection
+
 Launch the interactive checklist to select which configurations to link:
 
 ```bash
@@ -85,6 +86,7 @@ Launch the interactive checklist to select which configurations to link:
 ```
 
 **Controls in Interactive Terminal:**
+
 - `↑` / `↓` or `k` / `j`: Move up and down
 - `Space`: Toggle selected item
 - `a`: Toggle all items on/off
@@ -92,6 +94,7 @@ Launch the interactive checklist to select which configurations to link:
 - `q` or `Esc`: Cancel without installing
 
 ### 3. Interactive Application Installation
+
 Launch the interactive checklist to select CLI applications to install:
 
 ```bash
@@ -101,11 +104,12 @@ Launch the interactive checklist to select CLI applications to install:
 ```
 
 ### 4. Direct / Scriptable Installation
+
 Install specific configurations or applications directly without interactive prompts:
 
 ```bash
 # Install specific configs
-./install.sh -c git bash neovim
+./install.sh -c bash neovim
 
 # Install specific apps
 ./install.sh -a ripgrep fzf starship
@@ -115,6 +119,7 @@ Install specific configurations or applications directly without interactive pro
 ```
 
 ### 5. Listing Available Items
+
 List all discovered configurations in `configs/` and installable applications in `apps/`:
 
 ```bash
@@ -128,6 +133,7 @@ List all discovered configurations in `configs/` and installable applications in
 Configs are stored in the `configs/` directory and named after the app it belongs to.
 
 ### Automatic Linking Rules:
+
 1. **Custom `install.sh`**: If `configs/<app>/install.sh` exists, it will be executed.
 2. **Explicit Target `.target`**: If `configs/<app>/.target` exists, you can specify destination paths:
    ```text
@@ -138,7 +144,6 @@ Configs are stored in the `configs/` directory and named after the app it belong
    ```
 3. **Dotfiles**: Files starting with `.` (e.g., `.bashrc`, `.zshrc`) are symlinked directly to `$HOME/<filename>`.
 4. **Known Core Tools**:
-   - `git` -> `~/.gitconfig`, `~/.gitignore_global`
    - `bash` -> `~/.bashrc`, `~/.bash_aliases`
    - `zsh` -> `~/.zshrc`
 5. **Modern XDG Apps**: Any folder (e.g. `configs/zellij`, `configs/ghostty`, `configs/superfile`) is symlinked to `~/.config/<app>`.
@@ -148,6 +153,7 @@ Configs are stored in the `configs/` directory and named after the app it belong
 ## Adding Applications
 
 To add an application installer:
+
 1. Create a script `apps/<app_name>.sh` (make it executable: `chmod +x`).
 2. Add metadata comments at the top:
    ```bash
