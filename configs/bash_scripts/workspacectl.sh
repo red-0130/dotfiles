@@ -290,6 +290,7 @@ Commands:
   get-workspace           Print current PROJECT_WORKSPACE
   set-gemini-api <KEY>    Save GEMINI_API_KEY to ~/.gemini_api
   set-gitconfig           Interactively configure Git settings (user, branch, provider email)
+  install-app [NAMES...]  Install applications (same as running install.sh -a)
   --reset                 Reset workspace and Gemini API configuration files and variables
   help, -h, --help        Show this help message
 
@@ -298,9 +299,33 @@ Examples:
   wsctl get-workspace
   wsctl set-gemini-api "AIzaSy..."
   wsctl set-gitconfig
+  wsctl install-app
   wsctl --reset
   wsctl help
 EOF
+  }
+
+  install-app() {
+    local script_source="${BASH_SOURCE[0]}"
+    if command -v realpath >/dev/null 2>&1; then
+      script_source="$(realpath "$script_source" 2>/dev/null || echo "$script_source")"
+    elif command -v readlink >/dev/null 2>&1; then
+      script_source="$(readlink -f "$script_source" 2>/dev/null || echo "$script_source")"
+    fi
+
+    local repo_dir
+    repo_dir="$(cd "$(dirname "$script_source")/../.." 2>/dev/null && pwd)"
+
+    if [[ -z "$repo_dir" || ! -f "$repo_dir/install.sh" ]]; then
+      echo "Error: Could not locate install.sh in repository root '$repo_dir'." >&2
+      return 1
+    fi
+
+    if [[ -x "$repo_dir/install.sh" ]]; then
+      "$repo_dir/install.sh" -a "$@"
+    else
+      bash "$repo_dir/install.sh" -a "$@"
+    fi
   }
 
   if [[ $# -eq 0 ]]; then
@@ -309,7 +334,7 @@ EOF
   fi
 
   case "$1" in
-    set-workspace|set-gemini-api|get-workspace|set-gitconfig|--reset)
+    set-workspace|set-gemini-api|get-workspace|set-gitconfig|--reset|install-app)
       "$@"
       ;;
     help|--help|-h)
@@ -323,7 +348,7 @@ EOF
   esac
 }
 
-complete -W "set-workspace set-gemini-api get-workspace set-gitconfig --reset help --help" wsctl
+complete -W "set-workspace set-gemini-api get-workspace set-gitconfig install-app --reset help --help" wsctl
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   wsctl "$@"
