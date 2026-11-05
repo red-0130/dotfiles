@@ -27,11 +27,13 @@ dotfiles/
 │   ├── ghostty/                # Ghostty terminal emulator config
 │   ├── mpv/                    # MPV media player config & scripts
 │   ├── neovim/                 # Neovim config (init.lua, LazyVim)
+│   ├── opencode/               # OpenCode terminal AI assistant config
 │   ├── ssh/                    # SSH client config & setup script
 │   ├── starship/               # Starship prompt config (starship.toml)
 │   ├── superfile/              # Superfile terminal file manager config
 │   └── zellij/                 # Zellij terminal workspace config (config.kdl)
 ├── apps/                       # Application installation scripts
+│   ├── antigravity-cli.sh
 │   ├── antigravity.sh
 │   ├── bat.sh
 │   ├── bun.sh
@@ -46,6 +48,7 @@ dotfiles/
 │   ├── lazygit.sh
 │   ├── neovim.sh
 │   ├── nvm.sh
+│   ├── opencode.sh
 │   ├── ripgrep.sh
 │   ├── rust.sh
 │   ├── starship.sh
