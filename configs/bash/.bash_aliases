@@ -59,7 +59,7 @@ alias upgrade='sudo apt full-upgrade -y'
 # project commands
 alias personal="cd $HOME/Projects/personal"
 alias playground="cd $HOME/Projects/playground"
-! [[ -z ${PROJECT_WORKSPACE+x} ]] && alias workspace="cd $PROJECT_WORKSPACE"
+alias workspace="cd ${PROJECT_WORKSPACE:-$(echo "/workspaces")}"
 
 # podman commands
 if command -v podman &>/dev/null && command -v fzf &>/dev/null; then
