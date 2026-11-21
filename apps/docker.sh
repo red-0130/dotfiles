@@ -19,9 +19,9 @@ PKG="$(detect_pkg_manager)"
 
 case "$PKG" in
 apt)
-  local CONFLICTING_PACKAGES=$(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc docker-buildx podman-docker containerd runc | cut -f1)
+  CONFLICTING_PACKAGES=$(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc docker-buildx podman-docker containerd runc | cut -f1)
   . /etc/os-release
-  local OS_ID=$([ "$ID" = "ubuntu" ] && echo "ubuntu" || echo "debian")
+  OS_ID=$([ "$ID" = "ubuntu" ] && echo "ubuntu" || echo "debian")
   log_info "Removing conflicting packages..."
   run_privileged apt remove $CONFLICTING_PACKAGES
   log_info "Updating repo sources..."
@@ -31,7 +31,7 @@ apt)
   run_privileged install -m 0755 -d /etc/apt/keyrings
   run_privileged curl -fsSL https://download.docker.com/linux/${OS_ID}/gpg -o /etc/apt/keyrings/docker.asc
   run_privileged chmod a+r /etc/apt/keyrings/docker.asc
-  run_privileged tee /etc/apt/sources.list.d/debian.sources <<EOF
+  run_privileged tee /etc/apt/sources.list.d/docker.sources <<EOF
 Types: deb
 URIs: https://download.docker.com/linux/debian
 Suites: ${UBUNTU_VERSION:-$VERSION_CODENAME}
