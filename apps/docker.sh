@@ -27,7 +27,7 @@ apt)
   log_info "Updating repo sources..."
   run_privileged apt update -qq
   log_info "Installing docker..."
-  run_privileged apt install ca-certificates curl
+  run_privileged apt install -y ca-certificates curl
   run_privileged install -m 0755 -d /etc/apt/keyrings
   run_privileged curl -fsSL https://download.docker.com/linux/${OS_ID}/gpg -o /etc/apt/keyrings/docker.asc
   run_privileged chmod a+r /etc/apt/keyrings/docker.asc
@@ -40,7 +40,7 @@ Architectures: $(dpkg --print-architecture)
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
   run_privileged apt update -qq
-  run_privileged apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  run_privileged apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   ;;
 dnf)
   log_info "Removing old/conflicting packages..."
