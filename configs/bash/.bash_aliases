@@ -48,7 +48,9 @@ alias reload="source ~/.bashrc"
 alias myip="curl -s https://ifconfig.me"
 
 # batcat aliases
-if command -v batcat &>/dev/null || command -v bat &>/dev/null; then
+if command -v bat &>/dev/null; then
+  alias cat="bat"
+elif command -v batcat &>/dev/null; then
   alias cat="batcat"
 fi
 
