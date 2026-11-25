@@ -36,7 +36,7 @@ if has_cmd bun; then
     else
       log_info "Native upgrade failed, attempting update via official install script..."
       if has_cmd curl; then
-        curl -fsSL https://bun.sh/install | bash
+        run_remote_script bash https://bun.sh/install
       else
         log_error "Failed to upgrade Bun and curl is not available."
         exit 1
@@ -90,7 +90,7 @@ fi
 if [[ "$PKG" == "brew" ]]; then
   brew install oven-sh/bun/bun || brew install bun
 elif has_cmd curl; then
-  curl -fsSL https://bun.sh/install | bash
+  run_remote_script bash https://bun.sh/install
 else
   log_error "curl is required to install Bun."
   exit 1

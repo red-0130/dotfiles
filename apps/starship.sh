@@ -20,7 +20,7 @@ ensure_dir "$HOME/.local/bin"
 
 if has_cmd curl; then
     # Use official starship install script with non-interactive flags
-    curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir "$HOME/.local/bin" --yes
+    run_remote_script sh https://starship.rs/install.sh --bin-dir "$HOME/.local/bin" --yes
 else
     PKG="$(detect_pkg_manager)"
     case "$PKG" in

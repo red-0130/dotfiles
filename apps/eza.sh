@@ -41,13 +41,7 @@ apt)
   elif has_cmd curl; then
     # Add official eza apt repository for older Debian/Ubuntu
     log_info "Adding official eza apt repository..."
-    run_privileged mkdir -p -m 755 /etc/apt/keyrings
-    if has_cmd gpg; then
-      curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_privileged gpg --dearmor --yes -o /etc/apt/keyrings/gierens.gpg
-    else
-      curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_privileged dd of=/etc/apt/keyrings/gierens.gpg
-    fi
-    run_privileged chmod 644 /etc/apt/keyrings/gierens.gpg
+    install_apt_keyring https://raw.githubusercontent.com/eza-community/eza/main/deb.asc /etc/apt/keyrings/gierens.gpg --dearmor
     echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | run_privileged tee /etc/apt/sources.list.d/gierens.list >/dev/null
     run_privileged chmod 644 /etc/apt/sources.list.d/gierens.list
     run_privileged apt-get update -qq

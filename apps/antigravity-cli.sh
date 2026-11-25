@@ -146,18 +146,7 @@ install_via_bootstrapper() {
     mv "$BINARY_PATH" "$backup_bin"
   fi
 
-  local install_cmd
-  if has_cmd curl; then
-    install_cmd="curl -fsSL \"$OFFICIAL_BOOTSTRAPPER_URL\" | bash -s -- --dir \"$TARGET_DIR\""
-  elif has_cmd wget; then
-    install_cmd="wget -qO- \"$OFFICIAL_BOOTSTRAPPER_URL\" | bash -s -- --dir \"$TARGET_DIR\""
-  else
-    log_error "Neither curl nor wget is available."
-    [[ -n "$backup_bin" && -f "$backup_bin" ]] && mv "$backup_bin" "$BINARY_PATH"
-    return 1
-  fi
-
-  if eval "$install_cmd"; then
+  if run_remote_script bash "$OFFICIAL_BOOTSTRAPPER_URL" --dir "$TARGET_DIR"; then
     [[ -n "$backup_bin" && -f "$backup_bin" ]] && rm -f "$backup_bin"
     return 0
   else

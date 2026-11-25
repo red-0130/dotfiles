@@ -107,13 +107,7 @@ case "$PKG" in
         # Official Helium APT repository (https://helium.computer/download#all-downloads)
         if has_cmd curl; then
             log_info "Configuring official Helium APT repository..."
-            run_privileged mkdir -p -m 755 /etc/apt/keyrings
-            if has_cmd gpg; then
-                curl -fsSL https://raw.githubusercontent.com/imputnet/helium-linux/main/pubkey.asc | run_privileged gpg --dearmor --yes -o /etc/apt/keyrings/helium.gpg
-            else
-                curl -fsSL https://raw.githubusercontent.com/imputnet/helium-linux/main/pubkey.asc | run_privileged dd of=/etc/apt/keyrings/helium.gpg
-            fi
-            run_privileged chmod 644 /etc/apt/keyrings/helium.gpg
+            install_apt_keyring https://raw.githubusercontent.com/imputnet/helium-linux/main/pubkey.asc /etc/apt/keyrings/helium.gpg --dearmor
 
             # Also link to /usr/share/keyrings if directory exists for backwards compatibility
             if [[ -d /usr/share/keyrings ]] && [[ ! -e /usr/share/keyrings/helium.gpg ]]; then

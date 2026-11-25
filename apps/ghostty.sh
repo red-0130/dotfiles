@@ -62,7 +62,7 @@ install_ghostty_ubuntu_community() {
     elif has_cmd curl; then
         # 2. Try the community install script
         log_info "Running mkasberg/ghostty-ubuntu install script..."
-        if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"; then
+        if run_remote_script /bin/bash https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh; then
             log_success "Ghostty installed via community install script."
         else
             # 3. Fallback: Download latest .deb directly from GitHub releases

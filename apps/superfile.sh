@@ -138,7 +138,7 @@ if ! curl -fsSL "$DOWNLOAD_URL" -o "$TAR_FILE" 2>/dev/null; then
         if ! curl -fsSL "$DOWNLOAD_URL" -o "$TAR_FILE" 2>/dev/null; then
             # Fallback to official install script
             log_warn "Direct download failed, falling back to official superfile installer script..."
-            if curl -fsSL https://superfile.dev/install.sh | bash; then
+            if run_remote_script bash https://superfile.dev/install.sh; then
                 ensure_dir "$HOME/.local/bin"
                 if has_cmd spf && ! has_cmd superfile; then
                     ln -sf "$(command -v spf)" "$HOME/.local/bin/superfile"

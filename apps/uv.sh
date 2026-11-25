@@ -138,9 +138,7 @@ done
 if [[ "$DOWNLOAD_SUCCESS" != "true" || ! -s "$TAR_FILE" ]]; then
     # Fallback to official install script
     log_warn "Direct download failed, falling back to official uv installer script..."
-    if has_cmd curl && curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$HOME/.local/bin" sh; then
-        rm -rf "$TMP_DIR"
-    elif has_cmd wget && wget -qO- https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$HOME/.local/bin" sh; then
+    if UV_INSTALL_DIR="$HOME/.local/bin" run_remote_script sh https://astral.sh/uv/install.sh; then
         rm -rf "$TMP_DIR"
     else
         rm -rf "$TMP_DIR"

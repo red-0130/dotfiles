@@ -142,7 +142,7 @@ fi
 # ------------------------------------------------------------------------------
 if [[ "$INSTALLED" != "true" ]] && has_cmd curl; then
     log_info "Installing via official OpenCode v2 installer script..."
-    if curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path; then
+    if run_remote_script bash https://opencode.ai/v2/install --no-modify-path; then
         INSTALLED=true
     else
         log_warn "Official OpenCode installer script returned non-zero, trying direct package download..."

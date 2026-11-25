@@ -141,3 +141,56 @@ ensure_dir() {
         mkdir -p "$dir"
     fi
 }
+
+# Download a remote script to a temp file and execute it only after a clean, non-empty fetch.
+run_remote_script() {
+    local shell_bin="$1" url="$2"
+    shift 2
+    local tmp_script rc=0
+    tmp_script="$(mktemp)" || return 1
+
+    if has_cmd curl; then
+        curl -fsSL "$url" -o "$tmp_script" || rc=$?
+    elif has_cmd wget; then
+        wget -qO "$tmp_script" "$url" || rc=$?
+    else
+        log_error "Neither curl nor wget is available."
+        rm -f "$tmp_script"
+        return 1
+    fi
+
+    if [[ $rc -eq 0 && -s "$tmp_script" ]]; then
+        "$shell_bin" "$tmp_script" "$@" || rc=$?
+    elif [[ $rc -eq 0 ]]; then
+        rc=1
+    fi
+
+    rm -f "$tmp_script"
+    return "$rc"
+}
+
+# Download an APT signing key to a temp file before writing the destination keyring.
+install_apt_keyring() {
+    local url="$1" dest="$2" mode="${3:-}"
+    local tmp_key rc=0
+    tmp_key="$(mktemp)" || return 1
+
+    if ! curl -fsSL "$url" -o "$tmp_key" || [[ ! -s "$tmp_key" ]]; then
+        rm -f "$tmp_key"
+        return 1
+    fi
+
+    run_privileged mkdir -p -m 755 "$(dirname "$dest")" || { rm -f "$tmp_key"; return 1; }
+    if [[ "$mode" == "--dearmor" ]] && has_cmd gpg; then
+        if run_privileged gpg --dearmor --yes -o "$dest" "$tmp_key"; then
+            run_privileged chmod 644 "$dest" || rc=$?
+        else
+            rc=$?
+        fi
+    else
+        run_privileged install -m 644 "$tmp_key" "$dest" || rc=$?
+    fi
+
+    rm -f "$tmp_key"
+    return "$rc"
+}
