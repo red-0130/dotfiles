@@ -15,7 +15,6 @@ if [[ -t 1 ]] && [[ -z "${NO_COLOR:-}" ]]; then
     COLOR_MAGENTA="\033[35m"
     COLOR_CYAN="\033[36m"
     COLOR_GRAY="\033[90m"
-    COLOR_REVERSE="\033[7m"
 else
     COLOR_RESET=""
     COLOR_BOLD=""
@@ -27,7 +26,6 @@ else
     COLOR_MAGENTA=""
     COLOR_CYAN=""
     COLOR_GRAY=""
-    COLOR_REVERSE=""
 fi
 
 # ------------------------------------------------------------------------------
@@ -67,10 +65,6 @@ log_dim() {
 # ------------------------------------------------------------------------------
 has_cmd() {
     command -v "$1" >/dev/null 2>&1
-}
-
-is_tty() {
-    [[ -t 0 ]] || [[ -c /dev/tty ]]
 }
 
 is_codespaces() {

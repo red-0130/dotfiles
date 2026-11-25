@@ -87,7 +87,6 @@ install_single_config() {
   case "$app" in
   bash)
     local linked_any=false
-    local linked_files=()
     local rc=0
 
     # First check common bash config files without dot
@@ -95,7 +94,6 @@ install_single_config() {
       if [[ -f "$src/$bf" ]]; then
         safe_symlink "$src/$bf" "$HOME/.$bf" || rc=1
         linked_any=true
-        linked_files+=("$bf")
       fi
     done
 

@@ -6,7 +6,7 @@ A modular, robust, and extensible dotfiles installer compliant with the [GitHub 
 
 ## Features
 
-- **GitHub Codespaces & Dev Containers Compliant**: When executed without flags (unattended), it non-interactively installs predefined configurations (`bash`, `bash_scripts`), creates backups of conflicting files, and exits cleanly with code `0`.
+- **GitHub Codespaces & Dev Containers Compliant**: When executed without flags (unattended), it non-interactively installs predefined configurations (`bash`, `bash_scripts`, `superfile`, `neovim`, `zellij`), creates backups of conflicting files, and exits cleanly with code `0`.
 - **Interactive Configuration Selector (`-c`, `--config`)**: Terminal checkbox interface where you can navigate, toggle, and install select configurations.
 - **Interactive Application Installer (`-a`, `--app`)**: Terminal interface allowing you to choose which development tools and CLI utilities to install on the system.
 - **Safe & Idempotent**: Conflicting files are automatically backed up with timestamps to `~/.dotfiles_backup/`. Existing identical symlinks are recognized and left untouched.
@@ -26,7 +26,7 @@ dotfiles/
 │   ├── bash_scripts/           # Custom shell helper scripts & tools
 │   ├── ghostty/                # Ghostty terminal emulator config
 │   ├── mpv/                    # MPV media player config & scripts
-│   ├── neovim/                 # Neovim config (init.lua, LazyVim)
+│   ├── neovim/                 # Neovim config (init.lua, lazy.nvim)
 │   ├── opencode/               # OpenCode terminal AI assistant config
 │   ├── ssh/                    # SSH client config & setup script
 │   ├── starship/               # Starship prompt config (starship.toml)
@@ -39,6 +39,7 @@ dotfiles/
 │   ├── bun.sh
 │   ├── devsy-cli.sh
 │   ├── devsy.sh
+│   ├── docker.sh
 │   ├── eza.sh
 │   ├── fd.sh
 │   ├── flatpak.sh
@@ -51,6 +52,7 @@ dotfiles/
 │   ├── neovim.sh
 │   ├── nvm.sh
 │   ├── opencode.sh
+│   ├── podman.sh
 │   ├── ripgrep.sh
 │   ├── rust.sh
 │   ├── starship.sh
@@ -74,7 +76,7 @@ dotfiles/
 
 ### 1. Default (GitHub Dotfiles Mode)
 
-When invoked without arguments (such as during GitHub Codespaces container startup), the script installs the predefined configurations configured in `dotfiles.conf` (`bash`, `bash_scripts`):
+When invoked without arguments (such as during GitHub Codespaces container startup), the script installs the predefined configurations configured in `dotfiles.conf` (`bash`, `bash_scripts`, `superfile`, `neovim`, `zellij`):
 
 ```bash
 ./install.sh

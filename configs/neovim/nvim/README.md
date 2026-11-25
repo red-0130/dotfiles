@@ -1,35 +1,32 @@
-# 💤 LazyVim
+# Neovim
 
-A personalized starter template for [LazyVim](https://github.com/LazyVim/LazyVim). This configuration builds upon the standard LazyVim setup with additional features, plugins, and customizations.
+A modular Neovim configuration managed with [lazy.nvim](https://github.com/folke/lazy.nvim).
 
-Refer to the original [documentation](https://lazyvim.github.io/installation) to get started with LazyVim.
-
-## ✨ Features
-
-This configuration includes the following additions and modifications:
+## Features
 
 ### General Enhancements
 
 - **[better-escape.nvim](https://github.com/max397574/better-escape.nvim)**: Escape insert mode with `jk` or `jj`.
-- **[inc-rename](https://github.com/smjonas/inc-rename.nvim)**: Provides incremental renaming of variables.
-- **[mini.surround](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-surround.md)**: For adding, changing, and deleting surroundings (quotes, brackets, etc.).
-- **File Explorer**: `neo-tree` is configured to show hidden dotfiles.
+- **[snacks.nvim](https://github.com/folke/snacks.nvim)**: File explorer (`replace_netrw = true`, shows `.env*`), fuzzy picker, `lazygit`, image viewer, notifier, smooth scroll, and word highlights.
+- **[mini.nvim](https://github.com/nvim-mini/mini.nvim)**: `mini.surround` (`gsa`/`gsd`/`gsr`), `mini.pairs`, `mini.move`, `mini.icons`, `mini.indentscope`, `mini.misc`, `mini.tabline`, and `mini.trailspace`.
+- **UI & Navigation**: `lualine.nvim`, `noice.nvim`, `which-key.nvim`, `gitsigns.nvim`, `todo-comments.nvim`, `nvim-treesitter`, `nvim-treesitter-textobjects`, and `nvim-ts-autotag`.
 
 ### Theming
 
-- **[GitHub Theme](https://github.com/projekt0n/github-nvim-theme)**: The default colorscheme is set to `github_dark`.
+- **[GitHub Theme](https://github.com/projekt0n/github-nvim-theme)**: Default colorscheme set to `github_dark`.
 
 ### Keymaps
 
-- `<leader>rn`: Rename the variable under the cursor using `IncRename`.
-- `<C-w>`: Close the current buffer.
+- `<leader>qq`: Quit all.
+- `<C-s>`: Save file in normal, visual, and insert modes.
+- `<leader>yy` / `<leader>pp`: Yank to / put from system clipboard.
+- `<leader>e`: Toggle Snacks file explorer.
+- `<leader>ff` / `<leader><space>` / `<leader>fs`: Find files (Snacks picker).
+- `<leader>sg` / `<leader>/`: Grep across workspace (Snacks picker).
+- `<leader>sb` / `<leader>fc` / `<leader>st` / `<leader>sk`: Search buffers, config files, TODOs, and keymaps.
 
 ### Language Support & Tooling
 
-- **Formatting**: Code formatting is handled by [Prettier](https://prettier.io/).
-- **Snippets**: Utilizes [LuaSnip](https://github.com/L3MON4D3/LuaSnip) with custom snippets for:
-  - JavaScript (React, Jest)
-  - CSS
-- **LSP**:
-  - Enhanced settings for `vtsls` for better TypeScript/JavaScript autocompletion.
-  - Extra language support for JSON.
+- **Completion & Snippets**: [blink.cmp](https://github.com/saghen/blink.cmp) with [friendly-snippets](https://github.com/rafamadriz/friendly-snippets) and custom VS Code-style snippets in `snippets/` (`package.json`) for JavaScript/React/Jest/Redux/Express/JSDoc and CSS.
+- **Formatting**: [conform.nvim](https://github.com/stevearc/conform.nvim) with format-on-save (`biome`/`prettierd`/`prettier` for JS/TS/JSON/HTML/Markdown/YAML/CSS, `stylua` for Lua, `shfmt` for Shell, `isort` + `black` for Python, `rustfmt` for Rust, with LSP fallback).
+- **LSP**: `nvim-lspconfig` with `mason.nvim`, `mason-lspconfig.nvim`, and `mason-tool-installer.nvim`, configuring `vtsls` for TypeScript/JavaScript and installing `stylua` and `prettier`.

@@ -12,7 +12,4 @@ return {
     -- vim.g.no_rust_maps = true
     -- vim.g.no_go_maps = true
   end,
-  config = function()
-    -- put your config here
-  end,
 }
