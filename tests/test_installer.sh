@@ -189,6 +189,68 @@ HOME="$DUMB_HOME" TERM=dumb bash "$REPO_DIR/install.sh" -c <<<"1" >/dev/null 2>&
 assert_eq 0 "$rc" "dumb terminal numeric selection exits 0"
 assert_symlink "$DUMB_HOME/.bashrc" "dumb terminal numeric selection installs first config"
 
+# 8. version_ge and is_app_installed nvm
+echo "==> version_ge and is_app_installed nvm"
+# shellcheck source=/dev/null
+source "$REPO_DIR/lib/utils.sh"
+APPS_DIR="$REPO_DIR/apps"
+# shellcheck source=/dev/null
+source "$REPO_DIR/lib/app_installer.sh"
+
+version_ge "1.10" "1.2" && rc=0 || rc=$?
+assert_eq 0 "$rc" "version_ge 1.10 >= 1.2"
+
+version_ge "1.2" "1.10" && rc=0 || rc=$?
+assert_eq 1 "$rc" "version_ge 1.2 < 1.10"
+
+version_ge "1.2" "1.2.0" && rc=0 || rc=$?
+assert_eq 0 "$rc" "version_ge 1.2 == 1.2.0"
+
+version_ge "v1.2.3" "1.2.3" && rc=0 || rc=$?
+assert_eq 0 "$rc" "version_ge handles v-prefix"
+
+version_ge "0.08" "0.7" && rc=0 || rc=$?
+assert_eq 0 "$rc" "version_ge avoids octal on leading zeros"
+
+version_ge "" "1.0" && rc=0 || rc=$?
+assert_eq 1 "$rc" "version_ge rejects empty version"
+
+NVM_HOME="$TMP_ROOT/home_nvm"
+mkdir -p "$NVM_HOME"
+(
+  unset NVM_DIR XDG_CONFIG_HOME
+  HOME="$NVM_HOME"
+  is_app_installed nvm && exit 0 || exit 1
+) && rc=0 || rc=$?
+assert_eq 1 "$rc" "is_app_installed nvm false when absent"
+
+mkdir -p "$NVM_HOME/.nvm"
+echo "# nvm" >"$NVM_HOME/.nvm/nvm.sh"
+(
+  unset NVM_DIR XDG_CONFIG_HOME
+  HOME="$NVM_HOME"
+  is_app_installed nvm && exit 0 || exit 1
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "is_app_installed nvm true with ~/.nvm/nvm.sh"
+
+NVM_XDG="$TMP_ROOT/xdg_nvm"
+mkdir -p "$NVM_XDG/nvm"
+echo "# nvm" >"$NVM_XDG/nvm/nvm.sh"
+(
+  unset NVM_DIR
+  HOME="$TMP_ROOT/home_nvm_empty"
+  XDG_CONFIG_HOME="$NVM_XDG"
+  is_app_installed nvm && exit 0 || exit 1
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "is_app_installed nvm true with XDG_CONFIG_HOME/nvm/nvm.sh"
+
+(
+  NVM_DIR="$TMP_ROOT/missing_nvm"
+  HOME="$NVM_HOME"
+  is_app_installed nvm && exit 0 || exit 1
+) && rc=0 || rc=$?
+assert_eq 1 "$rc" "is_app_installed nvm respects explicit NVM_DIR"
+
 echo ""
 echo "Results: ${PASSED} passed, ${FAILED} failed"
 [[ "$FAILED" -eq 0 ]]

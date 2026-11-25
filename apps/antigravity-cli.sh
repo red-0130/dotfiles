@@ -100,7 +100,7 @@ fi
 if has_cmd agy || [[ -x "$BINARY_PATH" ]]; then
   CURRENT_VERSION="$($(agy --version 2>/dev/null || "$BINARY_PATH" --version 2>/dev/null) | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
   if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" && "${AGY_FORCE_INSTALL:-0}" != "1" ]]; then
-    if [[ "$(printf '%s\n%s' "$LATEST_VERSION" "$CURRENT_VERSION" | sort -V | head -n1)" == "$LATEST_VERSION" ]]; then
+    if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
       log_success "Antigravity CLI (agy) is already up to date (v${CURRENT_VERSION})"
       exit 0
     else

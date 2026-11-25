@@ -40,7 +40,7 @@ if has_cmd lazygit; then
     CURRENT_VERSION="$(lazygit --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
     if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
         # Check if current version is at least the latest version
-        if [[ "$(printf '%s\n%s' "$LATEST_VERSION" "$CURRENT_VERSION" | sort -V | head -n1)" == "$LATEST_VERSION" ]]; then
+        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
             log_success "lazygit is already at the latest version (v${CURRENT_VERSION})"
             exit 0
         else

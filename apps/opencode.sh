@@ -52,7 +52,7 @@ LATEST_VERSION="$(get_latest_opencode_version)"
 if has_cmd opencode || [[ -x "$INSTALL_DIR/opencode" ]] || [[ -x "$LOCAL_BIN/opencode" ]]; then
     CURRENT_VERSION="$((opencode --version 2>/dev/null || "$INSTALL_DIR/opencode" --version 2>/dev/null || "$LOCAL_BIN/opencode" --version 2>/dev/null) | head -n 1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
     if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" && "${OPENCODE_FORCE_INSTALL:-0}" != "1" ]]; then
-        if [[ "$(printf '%s\n%s' "$LATEST_VERSION" "$CURRENT_VERSION" | sort -V | head -n1)" == "$LATEST_VERSION" ]]; then
+        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
             log_success "OpenCode is already at the latest version (v${CURRENT_VERSION})"
             # Ensure local bin symlink exists
             if [[ -x "$INSTALL_DIR/opencode" ]]; then

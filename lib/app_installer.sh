@@ -84,6 +84,14 @@ get_app_command_name() {
 
 is_app_installed() {
   local app="$1"
+  if [[ "$app" == "nvm" ]]; then
+    if [[ -n "${NVM_DIR:-}" ]]; then
+      [[ -s "${NVM_DIR}/nvm.sh" ]]
+    else
+      [[ -s "$HOME/.nvm/nvm.sh" || -s "${XDG_CONFIG_HOME:-$HOME/.config}/nvm/nvm.sh" ]]
+    fi
+    return
+  fi
   local cmd
   cmd="$(get_app_command_name "$app")"
   has_cmd "$cmd"

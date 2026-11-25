@@ -46,7 +46,7 @@ LATEST_VERSION="$(get_latest_nvm_version)"
 if has_cmd nvm; then
     CURRENT_VERSION="$(nvm --version 2>/dev/null || echo '')"
     if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        if [[ "$(printf '%s\n%s' "$LATEST_VERSION" "$CURRENT_VERSION" | sort -V | head -n1)" == "$LATEST_VERSION" ]]; then
+        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
             log_success "nvm is already at the latest version (v${CURRENT_VERSION})"
             exit 0
         else

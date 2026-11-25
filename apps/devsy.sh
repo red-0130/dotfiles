@@ -21,12 +21,6 @@ get_latest_devsy_version() {
     fi
 }
 
-version_ge() {
-    local current="$1"
-    local latest="$2"
-    [[ -n "$current" && -n "$latest" ]] && [[ "$(printf '%s\n%s' "$latest" "$current" | sort -V | head -n1)" == "$latest" ]]
-}
-
 download_asset() {
     local asset="$1"
     local dest="$2"

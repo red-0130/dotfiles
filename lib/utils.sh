@@ -194,3 +194,33 @@ install_apt_keyring() {
     rm -f "$tmp_key"
     return "$rc"
 }
+
+# Return 0 if version $1 >= $2 (dot-separated integers, optional leading 'v')
+version_ge() {
+    local v1="${1:-}" v2="${2:-}"
+    v1="${v1#[vV]}"
+    v2="${v2#[vV]}"
+    [[ -n "$v1" && -n "$v2" ]] || return 1
+
+    local IFS='.'
+    local -a a b
+    read -r -a a <<< "$v1"
+    read -r -a b <<< "$v2"
+
+    local i max=${#a[@]}
+    (( ${#b[@]} > max )) && max=${#b[@]}
+
+    local ai bi
+    for (( i = 0; i < max; i++ )); do
+        ai="${a[i]:-0}"
+        bi="${b[i]:-0}"
+        ai="${ai%%[!0-9]*}"; ai="${ai:-0}"
+        bi="${bi%%[!0-9]*}"; bi="${bi:-0}"
+        if (( 10#$ai > 10#$bi )); then
+            return 0
+        elif (( 10#$ai < 10#$bi )); then
+            return 1
+        fi
+    done
+    return 0
+}

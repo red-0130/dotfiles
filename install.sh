@@ -5,6 +5,11 @@
 # ==============================================================================
 set -euo pipefail
 
+if (( BASH_VERSINFO[0] < 4 )); then
+  echo "Error: Bash 4.0+ is required (found ${BASH_VERSION:-unknown}). On macOS, install via 'brew install bash'." >&2
+  exit 1
+fi
+
 # Determine script root directory
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DOTFILES_DIR
