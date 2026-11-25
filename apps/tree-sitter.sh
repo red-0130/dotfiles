@@ -17,27 +17,10 @@ LATEST_VERSION="$(get_github_latest_version "tree-sitter/tree-sitter" "0.25.3")"
 # ------------------------------------------------------------------------------
 # Check if tree-sitter is already installed and up to date
 # ------------------------------------------------------------------------------
-if has_cmd tree-sitter || has_cmd tree-sitter-cli; then
-    # Ensure both symlinks exist
-    if has_cmd tree-sitter && ! has_cmd tree-sitter-cli; then
-        ensure_dir "$HOME/.local/bin"
-        ln -sf "$(command -v tree-sitter)" "$HOME/.local/bin/tree-sitter-cli"
-    elif has_cmd tree-sitter-cli && ! has_cmd tree-sitter; then
-        ensure_dir "$HOME/.local/bin"
-        ln -sf "$(command -v tree-sitter-cli)" "$HOME/.local/bin/tree-sitter"
-    fi
-
-    CURRENT_VERSION="$((tree-sitter --version || tree-sitter-cli --version) 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "tree-sitter is already at the latest version (v${CURRENT_VERSION})"
-            exit 0
-        else
-            log_info "Current tree-sitter (v${CURRENT_VERSION}) is outdated. Upgrading to latest version (v${LATEST_VERSION})..."
-        fi
-    else
-        log_info "tree-sitter is installed. Verifying latest version..."
-    fi
+ensure_bin_alias tree-sitter tree-sitter-cli
+ensure_bin_alias tree-sitter-cli tree-sitter
+if is_cmd_up_to_date "tree-sitter" "$LATEST_VERSION" tree-sitter tree-sitter-cli; then
+    exit 0
 fi
 
 log_info "Installing tree-sitter CLI (v${LATEST_VERSION})..."
@@ -61,15 +44,7 @@ extract_zip() {
     elif has_cmd 7z; then
         7z x -y "-o$dest_dir" "$zip_file" >/dev/null
     else
-        local pkg="$(detect_pkg_manager)"
-        case "$pkg" in
-            apt) run_privileged apt-get update -qq && run_privileged apt-get install -y unzip ;;
-            dnf) run_privileged dnf install -y unzip ;;
-            pacman) run_privileged pacman -Sy --noconfirm unzip ;;
-            apk) run_privileged apk add unzip ;;
-            zypper) run_privileged zypper install -y unzip ;;
-            brew) brew install unzip ;;
-        esac
+        pkg_install unzip || true
         if has_cmd unzip; then
             unzip -q -o "$zip_file" -d "$dest_dir"
         else
@@ -125,113 +100,87 @@ esac
 # ------------------------------------------------------------------------------
 # Download and install prebuilt binary from GitHub releases
 # ------------------------------------------------------------------------------
-if ! has_cmd curl && ! has_cmd wget; then
-    log_error "curl or wget is required to download tree-sitter binary."
-    exit 1
-fi
+(
+    tmp_dir="$(mktemp -d)" || exit 1
+    trap 'rm -rf "$tmp_dir"' EXIT
 
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
-
-# Query GitHub API for download URL
-RELEASE_JSON="$(curl -fsSL https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null || true)"
-DOWNLOAD_URL=""
-
-if [[ -n "$RELEASE_JSON" ]]; then
-    DOWNLOAD_URL="$(echo "$RELEASE_JSON" | grep -E "browser_download_url.*tree-sitter.*${OS_NAME}.*${ARCH_NAME}\.(zip|gz)" | head -n 1 | cut -d '"' -f 4)"
-fi
-
-if [[ -z "$DOWNLOAD_URL" ]]; then
-    DOWNLOAD_URL="https://github.com/tree-sitter/tree-sitter/releases/download/v${LATEST_VERSION}/tree-sitter-cli-${OS_NAME}-${ARCH_NAME}.zip"
-fi
-
-ARCHIVE_EXT="zip"
-if [[ "$DOWNLOAD_URL" == *".gz" && "$DOWNLOAD_URL" != *".tar.gz" ]]; then
-    ARCHIVE_EXT="gz"
-fi
-ARCHIVE_FILE="$TMP_DIR/tree-sitter-download.${ARCHIVE_EXT}"
-
-log_info "Downloading tree-sitter prebuilt binary: $DOWNLOAD_URL"
-DOWNLOAD_SUCCESS=false
-
-if has_cmd curl; then
-    if curl -fsSL "$DOWNLOAD_URL" -o "$ARCHIVE_FILE" 2>/dev/null; then
-        DOWNLOAD_SUCCESS=true
+    # Query GitHub API for download URL
+    release_json=""
+    if has_cmd curl; then
+        release_json="$(curl -fsSL https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null || true)"
     fi
-elif has_cmd wget; then
-    if wget -qO "$ARCHIVE_FILE" "$DOWNLOAD_URL" 2>/dev/null; then
-        DOWNLOAD_SUCCESS=true
+    download_url=""
+    if [[ -n "$release_json" ]]; then
+        download_url="$(echo "$release_json" | grep -E "browser_download_url.*tree-sitter.*${OS_NAME}.*${ARCH_NAME}\.(zip|gz)" | head -n 1 | cut -d '"' -f 4)"
     fi
-fi
 
-if [[ "$DOWNLOAD_SUCCESS" != "true" ]]; then
-    # Try alternative release URLs
-    ALT_URLS=(
+    zip_urls=(
+        "https://github.com/tree-sitter/tree-sitter/releases/download/v${LATEST_VERSION}/tree-sitter-cli-${OS_NAME}-${ARCH_NAME}.zip"
         "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-cli-${OS_NAME}-${ARCH_NAME}.zip"
+    )
+    gz_urls=(
         "https://github.com/tree-sitter/tree-sitter/releases/download/v${LATEST_VERSION}/tree-sitter-${OS_NAME}-${ARCH_NAME}.gz"
         "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-${OS_NAME}-${ARCH_NAME}.gz"
     )
-    for alt in "${ALT_URLS[@]}"; do
-        log_info "Trying alternative download URL: $alt"
-        if has_cmd curl && curl -fsSL "$alt" -o "$ARCHIVE_FILE" 2>/dev/null; then
-            if [[ "$alt" == *".gz" ]]; then ARCHIVE_EXT="gz"; else ARCHIVE_EXT="zip"; fi
-            DOWNLOAD_SUCCESS=true
-            break
-        elif has_cmd wget && wget -qO "$ARCHIVE_FILE" "$alt" 2>/dev/null; then
-            if [[ "$alt" == *".gz" ]]; then ARCHIVE_EXT="gz"; else ARCHIVE_EXT="zip"; fi
-            DOWNLOAD_SUCCESS=true
-            break
+
+    archive_ext=""
+    archive_file=""
+    if [[ -n "$download_url" && "$download_url" == *".gz" && "$download_url" != *".tar.gz" ]] && download_file "$tmp_dir/tree-sitter.gz" "$download_url"; then
+        archive_ext="gz"
+        archive_file="$tmp_dir/tree-sitter.gz"
+    else
+        [[ -n "$download_url" && "$download_url" != *".gz" ]] && zip_urls=("$download_url" "${zip_urls[@]}")
+        if download_file "$tmp_dir/tree-sitter.zip" "${zip_urls[@]}"; then
+            archive_ext="zip"
+            archive_file="$tmp_dir/tree-sitter.zip"
+        elif download_file "$tmp_dir/tree-sitter.gz" "${gz_urls[@]}"; then
+            archive_ext="gz"
+            archive_file="$tmp_dir/tree-sitter.gz"
+        else
+            log_error "Failed to download tree-sitter prebuilt binary."
+            exit 1
         fi
-    done
-fi
-
-if [[ "$DOWNLOAD_SUCCESS" != "true" || ! -s "$ARCHIVE_FILE" ]]; then
-    rm -rf "$TMP_DIR"
-    log_error "Failed to download tree-sitter prebuilt binary."
-    exit 1
-fi
-
-# Extract downloaded archive
-EXTRACT_DIR="$TMP_DIR/extracted"
-ensure_dir "$EXTRACT_DIR"
-
-if [[ "$ARCHIVE_EXT" == "zip" ]]; then
-    extract_zip "$ARCHIVE_FILE" "$EXTRACT_DIR"
-elif [[ "$ARCHIVE_EXT" == "gz" ]]; then
-    if has_cmd gzip; then
-        gzip -dc "$ARCHIVE_FILE" > "$EXTRACT_DIR/tree-sitter"
-    elif has_cmd gunzip; then
-        gunzip -c "$ARCHIVE_FILE" > "$EXTRACT_DIR/tree-sitter"
     fi
-fi
 
-# Locate executable binary
-BIN_SRC=""
-if [[ -f "$EXTRACT_DIR/tree-sitter" ]]; then
-    BIN_SRC="$EXTRACT_DIR/tree-sitter"
-elif [[ -f "$EXTRACT_DIR/tree-sitter.exe" ]]; then
-    BIN_SRC="$EXTRACT_DIR/tree-sitter.exe"
-else
-    BIN_SRC="$(find "$EXTRACT_DIR" -type f -name "tree-sitter*" 2>/dev/null | head -n 1)"
-fi
+    # Extract downloaded archive
+    extract_dir="$tmp_dir/extracted"
+    ensure_dir "$extract_dir"
 
-if [[ -z "$BIN_SRC" || ! -f "$BIN_SRC" ]]; then
-    rm -rf "$TMP_DIR"
-    log_error "tree-sitter binary not found in extracted archive."
-    exit 1
-fi
+    if [[ "$archive_ext" == "zip" ]]; then
+        extract_zip "$archive_file" "$extract_dir"
+    elif [[ "$archive_ext" == "gz" ]]; then
+        if has_cmd gzip; then
+            gzip -dc "$archive_file" > "$extract_dir/tree-sitter"
+        elif has_cmd gunzip; then
+            gunzip -c "$archive_file" > "$extract_dir/tree-sitter"
+        else
+            log_error "gzip is required to extract .gz archive."
+            exit 1
+        fi
+    fi
 
-chmod +x "$BIN_SRC"
-ensure_dir "$HOME/.local/bin"
-install -m 755 "$BIN_SRC" "$HOME/.local/bin/tree-sitter"
-ln -sf "$HOME/.local/bin/tree-sitter" "$HOME/.local/bin/tree-sitter-cli"
+    # Locate executable binary
+    bin_src=""
+    if [[ -f "$extract_dir/tree-sitter" ]]; then
+        bin_src="$extract_dir/tree-sitter"
+    elif [[ -f "$extract_dir/tree-sitter.exe" ]]; then
+        bin_src="$extract_dir/tree-sitter.exe"
+    else
+        bin_src="$(find "$extract_dir" -type f -name "tree-sitter*" 2>/dev/null | head -n 1)"
+    fi
 
-if [[ $EUID -eq 0 ]] || has_cmd sudo; then
-    run_privileged install -m 755 "$BIN_SRC" /usr/local/bin/tree-sitter 2>/dev/null || true
-    run_privileged ln -sf /usr/local/bin/tree-sitter /usr/local/bin/tree-sitter-cli 2>/dev/null || true
-fi
+    if [[ -z "$bin_src" || ! -f "$bin_src" ]]; then
+        log_error "tree-sitter binary not found in extracted archive."
+        exit 1
+    fi
 
-rm -rf "$TMP_DIR"
+    install_binary "$bin_src" "tree-sitter"
+    ln -sf "$HOME/.local/bin/tree-sitter" "$HOME/.local/bin/tree-sitter-cli"
+
+    if [[ $EUID -eq 0 ]] || has_cmd sudo; then
+        run_privileged ln -sf /usr/local/bin/tree-sitter /usr/local/bin/tree-sitter-cli 2>/dev/null || true
+    fi
+)
 
 # ------------------------------------------------------------------------------
 # Verify installation

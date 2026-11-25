@@ -167,6 +167,32 @@ get_github_latest_version() {
     echo "$version"
 }
 
+# Try each URL in order via curl then wget; keep destination only if non-empty.
+download_file() {
+    local dest="$1"
+    shift
+    if ! has_cmd curl && ! has_cmd wget; then
+        log_error "Neither curl nor wget is available."
+        return 1
+    fi
+    local url
+    for url in "$@"; do
+        [[ -n "$url" ]] || continue
+        rm -f "$dest"
+        if has_cmd curl; then
+            if curl -fsSL "$url" -o "$dest" 2>/dev/null && [[ -s "$dest" ]]; then
+                return 0
+            fi
+        elif has_cmd wget; then
+            if wget -qO "$dest" "$url" 2>/dev/null && [[ -s "$dest" ]]; then
+                return 0
+            fi
+        fi
+    done
+    rm -f "$dest"
+    return 1
+}
+
 # Download a remote script to a temp file and execute it only after a clean, non-empty fetch.
 run_remote_script() {
     local shell_bin="$1" url="$2"
@@ -174,20 +200,10 @@ run_remote_script() {
     local tmp_script rc=0
     tmp_script="$(mktemp)" || return 1
 
-    if has_cmd curl; then
-        curl -fsSL "$url" -o "$tmp_script" || rc=$?
-    elif has_cmd wget; then
-        wget -qO "$tmp_script" "$url" || rc=$?
-    else
-        log_error "Neither curl nor wget is available."
-        rm -f "$tmp_script"
-        return 1
-    fi
-
-    if [[ $rc -eq 0 && -s "$tmp_script" ]]; then
+    if download_file "$tmp_script" "$url"; then
         "$shell_bin" "$tmp_script" "$@" || rc=$?
-    elif [[ $rc -eq 0 ]]; then
-        rc=1
+    else
+        rc=$?
     fi
 
     rm -f "$tmp_script"
@@ -248,4 +264,121 @@ version_ge() {
         fi
     done
     return 0
+}
+
+# Check if any candidate command/path is installed and >= latest_version.
+# Usage: is_cmd_up_to_date <label> <latest_version> [--keep-if-offline] <cmd_or_path...>
+is_cmd_up_to_date() {
+    local label="$1" latest="$2" keep_if_offline=false
+    shift 2
+    if [[ "${1:-}" == "--keep-if-offline" ]]; then
+        keep_if_offline=true
+        shift
+    fi
+    local found="" c current=""
+    for c in "$@"; do
+        if [[ "$c" == */* ]]; then
+            if [[ -x "$c" ]]; then
+                found="$c"; break
+            fi
+        elif has_cmd "$c"; then
+            found="$c"; break
+        fi
+    done
+    [[ -n "$found" ]] || return 1
+
+    current="$("$found" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || true)"
+    if [[ -n "$current" && -n "$latest" ]]; then
+        if version_ge "$current" "$latest"; then
+            log_success "${label} is already at the latest version (v${current})"
+            return 0
+        fi
+        log_info "Current ${label} (v${current}) is outdated. Upgrading to latest version (v${latest})..."
+        return 1
+    elif [[ -n "$current" && "$keep_if_offline" == "true" ]]; then
+        log_success "${label} is already installed (v${current})"
+        return 0
+    fi
+    log_info "${label} is installed. Verifying latest version..."
+    return 1
+}
+
+# Install binary to target_dir (default ~/.local/bin) and mirror to /usr/local/bin if privileged.
+install_binary() {
+    local src="$1" name="$2" target_dir="${3:-$HOME/.local/bin}"
+    [[ -f "$src" ]] || { log_error "Binary not found: $src"; return 1; }
+    ensure_dir "$target_dir"
+    install -m 755 "$src" "$target_dir/$name"
+    if [[ "$target_dir" == "$HOME/.local/bin" ]] && { [[ $EUID -eq 0 ]] || has_cmd sudo; }; then
+        run_privileged mkdir -p /usr/local/bin 2>/dev/null || true
+        run_privileged install -m 755 "$src" "/usr/local/bin/$name" 2>/dev/null || true
+    fi
+}
+
+# Create ~/.local/bin/<alias_name> symlink when target_cmd exists and alias_name is missing.
+ensure_bin_alias() {
+    local target_cmd="$1" alias_name="$2"
+    if has_cmd "$target_cmd" && ! has_cmd "$alias_name"; then
+        ensure_dir "$HOME/.local/bin"
+        ln -sf "$(command -v "$target_cmd")" "$HOME/.local/bin/$alias_name"
+    fi
+}
+
+# Download .tar.gz/.tgz from first working URL, extract in a subshell-trapped temp dir, and install binary.
+# bin_patterns supports '|'-separated executable names (e.g. "spf|superfile").
+install_tar_binary() {
+    local bin_patterns="$1" dest_name="$2"
+    shift 2
+    has_cmd tar || { log_error "tar is required to extract archive."; return 1; }
+    (
+        local tmp_dir archive found="" name
+        local -a names=()
+        tmp_dir="$(mktemp -d)" || return 1
+        trap 'rm -rf "$tmp_dir"' EXIT
+        archive="$tmp_dir/archive.tar.gz"
+        download_file "$archive" "$@" || return 1
+        tar -xzf "$archive" -C "$tmp_dir" || return 1
+        IFS='|' read -ra names <<< "$bin_patterns"
+        for name in "${names[@]}"; do
+            if [[ -f "$tmp_dir/$name" ]]; then
+                found="$tmp_dir/$name"; break
+            fi
+            found="$(find "$tmp_dir" -type f -name "$name" 2>/dev/null | head -n 1)"
+            [[ -n "$found" ]] && break
+        done
+        [[ -n "$found" && -f "$found" ]] || { log_error "Binary '${bin_patterns}' not found in archive."; return 1; }
+        install_binary "$found" "$dest_name"
+    )
+}
+
+# Install package using detected manager; pass manager=pkg overrides (empty value returns 2).
+pkg_install() {
+    local default_pkg="$1" pkg_mgr pkg_name arg
+    shift
+    pkg_mgr="$(detect_pkg_manager)"
+    pkg_name="$default_pkg"
+    for arg in "$@"; do
+        if [[ "$arg" == "${pkg_mgr}="* ]]; then
+            pkg_name="${arg#*=}"; break
+        fi
+    done
+    [[ -n "$pkg_name" ]] || return 2
+    case "$pkg_mgr" in
+        apt)    run_privileged apt-get update -qq && run_privileged apt-get install -y "$pkg_name" ;;
+        brew)   brew install "$pkg_name" ;;
+        pacman) run_privileged pacman -Sy --noconfirm "$pkg_name" ;;
+        dnf)    run_privileged dnf install -y "$pkg_name" ;;
+        apk)    run_privileged apk add "$pkg_name" ;;
+        zypper) run_privileged zypper install -y "$pkg_name" ;;
+        *)      return 2 ;;
+    esac
+}
+
+# Configure APT keyring + source list entry + update.
+add_apt_repo() {
+    local key_url="$1" keyring="$2" source_line="$3" list_file="$4" mode="${5:-}"
+    install_apt_keyring "$key_url" "$keyring" "$mode" || return 1
+    printf '%s\n' "$source_line" | run_privileged tee "$list_file" >/dev/null || return 1
+    run_privileged chmod 644 "$list_file" || return 1
+    run_privileged apt-get update -qq
 }

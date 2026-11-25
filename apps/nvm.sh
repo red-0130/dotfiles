@@ -23,18 +23,8 @@ LATEST_VERSION="$(get_github_latest_version "nvm-sh/nvm" "0.40.8")"
 # ------------------------------------------------------------------------------
 # Check if nvm is already installed and up to date
 # ------------------------------------------------------------------------------
-if has_cmd nvm; then
-    CURRENT_VERSION="$(nvm --version 2>/dev/null || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "nvm is already at the latest version (v${CURRENT_VERSION})"
-            exit 0
-        else
-            log_info "Current nvm (v${CURRENT_VERSION}) is outdated. Upgrading to latest version (v${LATEST_VERSION})..."
-        fi
-    else
-        log_info "nvm is installed. Verifying latest version..."
-    fi
+if is_cmd_up_to_date "nvm" "$LATEST_VERSION" nvm; then
+    exit 0
 fi
 
 log_info "Installing / updating Node Version Manager (nvm) to v${LATEST_VERSION}..."
@@ -44,26 +34,20 @@ log_info "Installing / updating Node Version Manager (nvm) to v${LATEST_VERSION}
 # Reference: https://github.com/nvm-sh/nvm#installing-and-updating
 # ------------------------------------------------------------------------------
 INSTALL_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v${LATEST_VERSION}/install.sh"
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
-TMP_SCRIPT="$TMP_DIR/install.sh"
-
-if has_cmd curl; then
-    log_info "Downloading official nvm install script via curl..."
-    if ! curl -fsSL "$INSTALL_URL" -o "$TMP_SCRIPT" 2>/dev/null; then
-        log_warn "Direct download from raw.githubusercontent.com failed, attempting git fallback..."
+if ! (
+    tmp_dir="$(mktemp -d)" || exit 1
+    trap 'rm -rf "$tmp_dir"' EXIT
+    tmp_script="$tmp_dir/install.sh"
+    if ! download_file "$tmp_script" "$INSTALL_URL"; then
+        exit 2
     fi
-elif has_cmd wget; then
-    log_info "Downloading official nvm install script via wget..."
-    if ! wget -qO "$TMP_SCRIPT" "$INSTALL_URL" 2>/dev/null; then
-        log_warn "Direct download from raw.githubusercontent.com failed, attempting git fallback..."
+    bash "$tmp_script"
+); then
+    rc=$?
+    if [[ $rc -ne 2 ]]; then
+        exit "$rc"
     fi
-fi
-
-if [[ -f "$TMP_SCRIPT" && -s "$TMP_SCRIPT" ]]; then
-    bash "$TMP_SCRIPT"
-    rm -rf "$TMP_DIR"
-else
+    log_warn "Direct download from raw.githubusercontent.com failed, attempting git fallback..."
     # Git-based installation fallback as documented in nvm README
     if has_cmd git; then
         log_info "Cloning/updating nvm repository via git..."
@@ -75,7 +59,6 @@ else
             (cd "$NVM_DIR" && git checkout "v${LATEST_VERSION}")
         fi
     else
-        rm -rf "$TMP_DIR"
         log_error "Could not download nvm install script and git is not available."
         exit 1
     fi

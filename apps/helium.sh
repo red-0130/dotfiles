@@ -10,18 +10,13 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 # ------------------------------------------------------------------------------
 # Check if Helium is already installed
 # ------------------------------------------------------------------------------
 if has_cmd helium || has_cmd helium-bin; then
-    if ! has_cmd helium && has_cmd helium-bin; then
-        ensure_dir "$HOME/.local/bin"
-        ln -sf "$(command -v helium-bin)" "$HOME/.local/bin/helium"
-    fi
+    ensure_bin_alias helium-bin helium
     log_success "Helium browser is already installed ($((helium --version || helium-bin --version) 2>/dev/null | head -n 1 || echo 'helium'))"
     exit 0
 fi
@@ -78,7 +73,7 @@ install_helium_appimage() {
 
     log_info "Downloading Helium AppImage: $appimage_url"
     local target_bin="$HOME/.local/bin/helium"
-    curl -fsSL "$appimage_url" -o "$target_bin"
+    download_file "$target_bin" "$appimage_url"
     chmod +x "$target_bin"
 
     # Set up desktop entry if user applications directory exists or can be created
@@ -107,19 +102,19 @@ case "$PKG" in
         # Official Helium APT repository (https://helium.computer/download#all-downloads)
         if has_cmd curl; then
             log_info "Configuring official Helium APT repository..."
-            install_apt_keyring https://raw.githubusercontent.com/imputnet/helium-linux/main/pubkey.asc /etc/apt/keyrings/helium.gpg --dearmor
+            arch="$(dpkg --print-architecture 2>/dev/null || echo 'amd64')"
+            add_apt_repo \
+                "https://raw.githubusercontent.com/imputnet/helium-linux/main/pubkey.asc" \
+                "/etc/apt/keyrings/helium.gpg" \
+                "deb [arch=${arch} signed-by=/etc/apt/keyrings/helium.gpg] https://pkg.helium.computer/deb stable main" \
+                "/etc/apt/sources.list.d/helium.list" \
+                "--dearmor"
 
             # Also link to /usr/share/keyrings if directory exists for backwards compatibility
             if [[ -d /usr/share/keyrings ]] && [[ ! -e /usr/share/keyrings/helium.gpg ]]; then
                 run_privileged ln -sf /etc/apt/keyrings/helium.gpg /usr/share/keyrings/helium.gpg 2>/dev/null || true
             fi
 
-            arch
-            arch="$(dpkg --print-architecture 2>/dev/null || echo 'amd64')"
-            echo "deb [arch=${arch} signed-by=/etc/apt/keyrings/helium.gpg] https://pkg.helium.computer/deb stable main" | run_privileged tee /etc/apt/sources.list.d/helium.list > /dev/null
-            run_privileged chmod 644 /etc/apt/sources.list.d/helium.list
-
-            run_privileged apt-get update -qq
             if ! run_privileged apt-get install -y helium-bin; then
                 log_warn "APT installation failed. Falling back to AppImage..."
                 install_helium_appimage
@@ -155,19 +150,18 @@ case "$PKG" in
     brew)
         log_info "Installing Helium on macOS..."
         if has_cmd curl; then
-            local mac_json
             mac_json="$(curl -fsSL https://api.github.com/repos/imputnet/helium-macos/releases/latest 2>/dev/null || true)"
-            local dmg_url
             dmg_url="$(echo "$mac_json" | grep -E "browser_download_url.*\.dmg" | head -n 1 | cut -d '"' -f 4)"
             if [[ -n "$dmg_url" ]]; then
-                TMP_DIR="$(mktemp -d)"
-                trap 'rm -rf "$TMP_DIR"' EXIT
-                tmp_dmg="$TMP_DIR/helium.dmg"
-                curl -fsSL "$dmg_url" -o "$tmp_dmg"
-                hdiutil attach "$tmp_dmg" -nobrowse -quiet
-                cp -R /Volumes/*[Hh]elium*/*.app /Applications/ 2>/dev/null || true
-                hdiutil detach /Volumes/*[Hh]elium* -quiet 2>/dev/null || true
-                rm -rf "$TMP_DIR"
+                (
+                    tmp_dir="$(mktemp -d)"
+                    trap 'rm -rf "$tmp_dir"' EXIT
+                    tmp_dmg="$tmp_dir/helium.dmg"
+                    download_file "$tmp_dmg" "$dmg_url"
+                    hdiutil attach "$tmp_dmg" -nobrowse -quiet
+                    cp -R /Volumes/*[Hh]elium*/*.app /Applications/ 2>/dev/null || true
+                    hdiutil detach /Volumes/*[Hh]elium* -quiet 2>/dev/null || true
+                )
                 ensure_dir "$HOME/.local/bin"
                 ln -sf "/Applications/Helium.app/Contents/MacOS/Helium" "$HOME/.local/bin/helium" 2>/dev/null || true
             else
@@ -186,10 +180,7 @@ esac
 # ------------------------------------------------------------------------------
 # Verify and symlink
 # ------------------------------------------------------------------------------
-ensure_dir "$HOME/.local/bin"
-if has_cmd helium-bin && ! has_cmd helium; then
-    ln -sf "$(command -v helium-bin)" "$HOME/.local/bin/helium"
-fi
+ensure_bin_alias helium-bin helium
 
 if has_cmd helium || has_cmd helium-bin; then
     log_success "Helium browser installed successfully: $((helium --version || helium-bin --version) 2>/dev/null | head -n 1 || echo 'helium')"

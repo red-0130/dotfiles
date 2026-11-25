@@ -17,18 +17,8 @@ LATEST_VERSION="$(get_github_latest_version "BurntSushi/ripgrep" "14.1.1")"
 # ------------------------------------------------------------------------------
 # Check if Ripgrep is already installed and up to date
 # ------------------------------------------------------------------------------
-if has_cmd rg; then
-    CURRENT_VERSION="$(rg --version 2>/dev/null | head -n 1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "ripgrep is already at the latest version (v${CURRENT_VERSION})"
-            exit 0
-        else
-            log_info "Current ripgrep (v${CURRENT_VERSION}) is outdated. Upgrading to latest version (v${LATEST_VERSION})..."
-        fi
-    else
-        log_info "ripgrep is installed. Verifying latest version..."
-    fi
+if is_cmd_up_to_date "ripgrep" "$LATEST_VERSION" rg; then
+    exit 0
 fi
 
 log_info "Installing ripgrep..."
@@ -40,14 +30,14 @@ install_ripgrep_github_binary() {
     local version="${1:-$LATEST_VERSION}"
     log_info "Downloading latest ripgrep prebuilt binary (v${version}) from GitHub..."
 
-    if ! has_cmd curl || ! has_cmd tar; then
-        log_error "curl and tar are required to download ripgrep binary."
+    if ! has_cmd tar; then
+        log_error "tar is required to extract ripgrep binary."
         exit 1
     fi
 
-    local arch="$(uname -m)"
-    local os="$(uname -s)"
-    local rg_arch=""
+    local arch os rg_arch=""
+    arch="$(uname -m)"
+    os="$(uname -s)"
 
     if [[ "$os" == "Darwin" || "$os" == "darwin" ]]; then
         case "$arch" in
@@ -66,98 +56,73 @@ install_ripgrep_github_binary() {
 
     local folder_name="ripgrep-${version}-${rg_arch}"
     local tar_file="${folder_name}.tar.gz"
-    local download_url="https://github.com/BurntSushi/ripgrep/releases/download/${version}/${tar_file}"
 
-    ensure_dir "$HOME/.local/bin"
-    local tmp_dir="$(mktemp -d)"
-    trap "rm -rf '$tmp_dir'" EXIT
+    (
+        local tmp_dir extracted_dir
+        tmp_dir="$(mktemp -d)" || exit 1
+        trap 'rm -rf "$tmp_dir"' EXIT
 
-    log_info "Downloading: $download_url"
-    if ! curl -fsSL "$download_url" -o "$tmp_dir/$tar_file" 2>/dev/null; then
-        download_url="https://github.com/BurntSushi/ripgrep/releases/download/v${version}/${tar_file}"
-        if ! curl -fsSL "$download_url" -o "$tmp_dir/$tar_file" 2>/dev/null; then
-            download_url="https://github.com/BurntSushi/ripgrep/releases/latest/download/${tar_file}"
-            if ! curl -fsSL "$download_url" -o "$tmp_dir/$tar_file" 2>/dev/null; then
-                rm -rf "$tmp_dir"
-                log_error "Failed to download ripgrep binary archive."
-                exit 1
+        if ! download_file "$tmp_dir/$tar_file" \
+            "https://github.com/BurntSushi/ripgrep/releases/download/${version}/${tar_file}" \
+            "https://github.com/BurntSushi/ripgrep/releases/download/v${version}/${tar_file}" \
+            "https://github.com/BurntSushi/ripgrep/releases/latest/download/${tar_file}"; then
+            log_error "Failed to download ripgrep binary archive."
+            exit 1
+        fi
+
+        tar -xzf "$tmp_dir/$tar_file" -C "$tmp_dir"
+
+        if [[ -d "$tmp_dir/$folder_name" ]]; then
+            extracted_dir="$tmp_dir/$folder_name"
+        else
+            extracted_dir="$(find "$tmp_dir" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+        fi
+
+        if [[ -f "$extracted_dir/rg" ]]; then
+            install_binary "$extracted_dir/rg" "rg"
+        else
+            log_error "ripgrep executable not found in archive."
+            exit 1
+        fi
+
+        # Install man page if present
+        if [[ -f "$extracted_dir/doc/rg.1" ]]; then
+            ensure_dir "$HOME/.local/share/man/man1"
+            install -m 644 "$extracted_dir/doc/rg.1" "$HOME/.local/share/man/man1/rg.1" 2>/dev/null || true
+            if [[ $EUID -eq 0 ]] || has_cmd sudo; then
+                run_privileged mkdir -p /usr/local/share/man/man1 2>/dev/null || true
+                run_privileged install -m 644 "$extracted_dir/doc/rg.1" /usr/local/share/man/man1/rg.1 2>/dev/null || true
             fi
         fi
-    fi
 
-    tar -xzf "$tmp_dir/$tar_file" -C "$tmp_dir"
-
-    local extracted_dir
-    if [[ -d "$tmp_dir/$folder_name" ]]; then
-        extracted_dir="$tmp_dir/$folder_name"
-    else
-        extracted_dir="$(find "$tmp_dir" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
-    fi
-
-    if [[ -f "$extracted_dir/rg" ]]; then
-        install -m 755 "$extracted_dir/rg" "$HOME/.local/bin/rg"
-        if [[ $EUID -eq 0 ]] || has_cmd sudo; then
-            run_privileged install -m 755 "$extracted_dir/rg" /usr/local/bin/rg 2>/dev/null || true
+        # Install completions if present
+        if [[ -f "$extracted_dir/complete/rg.bash" ]]; then
+            ensure_dir "$HOME/.local/share/bash-completion/completions"
+            cp -f "$extracted_dir/complete/rg.bash" "$HOME/.local/share/bash-completion/completions/rg" 2>/dev/null || true
         fi
-    else
-        rm -rf "$tmp_dir"
-        log_error "ripgrep executable not found in archive."
-        exit 1
-    fi
-
-    # Install man page if present
-    if [[ -f "$extracted_dir/doc/rg.1" ]]; then
-        ensure_dir "$HOME/.local/share/man/man1"
-        install -m 644 "$extracted_dir/doc/rg.1" "$HOME/.local/share/man/man1/rg.1" 2>/dev/null || true
-        if [[ $EUID -eq 0 ]] || has_cmd sudo; then
-            run_privileged mkdir -p /usr/local/share/man/man1 2>/dev/null || true
-            run_privileged install -m 644 "$extracted_dir/doc/rg.1" /usr/local/share/man/man1/rg.1 2>/dev/null || true
-        fi
-    fi
-
-    # Install completions if present
-    if [[ -f "$extracted_dir/complete/rg.bash" ]]; then
-        ensure_dir "$HOME/.local/share/bash-completion/completions"
-        cp -f "$extracted_dir/complete/rg.bash" "$HOME/.local/share/bash-completion/completions/rg" 2>/dev/null || true
-    fi
-
-    rm -rf "$tmp_dir"
+    )
 }
 
 # ------------------------------------------------------------------------------
 # Install based on package manager
 # ------------------------------------------------------------------------------
-PKG="$(detect_pkg_manager)"
-
-case "$PKG" in
-    apt)
-        # On Debian/Ubuntu, apt repositories frequently package outdated versions.
-        # Use official prebuilt binary release from GitHub instead.
-        if has_cmd apt-get && dpkg -l ripgrep 2>/dev/null | grep -q '^ii'; then
-            log_info "Removing outdated ripgrep package from apt..."
-            run_privileged apt-get remove -y ripgrep 2>/dev/null || true
-        fi
+if [[ "$(detect_pkg_manager)" == "apt" ]]; then
+    # On Debian/Ubuntu, apt repositories frequently package outdated versions.
+    # Use official prebuilt binary release from GitHub instead.
+    if has_cmd apt-get && dpkg -l ripgrep 2>/dev/null | grep -q '^ii'; then
+        log_info "Removing outdated ripgrep package from apt..."
+        run_privileged apt-get remove -y ripgrep 2>/dev/null || true
+    fi
+    install_ripgrep_github_binary "$LATEST_VERSION"
+else
+    rc=0
+    pkg_install ripgrep || rc=$?
+    if [[ $rc -eq 2 ]]; then
         install_ripgrep_github_binary "$LATEST_VERSION"
-        ;;
-    brew)
-        brew install ripgrep
-        ;;
-    pacman)
-        run_privileged pacman -Sy --noconfirm ripgrep
-        ;;
-    dnf)
-        run_privileged dnf install -y ripgrep
-        ;;
-    apk)
-        run_privileged apk add ripgrep
-        ;;
-    zypper)
-        run_privileged zypper install -y ripgrep
-        ;;
-    *)
-        install_ripgrep_github_binary "$LATEST_VERSION"
-        ;;
-esac
+    elif [[ $rc -ne 0 ]]; then
+        exit "$rc"
+    fi
+fi
 
 # ------------------------------------------------------------------------------
 # Verify installation

@@ -18,18 +18,8 @@ LATEST_VERSION="$(get_github_latest_version "astral-sh/uv" "0.6.5")"
 # ------------------------------------------------------------------------------
 # Check if uv is already installed and up to date
 # ------------------------------------------------------------------------------
-if has_cmd uv; then
-    CURRENT_VERSION="$(uv --version 2>/dev/null | head -n 1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "uv is already at the latest version (v${CURRENT_VERSION})"
-            exit 0
-        else
-            log_info "Current uv (v${CURRENT_VERSION}) is outdated. Upgrading to latest prebuilt version (v${LATEST_VERSION})..."
-        fi
-    else
-        log_info "uv is installed. Verifying latest version..."
-    fi
+if is_cmd_up_to_date "uv" "$LATEST_VERSION" uv; then
+    exit 0
 fi
 
 log_info "Installing uv (v${LATEST_VERSION})..."
@@ -84,78 +74,48 @@ fi
 # ------------------------------------------------------------------------------
 # Download and install prebuilt package from GitHub releases
 # ------------------------------------------------------------------------------
-if ! has_cmd curl && ! has_cmd wget; then
-    log_error "curl or wget is required to download uv prebuilt packages."
-    exit 1
-fi
+(
+    tmp_dir="$(mktemp -d)" || exit 1
+    trap 'rm -rf "$tmp_dir"' EXIT
+    tar_file="$tmp_dir/uv-${TARGET}.tar.gz"
 
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
-TAR_FILE="$TMP_DIR/uv-${TARGET}.tar.gz"
-
-DOWNLOAD_URLS=(
-    "https://github.com/astral-sh/uv/releases/download/${LATEST_VERSION}/uv-${TARGET}.tar.gz"
-    "https://github.com/astral-sh/uv/releases/download/v${LATEST_VERSION}/uv-${TARGET}.tar.gz"
-    "https://github.com/astral-sh/uv/releases/latest/download/uv-${TARGET}.tar.gz"
-)
-
-DOWNLOAD_SUCCESS=false
-
-for url in "${DOWNLOAD_URLS[@]}"; do
-    log_info "Downloading uv prebuilt package: $url"
-    if has_cmd curl && curl -fsSL "$url" -o "$TAR_FILE" 2>/dev/null; then
-        DOWNLOAD_SUCCESS=true
-        break
-    elif has_cmd wget && wget -qO "$TAR_FILE" "$url" 2>/dev/null; then
-        DOWNLOAD_SUCCESS=true
-        break
-    fi
-done
-
-if [[ "$DOWNLOAD_SUCCESS" != "true" || ! -s "$TAR_FILE" ]]; then
-    # Fallback to official install script
-    log_warn "Direct download failed, falling back to official uv installer script..."
-    if UV_INSTALL_DIR="$HOME/.local/bin" run_remote_script sh https://astral.sh/uv/install.sh; then
-        rm -rf "$TMP_DIR"
+    if ! download_file "$tar_file" \
+        "https://github.com/astral-sh/uv/releases/download/${LATEST_VERSION}/uv-${TARGET}.tar.gz" \
+        "https://github.com/astral-sh/uv/releases/download/v${LATEST_VERSION}/uv-${TARGET}.tar.gz" \
+        "https://github.com/astral-sh/uv/releases/latest/download/uv-${TARGET}.tar.gz"; then
+        # Fallback to official install script
+        log_warn "Direct download failed, falling back to official uv installer script..."
+        if ! UV_INSTALL_DIR="$HOME/.local/bin" run_remote_script sh https://astral.sh/uv/install.sh; then
+            log_error "Failed to install uv prebuilt package."
+            exit 1
+        fi
     else
-        rm -rf "$TMP_DIR"
-        log_error "Failed to install uv prebuilt package."
-        exit 1
-    fi
-else
-    # Extract archive
-    tar -xzf "$TAR_FILE" -C "$TMP_DIR"
+        if ! has_cmd tar; then
+            log_error "tar is required to extract uv archive."
+            exit 1
+        fi
+        tar -xzf "$tar_file" -C "$tmp_dir"
 
-    # Locate uv and uvx binaries
-    UV_BIN="$(find "$TMP_DIR" -type f -name "uv" 2>/dev/null | head -n 1)"
-    UVX_BIN="$(find "$TMP_DIR" -type f -name "uvx" 2>/dev/null | head -n 1)"
+        uv_bin="$(find "$tmp_dir" -type f -name "uv" 2>/dev/null | head -n 1)"
+        uvx_bin="$(find "$tmp_dir" -type f -name "uvx" 2>/dev/null | head -n 1)"
 
-    if [[ -z "$UV_BIN" || ! -f "$UV_BIN" ]]; then
-        rm -rf "$TMP_DIR"
-        log_error "uv binary not found in extracted archive."
-        exit 1
-    fi
+        if [[ -z "$uv_bin" || ! -f "$uv_bin" ]]; then
+            log_error "uv binary not found in extracted archive."
+            exit 1
+        fi
 
-    ensure_dir "$HOME/.local/bin"
-    install -m 755 "$UV_BIN" "$HOME/.local/bin/uv"
+        install_binary "$uv_bin" "uv"
 
-    if [[ -n "$UVX_BIN" && -f "$UVX_BIN" ]]; then
-        install -m 755 "$UVX_BIN" "$HOME/.local/bin/uvx"
-    else
-        ln -sf "$HOME/.local/bin/uv" "$HOME/.local/bin/uvx"
-    fi
-
-    if [[ $EUID -eq 0 ]] || has_cmd sudo; then
-        run_privileged install -m 755 "$UV_BIN" /usr/local/bin/uv 2>/dev/null || true
-        if [[ -n "$UVX_BIN" && -f "$UVX_BIN" ]]; then
-            run_privileged install -m 755 "$UVX_BIN" /usr/local/bin/uvx 2>/dev/null || true
+        if [[ -n "$uvx_bin" && -f "$uvx_bin" ]]; then
+            install_binary "$uvx_bin" "uvx"
         else
-            run_privileged ln -sf /usr/local/bin/uv /usr/local/bin/uvx 2>/dev/null || true
+            ln -sf "$HOME/.local/bin/uv" "$HOME/.local/bin/uvx"
+            if [[ $EUID -eq 0 ]] || has_cmd sudo; then
+                run_privileged ln -sf /usr/local/bin/uv /usr/local/bin/uvx 2>/dev/null || true
+            fi
         fi
     fi
-
-    rm -rf "$TMP_DIR"
-fi
+)
 
 # ------------------------------------------------------------------------------
 # Generate shell completions

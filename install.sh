@@ -115,6 +115,62 @@ list_items() {
   echo ""
 }
 
+# Run interactive checklist for "config" or "app" and dispatch selected items.
+run_interactive_install() {
+  local title="$1" kind="$2" install_fn="$3"
+  shift 3
+
+  local label="applications" empty_dir="$APPS_DIR" desc_fn="get_app_description"
+  local predefined=("${PREDEFINED_APPS[@]:-}")
+  if [[ "$kind" == "config" ]]; then
+    label="configurations"
+    empty_dir="$CONFIG_DIR"
+    desc_fn="get_config_description"
+    predefined=("${PREDEFINED_CONFIGS[@]:-}")
+  fi
+
+  if [[ $# -eq 0 ]]; then
+    log_warn "No ${label} found in ${empty_dir}"
+    return 0
+  fi
+
+  local entries=() item sel badge desc pre
+  for item in "$@"; do
+    sel=0
+    for pre in "${predefined[@]}"; do
+      if [[ -n "$pre" && "$pre" == "$item" ]]; then
+        sel=1
+        break
+      fi
+    done
+    badge=""
+    if [[ "$kind" == "app" ]] && is_app_installed "$item"; then
+      badge="[installed]"
+    fi
+    desc="$("$desc_fn" "$item")"
+    entries+=("${item}"$'\t'"${sel}"$'\t'"${badge}"$'\t'"${desc}")
+  done
+
+  # Exit status: 0 = items selected, 2 = 0 selected, 1 = cancelled
+  local menu_out="" menu_status=0
+  set +e
+  menu_out="$(run_interactive_checklist "$title" "${entries[@]}")"
+  menu_status=$?
+  set -e
+
+  if [[ $menu_status -eq 0 && -n "$menu_out" ]]; then
+    local selected_items=()
+    readarray -t selected_items <<<"$menu_out"
+    "$install_fn" "${selected_items[@]}"
+    return $?
+  elif [[ $menu_status -eq 2 || $menu_status -eq 0 ]]; then
+    log_warn "No ${label} selected."
+  else
+    log_info "Selection cancelled (${label})."
+  fi
+  return 0
+}
+
 # ------------------------------------------------------------------------------
 # Main Dispatcher
 # ------------------------------------------------------------------------------
@@ -209,27 +265,7 @@ main() {
   if $interactive_config; then
     local available_configs=()
     readarray -t available_configs < <(get_available_configs)
-
-    if [[ ${#available_configs[@]} -eq 0 ]]; then
-      log_warn "No configurations found in $CONFIG_DIR"
-    else
-      local selected_configs=()
-      # Run interactive checklist; exit status 0 = items selected, 2 = 0 selected, 1 = cancelled
-      set +e
-      local menu_out
-      menu_out="$(run_interactive_checklist "Select Configurations to Install" "config" "${available_configs[@]}")"
-      local menu_status=$?
-      set -e
-
-      if [[ $menu_status -eq 0 && -n "$menu_out" ]]; then
-        readarray -t selected_configs <<<"$menu_out"
-        install_configs "${selected_configs[@]}" || rc=1
-      elif [[ $menu_status -eq 2 || $menu_status -eq 0 ]]; then
-        log_warn "No configurations selected."
-      else
-        log_info "Configuration selection cancelled."
-      fi
-    fi
+    run_interactive_install "Select Configurations to Install" "config" install_configs "${available_configs[@]}" || rc=1
   fi
 
   # 4. Handle explicit app installations
@@ -241,26 +277,7 @@ main() {
   if $interactive_app; then
     local available_apps=()
     readarray -t available_apps < <(get_available_apps)
-
-    if [[ ${#available_apps[@]} -eq 0 ]]; then
-      log_warn "No applications found in $APPS_DIR"
-    else
-      local selected_apps=()
-      set +e
-      local menu_out
-      menu_out="$(run_interactive_checklist "Select Applications to Install" "app" "${available_apps[@]}")"
-      local menu_status=$?
-      set -e
-
-      if [[ $menu_status -eq 0 && -n "$menu_out" ]]; then
-        readarray -t selected_apps <<<"$menu_out"
-        install_apps "${selected_apps[@]}" || rc=1
-      elif [[ $menu_status -eq 2 || $menu_status -eq 0 ]]; then
-        log_warn "No applications selected."
-      else
-        log_info "Application installation cancelled."
-      fi
-    fi
+    run_interactive_install "Select Applications to Install" "app" install_apps "${available_apps[@]}" || rc=1
   fi
 
   return "$rc"

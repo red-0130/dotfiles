@@ -9,9 +9,7 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 # ------------------------------------------------------------------------------
 # Check if Ghostty is already installed
@@ -31,8 +29,7 @@ is_ubuntu_2604_or_higher() {
         # shellcheck source=/dev/null
         source /etc/os-release
         if [[ "${ID:-}" == "ubuntu" && -n "${VERSION_ID:-}" ]]; then
-            local min_ver="26.04"
-            if [[ "$(printf '%s\n%s' "$min_ver" "$VERSION_ID" | sort -V | head -n1)" == "$min_ver" ]]; then
+            if version_ge "$VERSION_ID" "26.04"; then
                 return 0
             fi
         fi
@@ -67,21 +64,20 @@ install_ghostty_ubuntu_community() {
         else
             # 3. Fallback: Download latest .deb directly from GitHub releases
             log_info "Downloading latest .deb package from ghostty-ubuntu releases..."
-            local arch
+            local arch deb_url
             arch="$(dpkg --print-architecture 2>/dev/null || echo 'amd64')"
-            local tmp_dir
-            tmp_dir="$(mktemp -d)"
-            trap "rm -rf '$tmp_dir'" EXIT
-            local deb_url
             deb_url="$(curl -fsSL https://api.github.com/repos/mkasberg/ghostty-ubuntu/releases/latest 2>/dev/null | grep -E "browser_download_url.*_${arch}\.deb" | head -n 1 | cut -d '"' -f 4)"
 
             if [[ -n "$deb_url" ]]; then
-                curl -fsSL "$deb_url" -o "$tmp_dir/ghostty.deb"
-                run_privileged apt-get update -qq
-                run_privileged apt-get install -y "$tmp_dir/ghostty.deb"
-                rm -rf "$tmp_dir"
+                (
+                    local tmp_dir
+                    tmp_dir="$(mktemp -d)" || exit 1
+                    trap 'rm -rf "$tmp_dir"' EXIT
+                    download_file "$tmp_dir/ghostty.deb" "$deb_url" || exit 1
+                    run_privileged apt-get update -qq
+                    run_privileged apt-get install -y "$tmp_dir/ghostty.deb"
+                )
             else
-                rm -rf "$tmp_dir"
                 log_error "Could not find ghostty-ubuntu deb package for architecture: $arch"
                 exit 1
             fi
@@ -111,22 +107,8 @@ case "$PKG" in
     brew)
         brew install --cask ghostty 2>/dev/null || brew install ghostty
         ;;
-    pacman)
-        run_privileged pacman -Sy --noconfirm ghostty
-        ;;
-    dnf)
-        # Enable COPR repository if available, then install
-        if run_privileged dnf copr enable -y pgdev/ghostty 2>/dev/null; then
-            run_privileged dnf install -y ghostty
-        else
-            run_privileged dnf install -y ghostty
-        fi
-        ;;
-    apk)
-        run_privileged apk add ghostty
-        ;;
-    zypper)
-        run_privileged zypper install -y ghostty
+    pacman|apk|zypper)
+        pkg_install ghostty
         ;;
     *)
         if has_cmd flatpak; then

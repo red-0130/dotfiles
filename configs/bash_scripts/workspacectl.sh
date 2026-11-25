@@ -2,7 +2,7 @@
 
 _wsctl_set_workspace() {
   local WORKSPACE
-  if [[ -n "$1" ]]; then
+  if [[ -n "${1:-}" ]]; then
     WORKSPACE="$1"
   else
     WORKSPACE="$PWD"
@@ -12,7 +12,7 @@ _wsctl_set_workspace() {
 }
 
 _wsctl_set_gemini_api() {
-  local API="$1"
+  local API="${1:-}"
   if [[ -z "$API" ]]; then
     echo "API key not provided"
     return 1
@@ -25,7 +25,7 @@ _wsctl_set_gemini_api() {
 }
 
 _wsctl_get_workspace() {
-  [ -z "$PROJECT_WORKSPACE" ] && echo "Default workspace is not set" && return 1
+  [ -z "${PROJECT_WORKSPACE:-}" ] && echo "Default workspace is not set" && return 1
   echo "$PROJECT_WORKSPACE"
 }
 
@@ -40,9 +40,63 @@ _wsctl_reset() {
 _wsctl_extract_id() {
   local json="$1"
   if command -v jq &>/dev/null; then
-    echo "$json" | jq -r 'if type == "array" then .[0].id else .id end // empty' 2>/dev/null
+    echo "$json" | jq -r 'if type == "array" then .[0].id else .id end // empty' 2>/dev/null || true
   else
-    echo "$json" | grep -m1 -o '"id":[[:space:]]*[0-9]\+' | grep -o '[0-9]\+'
+    echo "$json" | grep -m1 -o '"id":[[:space:]]*[0-9]\+' | grep -o '[0-9]\+' || true
+  fi
+}
+
+# Configure provider-specific noreply email and includeIf rule, with global fallback.
+_wsctl_configure_provider() {
+  local label="$1" host="$2" noreply_domain="$3" id_sep="${4:-}" api_url_prefix="${5:-}"
+  local provider_user=""
+  while [[ -z "$provider_user" ]]; do
+    read -r -p "Enter username for ${label}: " provider_user
+  done
+
+  local provider_id=""
+  if [[ -n "$api_url_prefix" ]]; then
+    echo "Fetching ${label} user ID for '$provider_user'..."
+    if command -v curl &>/dev/null; then
+      local res
+      res=$(curl -sSL -m 5 "${api_url_prefix}${provider_user}" 2>/dev/null || true)
+      provider_id=$(_wsctl_extract_id "$res")
+    fi
+
+    if [[ -z "$provider_id" ]]; then
+      echo "Could not automatically fetch ${label} user ID."
+      read -r -p "Enter ${label} numeric ID (or press Enter to omit): " provider_id
+    else
+      echo "Found ${label} user ID: $provider_id"
+    fi
+  fi
+
+  local provider_email
+  if [[ -n "$provider_id" && -n "$id_sep" ]]; then
+    provider_email="${provider_id}${id_sep}${provider_user}@${noreply_domain}"
+  else
+    provider_email="${provider_user}@${noreply_domain}"
+  fi
+
+  local confirm_email
+  read -r -p "Configure ${label} email as '$provider_email'? [Y/n]: " confirm_email
+  if [[ "$confirm_email" =~ ^[Nn] ]]; then
+    local custom_email
+    read -r -p "Enter custom email for ${label}: " custom_email
+    if [[ -n "$custom_email" ]]; then
+      provider_email="$custom_email"
+    fi
+  fi
+
+  git config --global "includeIf.hasconfig:remote.*.url:**/*${host}/**.email" "$provider_email"
+  echo "Set [includeIf \"hasconfig:remote.*.url:**/*${host}/**\"] email = $provider_email"
+
+  # Set global user.email fallback if not already set
+  local current_email
+  current_email=$(git config --global user.email 2>/dev/null || true)
+  if [[ -z "$current_email" ]]; then
+    git config --global user.email "$provider_email"
+    echo "Set global fallback user.email to '$provider_email'."
   fi
 }
 
@@ -60,7 +114,7 @@ _wsctl_set_gitconfig() {
 
   # 2. Default branch configuration
   local current_branch
-  current_branch=$(git config --global init.defaultBranch 2>/dev/null)
+  current_branch=$(git config --global init.defaultBranch 2>/dev/null || true)
   if [[ -n "$current_branch" ]]; then
     local keep_branch
     read -r -p "Default branch is currently set to '$current_branch'. Keep it? [Y/n]: " keep_branch
@@ -84,7 +138,7 @@ _wsctl_set_gitconfig() {
 
   # 3. Git username configuration
   local current_user
-  current_user=$(git config --global user.name 2>/dev/null)
+  current_user=$(git config --global user.name 2>/dev/null || true)
   if [[ -z "$current_user" ]]; then
     local username=""
     while [[ -z "$username" ]]; do
@@ -123,135 +177,20 @@ _wsctl_set_gitconfig() {
 
       case "${provider_choice,,}" in
         1|github|gh)
-          local provider_user=""
-          while [[ -z "$provider_user" ]]; do
-            read -r -p "Enter username for GitHub: " provider_user
-          done
-
-          echo "Fetching GitHub user ID for '$provider_user'..."
-          local gh_id=""
-          if command -v curl &>/dev/null; then
-            local res
-            res=$(curl -sSL -m 5 "https://api.github.com/users/${provider_user}" 2>/dev/null)
-            gh_id=$(_wsctl_extract_id "$res")
-          fi
-
-          if [[ -z "$gh_id" ]]; then
-            echo "Could not automatically fetch GitHub user ID."
-            read -r -p "Enter GitHub numeric ID (or press Enter to omit): " gh_id
-          else
-            echo "Found GitHub user ID: $gh_id"
-          fi
-
-          local provider_email
-          if [[ -n "$gh_id" ]]; then
-            provider_email="${gh_id}+${provider_user}@users.noreply.github.com"
-          else
-            provider_email="${provider_user}@users.noreply.github.com"
-          fi
-
-          local confirm_email
-          read -r -p "Configure GitHub email as '$provider_email'? [Y/n]: " confirm_email
-          if [[ "$confirm_email" =~ ^[Nn] ]]; then
-            local custom_email
-            read -r -p "Enter custom email for GitHub: " custom_email
-            if [[ -n "$custom_email" ]]; then
-              provider_email="$custom_email"
-            fi
-          fi
-
-          git config --global "includeIf.hasconfig:remote.*.url:**/*github.com/**.email" "$provider_email"
-          echo "Set [includeIf \"hasconfig:remote.*.url:**/*github.com/**\"] email = $provider_email"
-
-          # Set global user.email fallback if not already set
-          local current_email
-          current_email=$(git config --global user.email 2>/dev/null)
-          if [[ -z "$current_email" ]]; then
-            git config --global user.email "$provider_email"
-            echo "Set global fallback user.email to '$provider_email'."
-          fi
+          _wsctl_configure_provider "GitHub" "github.com" "users.noreply.github.com" "+" "https://api.github.com/users/"
           ;;
 
         2|gitlab|gl)
-          local provider_user=""
-          while [[ -z "$provider_user" ]]; do
-            read -r -p "Enter username for GitLab: " provider_user
-          done
-
-          echo "Fetching GitLab user ID for '$provider_user'..."
-          local gl_id=""
-          if command -v curl &>/dev/null; then
-            local res
-            res=$(curl -sSL -m 5 "https://gitlab.com/api/v4/users?username=${provider_user}" 2>/dev/null)
-            gl_id=$(_wsctl_extract_id "$res")
-          fi
-
-          if [[ -z "$gl_id" ]]; then
-            echo "Could not automatically fetch GitLab user ID."
-            read -r -p "Enter GitLab numeric ID (or press Enter to omit): " gl_id
-          else
-            echo "Found GitLab user ID: $gl_id"
-          fi
-
-          local provider_email
-          if [[ -n "$gl_id" ]]; then
-            provider_email="${gl_id}-${provider_user}@users.noreply.gitlab.com"
-          else
-            provider_email="${provider_user}@users.noreply.gitlab.com"
-          fi
-
-          local confirm_email
-          read -r -p "Configure GitLab email as '$provider_email'? [Y/n]: " confirm_email
-          if [[ "$confirm_email" =~ ^[Nn] ]]; then
-            local custom_email
-            read -r -p "Enter custom email for GitLab: " custom_email
-            if [[ -n "$custom_email" ]]; then
-              provider_email="$custom_email"
-            fi
-          fi
-
-          git config --global "includeIf.hasconfig:remote.*.url:**/*gitlab.com/**.email" "$provider_email"
-          echo "Set [includeIf \"hasconfig:remote.*.url:**/*gitlab.com/**\"] email = $provider_email"
-
-          local current_email
-          current_email=$(git config --global user.email 2>/dev/null)
-          if [[ -z "$current_email" ]]; then
-            git config --global user.email "$provider_email"
-            echo "Set global fallback user.email to '$provider_email'."
-          fi
+          _wsctl_configure_provider "GitLab" "gitlab.com" "users.noreply.gitlab.com" "-" "https://gitlab.com/api/v4/users?username="
           ;;
 
         3|codeberg|cb)
-          local provider_user=""
-          while [[ -z "$provider_user" ]]; do
-            read -r -p "Enter username for Codeberg: " provider_user
-          done
-
-          local provider_email="${provider_user}@noreply.codeberg.org"
-          local confirm_email
-          read -r -p "Configure Codeberg email as '$provider_email'? [Y/n]: " confirm_email
-          if [[ "$confirm_email" =~ ^[Nn] ]]; then
-            local custom_email
-            read -r -p "Enter custom email for Codeberg: " custom_email
-            if [[ -n "$custom_email" ]]; then
-              provider_email="$custom_email"
-            fi
-          fi
-
-          git config --global "includeIf.hasconfig:remote.*.url:**/*codeberg.org/**.email" "$provider_email"
-          echo "Set [includeIf \"hasconfig:remote.*.url:**/*codeberg.org/**\"] email = $provider_email"
-
-          local current_email
-          current_email=$(git config --global user.email 2>/dev/null)
-          if [[ -z "$current_email" ]]; then
-            git config --global user.email "$provider_email"
-            echo "Set global fallback user.email to '$provider_email'."
-          fi
+          _wsctl_configure_provider "Codeberg" "codeberg.org" "noreply.codeberg.org"
           ;;
 
         4|global)
           local current_global_email
-          current_global_email=$(git config --global user.email 2>/dev/null)
+          current_global_email=$(git config --global user.email 2>/dev/null || true)
           local fallback_email=""
           while [[ -z "$fallback_email" ]]; do
             read -r -p "Enter global fallback email${current_global_email:+ [current: $current_global_email]}: " fallback_email

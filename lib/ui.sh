@@ -18,16 +18,47 @@ get_tty_in() {
     echo "/dev/stdin"
 }
 
+# Parse "name" or "name\tselected\tbadge\tdesc" into caller-scoped _ui_* vars
+# without bash IFS-whitespace collapsing of empty tab-delimited fields.
+_ui_parse_entry() {
+    local entry="$1" rest=""
+    _ui_name="$entry"
+    _ui_sel=0
+    _ui_badge=""
+    _ui_desc=""
+    if [[ "$entry" == *$'\t'* ]]; then
+        _ui_name="${entry%%$'\t'*}"
+        rest="${entry#*$'\t'}"
+        _ui_sel="${rest%%$'\t'*}"
+        [[ "$_ui_sel" == "1" ]] || _ui_sel=0
+        if [[ "$rest" == *$'\t'* ]]; then
+            rest="${rest#*$'\t'}"
+            _ui_badge="${rest%%$'\t'*}"
+            if [[ "$rest" == *$'\t'* ]]; then
+                _ui_desc="${rest#*$'\t'}"
+            fi
+        fi
+    fi
+}
+
 # ------------------------------------------------------------------------------
 # Fallback numbered selector for non-raw / non-TTY terminals
 # ------------------------------------------------------------------------------
 fallback_selector() {
     local title="$1"
     shift
-    local items=("$@")
-    if [[ ${#items[@]} -eq 0 ]]; then
+    if [[ $# -eq 0 ]]; then
         return 2
     fi
+
+    local names=() badges=() descriptions=()
+    local _ui_name _ui_sel _ui_badge _ui_desc entry
+    for entry in "$@"; do
+        _ui_parse_entry "$entry"
+        names+=("$_ui_name")
+        badges+=("$_ui_badge")
+        descriptions+=("$_ui_desc")
+    done
 
     local tty_out="$(get_tty_out)"
     local tty_in="$(get_tty_in)"
@@ -37,10 +68,12 @@ fallback_selector() {
     echo "Enter numbers separated by space (e.g. '1 3 4'), 'all', or 'q' to cancel:" > "$tty_out"
     echo "" > "$tty_out"
 
-    local idx=1
-    for item in "${items[@]}"; do
-        echo "  [$idx] $item" > "$tty_out"
-        idx=$((idx + 1))
+    local i line
+    for ((i=0; i<${#names[@]}; i++)); do
+        line="  [$((i + 1))] ${names[i]}"
+        [[ -n "${badges[i]}" ]] && line+=" ${badges[i]}"
+        [[ -n "${descriptions[i]}" ]] && line+=" - ${descriptions[i]}"
+        echo "$line" > "$tty_out"
     done
     echo "" > "$tty_out"
 
@@ -53,16 +86,14 @@ fallback_selector() {
     fi
 
     if [[ "$choice" == "all" || "$choice" == "ALL" ]]; then
-        for item in "${items[@]}"; do
-            echo "$item"
-        done
+        printf '%s\n' "${names[@]}"
         return 0
     fi
 
     local any_selected=false
     for num in $choice; do
-        if [[ "$num" =~ ^[0-9]+$ ]] && (( 10#$num >= 1 && 10#$num <= ${#items[@]} )); then
-            echo "${items[$((10#$num - 1))]}"
+        if [[ "$num" =~ ^[0-9]+$ ]] && (( 10#$num >= 1 && 10#$num <= ${#names[@]} )); then
+            echo "${names[$((10#$num - 1))]}"
             any_selected=true
         fi
     done
@@ -76,15 +107,10 @@ fallback_selector() {
 # ------------------------------------------------------------------------------
 run_interactive_checklist() {
     local title="$1"
-    local category="$2" # "config" or "app"
-    shift 2
+    shift
 
-    # Parse remaining arguments: items array
-    local items=("$@")
-    local total_items=${#items[@]}
-
-    if [[ $total_items -eq 0 ]]; then
-        log_warn "No ${category} items available to select." >&2
+    if [[ $# -eq 0 ]]; then
+        log_warn "No items available to select." >&2
         return 1
     fi
 
@@ -93,58 +119,25 @@ run_interactive_checklist() {
 
     # Check if we have an interactive terminal
     if [[ ! -t 0 ]] || [[ "${TERM:-}" == "dumb" ]]; then
-        fallback_selector "$title" "${items[@]}"
+        fallback_selector "$title" "$@"
         return $?
     fi
 
-    # Initialize descriptions and selections
-    local descriptions=()
+    # Parse entries ("name" or "name\tselected\tbadge\tdesc")
+    local items=()
     local selected=()
-    local is_installed=()
+    local badges=()
+    local descriptions=()
+    local _ui_name _ui_sel _ui_badge _ui_desc entry
 
-    for ((i=0; i<total_items; i++)); do
-        local item="${items[i]}"
-        local desc=""
-        local inst=""
-
-        if [[ "$category" == "config" ]]; then
-            desc="$(get_config_description "$item")"
-            # Check if predefined
-            local is_pre=false
-            for pre in "${PREDEFINED_CONFIGS[@]}"; do
-                if [[ "$pre" == "$item" ]]; then
-                    is_pre=true
-                    break
-                fi
-            done
-            if $is_pre; then
-                selected+=(1)
-            else
-                selected+=(0)
-            fi
-        else
-            desc="$(get_app_description "$item")"
-            if is_app_installed "$item"; then
-                inst="${COLOR_GREEN}[installed]${COLOR_RESET}"
-            fi
-            # Apps default to unselected unless in PREDEFINED_APPS
-            local is_pre=false
-            for pre in "${PREDEFINED_APPS[@]:-}"; do
-                if [[ "$pre" == "$item" ]]; then
-                    is_pre=true
-                    break
-                fi
-            done
-            if $is_pre; then
-                selected+=(1)
-            else
-                selected+=(0)
-            fi
-        fi
-
-        descriptions+=("$desc")
-        is_installed+=("$inst")
+    for entry in "$@"; do
+        _ui_parse_entry "$entry"
+        items+=("$_ui_name")
+        selected+=("$_ui_sel")
+        badges+=("$_ui_badge")
+        descriptions+=("$_ui_desc")
     done
+    local total_items=${#items[@]}
 
     # Terminal state setup
     local saved_stty
@@ -245,12 +238,12 @@ run_interactive_checklist() {
 
             local item_str="${items[i]}"
             local desc_str="${descriptions[i]}"
-            local inst_str="${is_installed[i]}"
+            local badge_str="${badges[i]}"
 
             # Format line
             local line_out
-            if [[ -n "$inst_str" ]]; then
-                line_out="$(printf "%b%b %-12s %b %s" "$cursor_prefix" "$checkbox" "$item_str" "$inst_str" "${COLOR_GRAY}${desc_str}${COLOR_RESET}")"
+            if [[ -n "$badge_str" ]]; then
+                line_out="$(printf "%b%b %-12s %s %s" "$cursor_prefix" "$checkbox" "$item_str" "${COLOR_GREEN}${badge_str}${COLOR_RESET}" "${COLOR_GRAY}${desc_str}${COLOR_RESET}")"
             else
                 line_out="$(printf "%b%b %-12s %s" "$cursor_prefix" "$checkbox" "$item_str" "${COLOR_GRAY}${desc_str}${COLOR_RESET}")"
             fi

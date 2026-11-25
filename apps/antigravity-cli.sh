@@ -93,19 +93,8 @@ if [[ -n "$PLATFORM" ]]; then
   fi
 fi
 
-if has_cmd agy || [[ -x "$BINARY_PATH" ]]; then
-  CURRENT_VERSION="$($(agy --version 2>/dev/null || "$BINARY_PATH" --version 2>/dev/null) | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-  if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" && "${AGY_FORCE_INSTALL:-0}" != "1" ]]; then
-    if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-      log_success "Antigravity CLI (agy) is already up to date (v${CURRENT_VERSION})"
-      exit 0
-    else
-      log_info "Antigravity CLI (v${CURRENT_VERSION}) is outdated. Upgrading to latest version (v${LATEST_VERSION})..."
-    fi
-  elif [[ -n "$CURRENT_VERSION" && "${AGY_FORCE_INSTALL:-0}" != "1" ]]; then
-    log_success "Antigravity CLI (agy) is already installed (v${CURRENT_VERSION})"
-    exit 0
-  fi
+if [[ "${AGY_FORCE_INSTALL:-0}" != "1" ]] && is_cmd_up_to_date "Antigravity CLI (agy)" "$LATEST_VERSION" --keep-if-offline agy "$BINARY_PATH"; then
+  exit 0
 fi
 
 log_info "Installing Google Antigravity CLI (agy)..."
@@ -175,50 +164,38 @@ install_via_direct_download() {
   fi
 
   log_info "Downloading Antigravity CLI release package directly..."
-  local tmp_dir
-  tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/agy_install.XXXXXX")"
-  # Ensure cleanup on function exit
-  trap 'rm -rf "$tmp_dir"' RETURN
+  (
+    local tmp_dir archive_file actual_sha="" bin_src
+    tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/agy_install.XXXXXX")" || exit 1
+    trap 'rm -rf "$tmp_dir"' EXIT
 
-  local archive_file="$tmp_dir/agy_payload"
-  if has_cmd curl; then
-    curl -fsSL -o "$archive_file" "$dl_url"
-  elif has_cmd wget; then
-    wget -q -O "$archive_file" "$dl_url"
-  else
-    log_error "curl or wget is required for direct download."
-    return 1
-  fi
+    archive_file="$tmp_dir/agy_payload"
+    download_file "$archive_file" "$dl_url" || exit 1
 
-  # Verify SHA-512 Checksum
-  local actual_sha=""
-  if has_cmd sha512sum; then
-    actual_sha="$(sha512sum "$archive_file" | cut -d' ' -f1)"
-  elif has_cmd shasum; then
-    actual_sha="$(shasum -a 512 "$archive_file" | cut -d' ' -f1)"
-  fi
-
-  if [[ -n "$actual_sha" && "$actual_sha" != "$dl_sha" ]]; then
-    log_error "SHA-512 checksum mismatch! Expected: $dl_sha, Got: $actual_sha"
-    return 1
-  fi
-
-  ensure_dir "$TARGET_DIR"
-
-  if [[ "$dl_url" == *.tar.gz* ]]; then
-    tar -xzf "$archive_file" -C "$tmp_dir"
-    local extracted_bin
-    extracted_bin="$(find "$tmp_dir" -maxdepth 2 -type f \( -name "antigravity" -o -name "agy" \) | head -n 1)"
-    if [[ -z "$extracted_bin" || ! -f "$extracted_bin" ]]; then
-      log_error "Could not find binary in extracted archive."
-      return 1
+    # Verify SHA-512 Checksum
+    if has_cmd sha512sum; then
+      actual_sha="$(sha512sum "$archive_file" | cut -d' ' -f1)"
+    elif has_cmd shasum; then
+      actual_sha="$(shasum -a 512 "$archive_file" | cut -d' ' -f1)"
     fi
-    cp -f "$extracted_bin" "$BINARY_PATH"
-  else
-    cp -f "$archive_file" "$BINARY_PATH"
-  fi
 
-  chmod +x "$BINARY_PATH"
+    if [[ -n "$actual_sha" && "$actual_sha" != "$dl_sha" ]]; then
+      log_error "SHA-512 checksum mismatch! Expected: $dl_sha, Got: $actual_sha"
+      exit 1
+    fi
+
+    bin_src="$archive_file"
+    if [[ "$dl_url" == *.tar.gz* ]]; then
+      tar -xzf "$archive_file" -C "$tmp_dir"
+      bin_src="$(find "$tmp_dir" -maxdepth 2 -type f \( -name "antigravity" -o -name "agy" \) | head -n 1)"
+      if [[ -z "$bin_src" || ! -f "$bin_src" ]]; then
+        log_error "Could not find binary in extracted archive."
+        exit 1
+      fi
+    fi
+
+    install_binary "$bin_src" "agy" "$TARGET_DIR"
+  ) || return 1
 
   if [[ "$(uname -s)" == "Darwin" ]] && has_cmd xattr; then
     xattr -d com.apple.quarantine "$BINARY_PATH" 2>/dev/null || true

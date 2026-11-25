@@ -18,20 +18,8 @@ log_info "Installing eza..."
 PKG="$(detect_pkg_manager)"
 
 case "$PKG" in
-brew)
-  brew install eza
-  ;;
-pacman)
-  run_privileged pacman -Sy --noconfirm eza
-  ;;
-dnf)
-  run_privileged dnf install -y eza
-  ;;
-apk)
-  run_privileged apk add eza
-  ;;
-zypper)
-  run_privileged zypper install -y eza
+brew | pacman | dnf | apk | zypper)
+  pkg_install eza
   ;;
 apt)
   # Attempt direct apt installation (Debian 13 trixie+, Ubuntu 24.04+)
@@ -41,10 +29,12 @@ apt)
   elif has_cmd curl; then
     # Add official eza apt repository for older Debian/Ubuntu
     log_info "Adding official eza apt repository..."
-    install_apt_keyring https://raw.githubusercontent.com/eza-community/eza/main/deb.asc /etc/apt/keyrings/gierens.gpg --dearmor
-    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] https://deb.gierens.de stable main" | run_privileged tee /etc/apt/sources.list.d/gierens.list >/dev/null
-    run_privileged chmod 644 /etc/apt/sources.list.d/gierens.list
-    run_privileged apt-get update -qq
+    add_apt_repo \
+      "https://raw.githubusercontent.com/eza-community/eza/main/deb.asc" \
+      "/etc/apt/keyrings/gierens.gpg" \
+      "deb [signed-by=/etc/apt/keyrings/gierens.gpg] https://deb.gierens.de stable main" \
+      "/etc/apt/sources.list.d/gierens.list" \
+      "--dearmor"
     run_privileged apt-get install -y eza
   else
     log_error "Could not install eza via apt and curl is unavailable."
@@ -53,9 +43,8 @@ apt)
   ;;
 *)
   # Fallback: GitHub binary release
-  if has_cmd curl && has_cmd tar; then
+  if (has_cmd curl || has_cmd wget) && has_cmd tar; then
     log_info "Attempting GitHub binary release download..."
-    ensure_dir "$HOME/.local/bin"
     ARCH="$(uname -m)"
     case "$ARCH" in
     x86_64) EZA_ARCH="x86_64-unknown-linux-musl" ;;
@@ -66,24 +55,17 @@ apt)
       exit 1
       ;;
     esac
-    TMP_DIR="$(mktemp -d)"
-    trap 'rm -rf "$TMP_DIR"' EXIT
-    curl -fsSL "https://github.com/eza-community/eza/releases/latest/download/eza_${EZA_ARCH}.tar.gz" -o "$TMP_DIR/eza.tar.gz"
-    tar -xzf "$TMP_DIR/eza.tar.gz" -C "$TMP_DIR"
-    install -m 755 "$TMP_DIR/eza" "$HOME/.local/bin/eza"
-    rm -rf "$TMP_DIR"
+    install_tar_binary "eza" "eza" "https://github.com/eza-community/eza/releases/latest/download/eza_${EZA_ARCH}.tar.gz"
   elif has_cmd cargo; then
     cargo install eza
   else
-    log_error "Unsupported package manager or missing curl/tar for eza installation."
+    log_error "Unsupported package manager or missing curl/wget/tar for eza installation."
     exit 1
   fi
   ;;
 esac
 
 # Ensure ~/.local/bin is in PATH if installed there
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 log_success "eza installed successfully: $(eza --version 2>/dev/null | head -n 1 || echo 'eza')"

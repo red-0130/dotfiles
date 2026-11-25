@@ -23,18 +23,8 @@ LATEST_VERSION="$(get_github_latest_version "zellij-org/zellij" "0.45.1")"
 # ------------------------------------------------------------------------------
 # Check if zellij is already installed and up to date
 # ------------------------------------------------------------------------------
-if has_cmd zellij; then
-    CURRENT_VERSION="$(zellij --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "zellij is already at the latest version (v${CURRENT_VERSION})"
-            exit 0
-        else
-            log_info "Current zellij (v${CURRENT_VERSION}) is outdated. Upgrading to latest version (v${LATEST_VERSION})..."
-        fi
-    else
-        log_info "zellij is installed. Verifying latest version..."
-    fi
+if is_cmd_up_to_date "zellij" "$LATEST_VERSION" zellij; then
+    exit 0
 fi
 
 log_info "Installing zellij (v${LATEST_VERSION})..."
@@ -44,19 +34,9 @@ log_info "Installing zellij (v${LATEST_VERSION})..."
 # ------------------------------------------------------------------------------
 install_zellij_prebuilt_binary() {
     local version="$1"
-
-    if ! has_cmd curl && ! has_cmd wget; then
-        log_error "curl or wget is required to download prebuilt binary."
-        exit 1
-    fi
-    if ! has_cmd tar; then
-        log_error "tar is required to unpack zellij archive."
-        exit 1
-    fi
-
-    local os="$(uname -s)"
-    local arch="$(uname -m)"
-    local target=""
+    local os arch target=""
+    os="$(uname -s)"
+    arch="$(uname -m)"
 
     if [[ "$os" == "Darwin" || "$os" == "darwin" ]]; then
         case "$arch" in
@@ -90,60 +70,13 @@ install_zellij_prebuilt_binary() {
     fi
 
     local tar_file="zellij-${target}.tar.gz"
-    local tmp_dir
-    tmp_dir="$(mktemp -d)"
-    trap "rm -rf '$tmp_dir'" EXIT INT TERM
-    local tar_path="$tmp_dir/$tar_file"
-
-    local download_urls=(
-        "https://github.com/zellij-org/zellij/releases/download/v${version}/${tar_file}"
-        "https://github.com/zellij-org/zellij/releases/download/${version}/${tar_file}"
-        "https://github.com/zellij-org/zellij/releases/latest/download/${tar_file}"
-    )
-
-    local download_success=false
-    for url in "${download_urls[@]}"; do
-        log_info "Downloading: $url"
-        if has_cmd curl && curl -fsSL "$url" -o "$tar_path" 2>/dev/null; then
-            download_success=true
-            break
-        elif has_cmd wget && wget -qO "$tar_path" "$url" 2>/dev/null; then
-            download_success=true
-            break
-        fi
-    done
-
-    if [[ "$download_success" != "true" || ! -s "$tar_path" ]]; then
-        rm -rf "$tmp_dir"
+    if ! install_tar_binary "zellij" "zellij" \
+        "https://github.com/zellij-org/zellij/releases/download/v${version}/${tar_file}" \
+        "https://github.com/zellij-org/zellij/releases/download/${version}/${tar_file}" \
+        "https://github.com/zellij-org/zellij/releases/latest/download/${tar_file}"; then
         log_error "Failed to download prebuilt zellij binary from GitHub."
         exit 1
     fi
-
-    tar -xzf "$tar_path" -C "$tmp_dir"
-
-    local bin_src=""
-    if [[ -f "$tmp_dir/zellij" ]]; then
-        bin_src="$tmp_dir/zellij"
-    else
-        bin_src="$(find "$tmp_dir" -type f -name "zellij" 2>/dev/null | head -n 1)"
-    fi
-
-    if [[ -z "$bin_src" || ! -f "$bin_src" ]]; then
-        rm -rf "$tmp_dir"
-        log_error "zellij binary not found in extracted archive."
-        exit 1
-    fi
-
-    ensure_dir "$HOME/.local/bin"
-    install -m 755 "$bin_src" "$HOME/.local/bin/zellij"
-
-    if [[ $EUID -eq 0 ]] || has_cmd sudo; then
-        run_privileged mkdir -p /usr/local/bin
-        run_privileged install -m 755 "$bin_src" /usr/local/bin/zellij 2>/dev/null || true
-    fi
-
-    rm -rf "$tmp_dir"
-    trap - EXIT INT TERM
 }
 
 # ------------------------------------------------------------------------------

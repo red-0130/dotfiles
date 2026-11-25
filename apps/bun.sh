@@ -10,12 +10,8 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
 # Ensure ~/.bun/bin and ~/.local/bin are in PATH for current script execution
-if [[ -d "$HOME/.bun/bin" ]]; then
-  export PATH="$HOME/.bun/bin:$PATH"
-fi
-if [[ -d "$HOME/.local/bin" ]]; then
-  export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.bun/bin"
+prepend_path "$HOME/.local/bin"
 
 # ------------------------------------------------------------------------------
 # Upgrade if already installed
@@ -64,41 +60,21 @@ PKG="$(detect_pkg_manager)"
 # Bun official installer requires unzip
 if ! has_cmd unzip; then
   log_info "unzip is required for Bun installation. Installing unzip..."
-  case "$PKG" in
-  apt)
-    run_privileged apt-get update -qq
-    run_privileged apt-get install -y unzip
-    ;;
-  pacman)
-    run_privileged pacman -Sy --noconfirm unzip
-    ;;
-  dnf)
-    run_privileged dnf install -y unzip
-    ;;
-  apk)
-    run_privileged apk add unzip
-    ;;
-  brew)
-    brew install unzip
-    ;;
-  *)
-    log_warn "Could not automatically install unzip. Bun installer may fail if unzip is missing."
-    ;;
-  esac
+  pkg_install unzip zypper= || log_warn "Could not automatically install unzip. Bun installer may fail if unzip is missing."
 fi
 
 if [[ "$PKG" == "brew" ]]; then
   brew install oven-sh/bun/bun || brew install bun
-elif has_cmd curl; then
+elif has_cmd curl || has_cmd wget; then
   run_remote_script bash https://bun.sh/install
 else
-  log_error "curl is required to install Bun."
+  log_error "curl or wget is required to install Bun."
   exit 1
 fi
 
 # Ensure newly installed Bun binary is accessible
+prepend_path "$HOME/.bun/bin"
 if [[ -d "$HOME/.bun/bin" ]]; then
-  export PATH="$HOME/.bun/bin:$PATH"
   if [[ -x "$HOME/.bun/bin/bun" ]]; then
     ensure_dir "$HOME/.local/bin"
     ln -sf "$HOME/.bun/bin/bun" "$HOME/.local/bin/bun"

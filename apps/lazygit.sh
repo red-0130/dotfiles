@@ -17,19 +17,8 @@ LATEST_VERSION="$(get_github_latest_version "jesseduffield/lazygit" "0.66.2")"
 # ------------------------------------------------------------------------------
 # Check if lazygit is already installed and up to date
 # ------------------------------------------------------------------------------
-if has_cmd lazygit; then
-    CURRENT_VERSION="$(lazygit --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        # Check if current version is at least the latest version
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "lazygit is already at the latest version (v${CURRENT_VERSION})"
-            exit 0
-        else
-            log_info "Current lazygit (v${CURRENT_VERSION}) is outdated. Upgrading to latest version (v${LATEST_VERSION})..."
-        fi
-    else
-        log_info "lazygit is installed. Verifying latest version..."
-    fi
+if is_cmd_up_to_date "lazygit" "$LATEST_VERSION" lazygit; then
+    exit 0
 fi
 
 log_info "Installing lazygit..."
@@ -40,14 +29,9 @@ log_info "Installing lazygit..."
 install_lazygit_binary() {
     local version="${1:-$LATEST_VERSION}"
     log_info "Downloading latest lazygit binary release (v${version}) from GitHub..."
-    if ! has_cmd curl || ! has_cmd tar; then
-        log_error "curl and tar are required to download lazygit binary release."
-        exit 1
-    fi
 
-    local arch
+    local arch lazygit_arch
     arch="$(uname -m)"
-    local lazygit_arch
     case "$arch" in
         x86_64|amd64)
             lazygit_arch="x86_64"
@@ -70,43 +54,19 @@ install_lazygit_binary() {
     local os
     os="$(uname -s)"
     case "$os" in
-        Linux|linux)
-            os="Linux"
-            ;;
-        Darwin|darwin)
-            os="Darwin"
-            ;;
-        *)
-            os="Linux"
-            ;;
+        Linux|linux) os="Linux" ;;
+        Darwin|darwin) os="Darwin" ;;
+        *) os="Linux" ;;
     esac
 
     log_info "Installing lazygit v${version} (${os}_${lazygit_arch})..."
-    ensure_dir "$HOME/.local/bin"
-
-    local tmp_dir
-    tmp_dir="$(mktemp -d)"
-    trap "rm -rf '$tmp_dir'" EXIT
-    local tar_url="https://github.com/jesseduffield/lazygit/releases/download/v${version}/lazygit_${version}_${os}_${lazygit_arch}.tar.gz"
-
-    if ! curl -fsSL "$tar_url" -o "$tmp_dir/lazygit.tar.gz" 2>/dev/null; then
-        # Fallback to latest download URL redirect
-        tar_url="https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${version}_${os}_${lazygit_arch}.tar.gz"
-        if ! curl -fsSL "$tar_url" -o "$tmp_dir/lazygit.tar.gz" 2>/dev/null; then
-            rm -rf "$tmp_dir"
-            log_error "Failed to download lazygit binary from: $tar_url"
-            exit 1
-        fi
+    local tar_name="lazygit_${version}_${os}_${lazygit_arch}.tar.gz"
+    if ! install_tar_binary "lazygit" "lazygit" \
+        "https://github.com/jesseduffield/lazygit/releases/download/v${version}/${tar_name}" \
+        "https://github.com/jesseduffield/lazygit/releases/latest/download/${tar_name}"; then
+        log_error "Failed to download lazygit binary from GitHub releases."
+        exit 1
     fi
-
-    tar -xzf "$tmp_dir/lazygit.tar.gz" -C "$tmp_dir" lazygit
-    install -m 755 "$tmp_dir/lazygit" "$HOME/.local/bin/lazygit"
-
-    if [[ $EUID -eq 0 ]] || has_cmd sudo; then
-        run_privileged install -m 755 "$tmp_dir/lazygit" /usr/local/bin/lazygit 2>/dev/null || true
-    fi
-
-    rm -rf "$tmp_dir"
 }
 
 # ------------------------------------------------------------------------------
@@ -125,13 +85,9 @@ case "$PKG" in
         fi
         install_lazygit_binary "$LATEST_VERSION"
         ;;
-    brew)
-        log_info "Installing lazygit via Homebrew..."
-        brew install lazygit
-        ;;
-    pacman)
-        log_info "Installing lazygit via pacman..."
-        run_privileged pacman -Sy --noconfirm lazygit
+    brew|pacman|apk)
+        log_info "Installing lazygit via ${PKG}..."
+        pkg_install lazygit
         ;;
     dnf)
         log_info "Installing lazygit via Fedora Copr (dejan/lazygit)..."
@@ -142,10 +98,6 @@ case "$PKG" in
             log_warn "Failed to enable Copr repository. Installing latest binary from GitHub..."
             install_lazygit_binary "$LATEST_VERSION"
         fi
-        ;;
-    apk)
-        log_info "Installing lazygit via apk..."
-        run_privileged apk add lazygit
         ;;
     zypper)
         log_info "Installing lazygit via zypper..."

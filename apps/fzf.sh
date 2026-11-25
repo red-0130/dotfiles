@@ -9,9 +9,7 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 if has_cmd fzf; then
   log_success "FZF is already installed ($(fzf --version | head -n 1))"
@@ -22,7 +20,6 @@ log_info "Installing FZF..."
 
 install_fzf_github_binary() {
   log_info "Downloading latest fzf binary from GitHub releases..."
-  ensure_dir "$HOME/.local/bin"
   local arch="$(uname -m)"
   local fzf_arch
   case "$arch" in
@@ -41,64 +38,29 @@ install_fzf_github_binary() {
   esac
 
   local version
-  version="$(curl -fsSL https://api.github.com/repos/junegunn/fzf/releases/latest 2>/dev/null | grep '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || echo "0.74.5")"
-  if [[ -z "$version" ]]; then
-    version="0.74.5"
-  fi
-
-  local tmp_dir
-  tmp_dir="$(mktemp -d)"
-  trap "rm -rf '$tmp_dir'" EXIT
+  version="$(get_github_latest_version "junegunn/fzf" "0.74.5")"
   local tar_url="https://github.com/junegunn/fzf/releases/download/v${version}/fzf-${version}-${fzf_arch}.tar.gz"
 
-  if curl -fsSL "$tar_url" -o "$tmp_dir/fzf.tar.gz"; then
-    tar -xzf "$tmp_dir/fzf.tar.gz" -C "$tmp_dir"
-    install -m 755 "$tmp_dir/fzf" "$HOME/.local/bin/fzf"
-    rm -rf "$tmp_dir"
-  else
-    rm -rf "$tmp_dir"
+  if ! install_tar_binary "fzf" "fzf" "$tar_url"; then
     log_error "Failed to download fzf binary from GitHub: $tar_url"
     exit 1
   fi
 }
 
-PKG="$(detect_pkg_manager)"
-
-case "$PKG" in
-apt)
+if [[ "$(detect_pkg_manager)" == "apt" ]]; then
   # On Debian/Ubuntu, apt repositories typically contain outdated fzf versions.
   # Use official GitHub binary release to ensure modern fzf.
   install_fzf_github_binary
-  ;;
-brew)
-  brew install fzf
-  ;;
-pacman)
-  run_privileged pacman -Sy --noconfirm fzf
-  ;;
-dnf)
-  run_privileged dnf install -y fzf
-  ;;
-apk)
-  run_privileged apk add fzf
-  ;;
-zypper)
-  run_privileged zypper install -y fzf
-  ;;
-*)
-  # Fallback to GitHub binary release
-  if has_cmd curl && has_cmd tar; then
+else
+  rc=0
+  pkg_install fzf || rc=$?
+  if [[ $rc -eq 2 ]]; then
     install_fzf_github_binary
-  else
-    log_error "Cannot install fzf: missing curl or tar for GitHub binary download."
-    exit 1
+  elif [[ $rc -ne 0 ]]; then
+    exit "$rc"
   fi
-  ;;
-esac
-
-# Ensure ~/.local/bin is in PATH if installed there
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  export PATH="$HOME/.local/bin:$PATH"
 fi
+
+prepend_path "$HOME/.local/bin"
 
 log_success "FZF installed successfully: $(fzf --version 2>/dev/null | head -n 1 || echo 'fzf in ~/.local/bin')"

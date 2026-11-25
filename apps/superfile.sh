@@ -17,27 +17,10 @@ LATEST_VERSION="$(get_github_latest_version "yorukot/superfile" "1.6.0")"
 # ------------------------------------------------------------------------------
 # Check if superfile (spf) is already installed and up to date
 # ------------------------------------------------------------------------------
-if has_cmd spf || has_cmd superfile; then
-    # Ensure both aliases exist
-    if has_cmd spf && ! has_cmd superfile; then
-        ensure_dir "$HOME/.local/bin"
-        ln -sf "$(command -v spf)" "$HOME/.local/bin/superfile"
-    elif has_cmd superfile && ! has_cmd spf; then
-        ensure_dir "$HOME/.local/bin"
-        ln -sf "$(command -v superfile)" "$HOME/.local/bin/spf"
-    fi
-
-    CURRENT_VERSION="$((spf --version || superfile --version) 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "superfile is already at the latest version (v${CURRENT_VERSION})"
-            exit 0
-        else
-            log_info "Current superfile (v${CURRENT_VERSION}) is outdated. Upgrading to latest version (v${LATEST_VERSION})..."
-        fi
-    else
-        log_info "superfile is installed. Verifying latest version..."
-    fi
+ensure_bin_alias spf superfile
+ensure_bin_alias superfile spf
+if is_cmd_up_to_date "superfile" "$LATEST_VERSION" spf superfile; then
+    exit 0
 fi
 
 log_info "Installing superfile (v${LATEST_VERSION})..."
@@ -85,17 +68,10 @@ esac
 # ------------------------------------------------------------------------------
 # Download and install prebuilt package from GitHub releases
 # ------------------------------------------------------------------------------
-if ! has_cmd curl || ! has_cmd tar; then
-    log_error "curl and tar are required to download superfile prebuilts."
-    exit 1
+RELEASE_JSON=""
+if has_cmd curl; then
+    RELEASE_JSON="$(curl -fsSL https://api.github.com/repos/yorukot/superfile/releases/latest 2>/dev/null || true)"
 fi
-
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
-TAR_FILE="$TMP_DIR/superfile.tar.gz"
-
-# Query GitHub API for download URL if available
-RELEASE_JSON="$(curl -fsSL https://api.github.com/repos/yorukot/superfile/releases/latest 2>/dev/null || true)"
 DOWNLOAD_URL=""
 
 if [[ -n "$RELEASE_JSON" ]]; then
@@ -105,63 +81,27 @@ if [[ -n "$RELEASE_JSON" ]]; then
     fi
 fi
 
-if [[ -z "$DOWNLOAD_URL" ]]; then
-    DOWNLOAD_URL="https://github.com/yorukot/superfile/releases/download/v${LATEST_VERSION}/superfile-${OS_NAME}-v${LATEST_VERSION}-${ARCH_NAME}.tar.gz"
-fi
-
-log_info "Downloading superfile prebuilt package: $DOWNLOAD_URL"
-if ! curl -fsSL "$DOWNLOAD_URL" -o "$TAR_FILE" 2>/dev/null; then
-    DOWNLOAD_URL="https://github.com/yorukot/superfile/releases/latest/download/superfile-${OS_NAME}-v${LATEST_VERSION}-${ARCH_NAME}.tar.gz"
-    if ! curl -fsSL "$DOWNLOAD_URL" -o "$TAR_FILE" 2>/dev/null; then
-        DOWNLOAD_URL="https://github.com/yorukot/superfile/releases/latest/download/superfile-${OS_NAME}-${ARCH_NAME}.tar.gz"
-        if ! curl -fsSL "$DOWNLOAD_URL" -o "$TAR_FILE" 2>/dev/null; then
-            # Fallback to official install script
-            log_warn "Direct download failed, falling back to official superfile installer script..."
-            if run_remote_script bash https://superfile.dev/install.sh; then
-                ensure_dir "$HOME/.local/bin"
-                if has_cmd spf && ! has_cmd superfile; then
-                    ln -sf "$(command -v spf)" "$HOME/.local/bin/superfile"
-                fi
-                rm -rf "$TMP_DIR"
-                exit 0
-            else
-                rm -rf "$TMP_DIR"
-                log_error "Failed to install superfile."
-                exit 1
-            fi
-        fi
+log_info "Downloading superfile prebuilt package..."
+if ! install_tar_binary "spf|superfile" "spf" \
+    "$DOWNLOAD_URL" \
+    "https://github.com/yorukot/superfile/releases/download/v${LATEST_VERSION}/superfile-${OS_NAME}-v${LATEST_VERSION}-${ARCH_NAME}.tar.gz" \
+    "https://github.com/yorukot/superfile/releases/latest/download/superfile-${OS_NAME}-v${LATEST_VERSION}-${ARCH_NAME}.tar.gz" \
+    "https://github.com/yorukot/superfile/releases/latest/download/superfile-${OS_NAME}-${ARCH_NAME}.tar.gz"; then
+    # Fallback to official install script
+    log_warn "Direct download failed, falling back to official superfile installer script..."
+    if run_remote_script bash https://superfile.dev/install.sh; then
+        ensure_bin_alias spf superfile
+        exit 0
+    else
+        log_error "Failed to install superfile."
+        exit 1
     fi
 fi
 
-# Extract archive
-tar -xzf "$TAR_FILE" -C "$TMP_DIR"
-
-# Locate the executable binary
-BIN_SRC=""
-if [[ -f "$TMP_DIR/spf" ]]; then
-    BIN_SRC="$TMP_DIR/spf"
-elif [[ -f "$TMP_DIR/superfile" ]]; then
-    BIN_SRC="$TMP_DIR/superfile"
-else
-    BIN_SRC="$(find "$TMP_DIR" -type f \( -name "spf" -o -name "superfile" \) 2>/dev/null | head -n 1)"
-fi
-
-if [[ -z "$BIN_SRC" || ! -f "$BIN_SRC" ]]; then
-    rm -rf "$TMP_DIR"
-    log_error "superfile binary (spf) not found in downloaded archive."
-    exit 1
-fi
-
-ensure_dir "$HOME/.local/bin"
-install -m 755 "$BIN_SRC" "$HOME/.local/bin/spf"
 ln -sf "$HOME/.local/bin/spf" "$HOME/.local/bin/superfile"
-
 if [[ $EUID -eq 0 ]] || has_cmd sudo; then
-    run_privileged install -m 755 "$BIN_SRC" /usr/local/bin/spf 2>/dev/null || true
     run_privileged ln -sf /usr/local/bin/spf /usr/local/bin/superfile 2>/dev/null || true
 fi
-
-rm -rf "$TMP_DIR"
 
 # ------------------------------------------------------------------------------
 # Verify installation

@@ -15,29 +15,9 @@ if has_cmd zsh; then
 fi
 
 log_info "Installing Zsh..."
-PKG="$(detect_pkg_manager)"
-
-case "$PKG" in
-    apt)
-        run_privileged apt-get update -qq
-        run_privileged apt-get install -y zsh
-        ;;
-    brew)
-        brew install zsh
-        ;;
-    pacman)
-        run_privileged pacman -Sy --noconfirm zsh
-        ;;
-    dnf)
-        run_privileged dnf install -y zsh
-        ;;
-    apk)
-        run_privileged apk add zsh
-        ;;
-    *)
-        log_error "Unsupported package manager for zsh installation."
-        exit 1
-        ;;
-esac
+if ! pkg_install zsh; then
+    log_error "Unsupported package manager or failed to install zsh."
+    exit 1
+fi
 
 log_success "Zsh installed successfully: $(zsh --version)"

@@ -21,32 +21,26 @@ case "$PKG" in
     apt)
         # Official GitHub CLI installation instructions for Debian/Ubuntu
         if has_cmd curl; then
-            install_apt_keyring https://cli.github.com/packages/githubcli-archive-keyring.gpg /etc/apt/keyrings/githubcli-archive-keyring.gpg
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | run_privileged tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-            run_privileged apt-get update -qq
+            add_apt_repo \
+                "https://cli.github.com/packages/githubcli-archive-keyring.gpg" \
+                "/etc/apt/keyrings/githubcli-archive-keyring.gpg" \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+                "/etc/apt/sources.list.d/github-cli.list"
             run_privileged apt-get install -y gh
         else
-            run_privileged apt-get update -qq
-            run_privileged apt-get install -y gh
+            pkg_install gh
         fi
-        ;;
-    brew)
-        brew install gh
-        ;;
-    pacman)
-        run_privileged pacman -Sy --noconfirm github-cli
         ;;
     dnf)
         run_privileged dnf install -y 'dnf-command(config-manager)'
         run_privileged dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
         run_privileged dnf install -y gh
         ;;
-    apk)
-        run_privileged apk add github-cli
-        ;;
     *)
-        log_error "Unsupported package manager for gh installation."
-        exit 1
+        if ! pkg_install gh pacman=github-cli apk=github-cli; then
+            log_error "Unsupported package manager or failed to install gh."
+            exit 1
+        fi
         ;;
 esac
 

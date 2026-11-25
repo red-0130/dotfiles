@@ -16,18 +16,8 @@ prepend_path "$HOME/.local/bin"
 
 LATEST_VERSION="$(get_github_latest_version "devsy-org/devsy" "")"
 
-if has_cmd devsy; then
-    CURRENT_VERSION="$(devsy --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" ]]; then
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "devsy is already at the latest version (v${CURRENT_VERSION})"
-            exit 0
-        fi
-        log_info "Current devsy (v${CURRENT_VERSION}) is outdated. Upgrading to v${LATEST_VERSION}..."
-    elif [[ -n "$CURRENT_VERSION" ]]; then
-        log_success "devsy is already installed (v${CURRENT_VERSION})"
-        exit 0
-    fi
+if is_cmd_up_to_date "devsy" "$LATEST_VERSION" --keep-if-offline devsy "$TARGET_DIR/devsy"; then
+    exit 0
 fi
 
 log_info "Installing devsy CLI..."
@@ -39,14 +29,11 @@ if [[ "$PKG" == "brew" ]]; then
     else
         brew install devsy-org/tap/devsy
     fi
-elif has_cmd curl; then
+elif has_cmd curl || has_cmd wget; then
     ensure_dir "$TARGET_DIR"
-    (
-        set -o pipefail
-        curl -fsSL https://devsy.sh/install.sh | DEVSY_INSTALL_DIR="$TARGET_DIR" sh
-    )
+    DEVSY_INSTALL_DIR="$TARGET_DIR" run_remote_script sh https://devsy.sh/install.sh
 else
-    log_error "brew or curl is required to install devsy CLI."
+    log_error "brew, curl, or wget is required to install devsy CLI."
     exit 1
 fi
 

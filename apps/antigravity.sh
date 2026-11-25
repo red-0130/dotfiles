@@ -10,9 +10,7 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 # ------------------------------------------------------------------------------
 # Detect install method (for upgrade routing)
@@ -175,42 +173,41 @@ else
     exit 1
 fi
 
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
-ARCHIVE="$TMP_DIR/antigravity.tar.gz"
+(
+    tmp_dir="$(mktemp -d)" || exit 1
+    trap 'rm -rf "$tmp_dir"' EXIT
+    archive="$tmp_dir/antigravity.tar.gz"
 
-log_info "Downloading Antigravity 2.0 (linux-${ARCH_SLUG})..."
-if ! curl -fsSL "$DOWNLOAD_URL" -o "$ARCHIVE" 2>/dev/null; then
-    rm -rf "$TMP_DIR"
-    log_error "Download failed. Visit https://antigravity.google/download for the current URL."
-    log_dim "  You can also set: AGY_VERSION=<version> and re-run this script."
-    exit 1
-fi
+    log_info "Downloading Antigravity 2.0 (linux-${ARCH_SLUG})..."
+    if ! download_file "$archive" "$DOWNLOAD_URL"; then
+        log_error "Download failed. Visit https://antigravity.google/download for the current URL."
+        log_dim "  You can also set: AGY_VERSION=<version> and re-run this script."
+        exit 1
+    fi
 
-log_info "Extracting archive..."
-tar -xzf "$ARCHIVE" -C "$TMP_DIR"
+    log_info "Extracting archive..."
+    tar -xzf "$archive" -C "$tmp_dir"
 
-# Locate extracted dir (may be Antigravity-x64, Antigravity-linux-x64, etc.)
-EXTRACTED_DIR="$(find "$TMP_DIR" -maxdepth 1 -type d -name "Antigravity*" | head -n 1)"
-if [[ -z "$EXTRACTED_DIR" ]]; then
-    EXTRACTED_DIR="$(find "$TMP_DIR" -maxdepth 1 -type d | grep -v "^${TMP_DIR}$" | head -n 1)"
-fi
-if [[ -z "$EXTRACTED_DIR" || ! -d "$EXTRACTED_DIR" ]]; then
-    rm -rf "$TMP_DIR"
-    log_error "Could not locate extracted Antigravity directory."
-    exit 1
-fi
+    # Locate extracted dir (may be Antigravity-x64, Antigravity-linux-x64, etc.)
+    extracted_dir="$(find "$tmp_dir" -maxdepth 1 -type d -name "Antigravity*" | head -n 1)"
+    if [[ -z "$extracted_dir" ]]; then
+        extracted_dir="$(find "$tmp_dir" -maxdepth 1 -type d | grep -v "^${tmp_dir}$" | head -n 1)"
+    fi
+    if [[ -z "$extracted_dir" || ! -d "$extracted_dir" ]]; then
+        log_error "Could not locate extracted Antigravity directory."
+        exit 1
+    fi
 
-# ------------------------------------------------------------------------------
-# Install to /opt/antigravity
-# ------------------------------------------------------------------------------
-log_step "Installing to $INSTALL_DIR ..."
+    # ------------------------------------------------------------------------------
+    # Install to /opt/antigravity
+    # ------------------------------------------------------------------------------
+    log_step "Installing to $INSTALL_DIR ..."
 
-if [[ -d "$INSTALL_DIR" ]]; then
-    run_privileged rm -rf "$INSTALL_DIR"
-fi
-run_privileged mv "$EXTRACTED_DIR" "$INSTALL_DIR"
-rm -rf "$TMP_DIR"
+    if [[ -d "$INSTALL_DIR" ]]; then
+        run_privileged rm -rf "$INSTALL_DIR"
+    fi
+    run_privileged mv "$extracted_dir" "$INSTALL_DIR"
+)
 
 # Electron chrome-sandbox requires setuid root for sandboxed rendering
 if [[ -f "$INSTALL_DIR/chrome-sandbox" ]]; then

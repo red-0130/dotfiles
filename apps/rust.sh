@@ -11,12 +11,8 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
 # Ensure ~/.cargo/bin and ~/.local/bin are in PATH for current script execution
-if [[ -d "$HOME/.cargo/bin" ]] && [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
-    export PATH="$HOME/.cargo/bin:$PATH"
-fi
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.cargo/bin"
+prepend_path "$HOME/.local/bin"
 
 # Source ~/.cargo/env if available
 if [[ -s "$HOME/.cargo/env" ]]; then
@@ -88,24 +84,8 @@ fi
 # Download and execute official rustup installer
 # Reference: https://sh.rustup.rs
 # ------------------------------------------------------------------------------
-if ! has_cmd curl && ! has_cmd wget; then
-    log_error "curl or wget is required to install rustup."
-    exit 1
-fi
-
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
-RUSTUP_INIT="$TMP_DIR/rustup-init.sh"
-
-if has_cmd curl; then
-    curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs -o "$RUSTUP_INIT"
-elif has_cmd wget; then
-    wget -qO "$RUSTUP_INIT" https://sh.rustup.rs
-fi
-
 log_info "Running rustup installer non-interactively (default toolchain: stable)..."
-sh "$RUSTUP_INIT" -y --default-toolchain stable --profile default
-rm -rf "$TMP_DIR"
+run_remote_script sh https://sh.rustup.rs -y --default-toolchain stable --profile default
 
 # Source cargo env in current session
 if [[ -s "$HOME/.cargo/env" ]]; then
@@ -113,9 +93,7 @@ if [[ -s "$HOME/.cargo/env" ]]; then
     source "$HOME/.cargo/env"
 fi
 
-if [[ -d "$HOME/.cargo/bin" ]] && [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
-    export PATH="$HOME/.cargo/bin:$PATH"
-fi
+prepend_path "$HOME/.cargo/bin"
 
 ensure_cargo_symlinks
 

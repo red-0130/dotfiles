@@ -1,4 +1,3 @@
-#!/bin/env bash
 spf() {
   os=$(uname -s)
 

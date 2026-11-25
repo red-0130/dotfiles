@@ -300,15 +300,17 @@ import fcntl, os, pty, re, select, struct, subprocess, sys, termios, time
 
 repo = sys.argv[1]
 
-def run_ui(rows, keys):
+def run_ui(rows, keys, body=None):
     master, slave = pty.openpty()
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", rows, 80, 0, 0))
+    if body is None:
+        body = (
+            'items=(); for i in $(seq -w 1 28); do items+=("$(printf "app%s\\t0\\t\\tdesc app%s" "$i" "$i")"); done; '
+            'run_interactive_checklist "Apps" "${items[@]}"'
+        )
     cmd = [
         "bash", "-c",
-        f'set -euo pipefail; source "{repo}/lib/utils.sh"; source "{repo}/lib/ui.sh"; '
-        'get_app_description() { echo "desc $1"; }; is_app_installed() { return 1; }; '
-        'items=(); for i in $(seq -w 1 28); do items+=("app$i"); done; '
-        'run_interactive_checklist "Apps" "app" "${items[@]}"'
+        f'set -euo pipefail; source "{repo}/lib/utils.sh"; source "{repo}/lib/ui.sh"; {body}'
     ]
     env = os.environ.copy()
     env["TERM"] = "xterm-256color"
@@ -343,6 +345,14 @@ for rows, keys, expect_range in ((10, [b"k", b" ", b"\r"], "27-28/28"), (24, [b"
     assert expect_range in clean, f"rows={rows} missing viewport {expect_range}"
     if b"\r" in keys:
         assert rc == 0 and "app28" in clean.splitlines()[-1], f"rows={rows} selection failed: rc={rc}"
+
+badge_text, badge_rc = run_ui(
+    12, [b"\r"],
+    'run_interactive_checklist "Apps" "$(printf "a\\t1\\t[ok]\\tdesc a")" "b"'
+)
+badge_clean = re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", "", badge_text)
+assert badge_rc == 0 and "[ok]" in badge_clean and "desc a" in badge_clean
+assert "Selected: 1/2" in badge_clean and badge_clean.splitlines()[-1].strip() == "a"
 print("viewport ok")
 PY
   )" && rc=0 || rc=$?
@@ -405,6 +415,250 @@ assert_eq "" "$ver" "get_github_latest_version returns empty when fallback omitt
 
 # Verify configs/neovim/.target symlink target
 assert_eq "$REPO_DIR/configs/neovim/nvim" "$(readlink "$DEF_HOME/.config/nvim")" ".target links ~/.config/nvim to configs/neovim/nvim"
+
+# 12. lib/utils.sh installer primitives
+echo "==> lib/utils.sh installer primitives"
+UTILS_MOCK="$TMP_ROOT/utils_mock"
+UTILS_HOME="$TMP_ROOT/utils_home"
+UTILS_TMP="$TMP_ROOT/utils_tmp"
+mkdir -p "$UTILS_MOCK" "$UTILS_HOME" "$UTILS_TMP/work"
+
+cat >"$UTILS_MOCK/mytool" <<'EOF'
+#!/usr/bin/env bash
+echo "mytool version 1.5.0"
+EOF
+chmod +x "$UTILS_MOCK/mytool"
+
+PATH="$UTILS_MOCK:$ORIG_PATH" is_cmd_up_to_date "mytool" "1.5.0" mytool >/dev/null && rc=0 || rc=$?
+assert_eq 0 "$rc" "is_cmd_up_to_date returns 0 when up-to-date"
+PATH="$UTILS_MOCK:$ORIG_PATH" is_cmd_up_to_date "mytool" "2.0.0" mytool >/dev/null && rc=0 || rc=$?
+assert_eq 1 "$rc" "is_cmd_up_to_date returns 1 when outdated"
+PATH="$UTILS_MOCK:$ORIG_PATH" is_cmd_up_to_date "mytool" "" --keep-if-offline mytool >/dev/null && rc=0 || rc=$?
+assert_eq 0 "$rc" "is_cmd_up_to_date --keep-if-offline returns 0 when offline"
+PATH="$UTILS_MOCK:$ORIG_PATH" is_cmd_up_to_date "mytool" "" mytool >/dev/null && rc=0 || rc=$?
+assert_eq 1 "$rc" "is_cmd_up_to_date returns 1 when latest empty without --keep-if-offline"
+PATH="$UTILS_MOCK:$ORIG_PATH" is_cmd_up_to_date "missing" "1.0.0" no_such_tool_xyz >/dev/null && rc=0 || rc=$?
+assert_eq 1 "$rc" "is_cmd_up_to_date returns 1 when command missing"
+
+cat >"$UTILS_MOCK/curl" <<'EOF'
+#!/usr/bin/env bash
+out="" url=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -o) out="$2"; shift 2 ;;
+    -*) shift ;;
+    *) url="$1"; shift ;;
+  esac
+done
+case "$url" in
+  *primary*) printf 'primary-data' >"$out" ;;
+  *fallback*) printf 'fallback-data' >"$out" ;;
+  *empty*) : >"$out" ;;
+  *tarball*) cp "$MOCK_TAR_FILE" "$out" ;;
+  *key*) printf 'KEYDATA' >"$out" ;;
+  *) exit 1 ;;
+esac
+EOF
+chmod +x "$UTILS_MOCK/curl"
+
+cat >"$UTILS_MOCK/wget" <<'EOF'
+#!/usr/bin/env bash
+out="" url=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -qO) out="$2"; shift 2 ;;
+    -*) shift ;;
+    *) url="$1"; shift ;;
+  esac
+done
+case "$url" in
+  *wgetok*) printf 'wget-data' >"$out" ;;
+  *) exit 1 ;;
+esac
+EOF
+chmod +x "$UTILS_MOCK/wget"
+
+PATH="$UTILS_MOCK:$ORIG_PATH" download_file "$UTILS_TMP/dl1" "https://x/primary" && rc=0 || rc=$?
+assert_eq 0 "$rc" "download_file succeeds on primary URL"
+assert_eq "primary-data" "$(cat "$UTILS_TMP/dl1")" "download_file writes primary payload"
+
+PATH="$UTILS_MOCK:$ORIG_PATH" download_file "$UTILS_TMP/dl2" "https://x/bad" "https://x/fallback" && rc=0 || rc=$?
+assert_eq 0 "$rc" "download_file falls back across URLs"
+assert_eq "fallback-data" "$(cat "$UTILS_TMP/dl2")" "download_file writes fallback payload"
+
+PATH="$UTILS_MOCK:$ORIG_PATH" download_file "$UTILS_TMP/dl3" "https://x/empty" && rc=0 || rc=$?
+assert_eq 1 "$rc" "download_file rejects empty download"
+assert_eq 0 "$([[ -e "$UTILS_TMP/dl3" ]] && echo 1 || echo 0)" "download_file removes empty destination"
+
+(
+  export PATH="$UTILS_MOCK:$ORIG_PATH"
+  has_cmd() { [[ "$1" != "curl" ]] && command -v "$1" >/dev/null 2>&1; }
+  download_file "$UTILS_TMP/dl4" "https://x/wgetok"
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "download_file falls back to wget when curl unavailable"
+assert_eq "wget-data" "$(cat "$UTILS_TMP/dl4")" "download_file wget writes payload"
+
+cat >"$UTILS_MOCK/sudo" <<'EOF'
+#!/usr/bin/env bash
+exec "$@"
+EOF
+chmod +x "$UTILS_MOCK/sudo"
+
+for mgr in apt-get dnf brew; do
+  cat >"$UTILS_MOCK/$mgr" <<EOF
+#!/usr/bin/env bash
+printf '%s %s\n' "$mgr" "\$*" >>"\${PKG_LOG}"
+EOF
+  chmod +x "$UTILS_MOCK/$mgr"
+done
+
+printf '#!/usr/bin/env bash\necho ok\n' >"$UTILS_TMP/src_bin"
+install_binary "$TMP_ROOT/missing_bin" "x" "$UTILS_HOME/custom_bin" >/dev/null 2>&1 && rc=0 || rc=$?
+assert_eq 1 "$rc" "install_binary fails on missing source"
+install_binary "$UTILS_TMP/src_bin" "mybin" "$UTILS_HOME/custom_bin" && rc=0 || rc=$?
+assert_eq 0 "$rc" "install_binary installs to custom target_dir"
+assert_eq 1 "$([[ -x "$UTILS_HOME/custom_bin/mybin" ]] && echo 1 || echo 0)" "install_binary sets executable mode"
+
+(
+  export HOME="$UTILS_HOME" PATH="$UTILS_MOCK:$UTILS_HOME/.local/bin:$ORIG_PATH"
+  ensure_bin_alias "mytool" "mytool_alias"
+)
+assert_symlink "$UTILS_HOME/.local/bin/mytool_alias" "ensure_bin_alias creates ~/.local/bin symlink"
+assert_eq "$UTILS_MOCK/mytool" "$(readlink "$UTILS_HOME/.local/bin/mytool_alias")" "ensure_bin_alias targets resolved command"
+
+mkdir -p "$UTILS_TMP/tar_src/nested"
+printf '#!/usr/bin/env bash\necho spf\n' >"$UTILS_TMP/tar_src/nested/spf"
+tar -czf "$UTILS_TMP/spf.tar.gz" -C "$UTILS_TMP/tar_src" nested/spf
+
+(
+  export HOME="$UTILS_HOME" TMPDIR="$UTILS_TMP/work" MOCK_TAR_FILE="$UTILS_TMP/spf.tar.gz" PATH="$UTILS_MOCK:$ORIG_PATH"
+  install_tar_binary "other|spf" "superfile" "https://x/tarball" >/dev/null
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "install_tar_binary extracts and installs matching pattern"
+assert_eq 1 "$([[ -x "$UTILS_HOME/.local/bin/superfile" ]] && echo 1 || echo 0)" "install_tar_binary installs to ~/.local/bin"
+assert_eq "" "$(find "$UTILS_TMP/work" -mindepth 1 2>/dev/null)" "install_tar_binary cleans up temp dir"
+
+(
+  export HOME="$UTILS_HOME" TMPDIR="$UTILS_TMP/work" MOCK_TAR_FILE="$UTILS_TMP/spf.tar.gz" PATH="$UTILS_MOCK:$ORIG_PATH"
+  install_tar_binary "missing_pat" "nope" "https://x/tarball" >/dev/null 2>&1
+) && rc=0 || rc=$?
+assert_eq 1 "$rc" "install_tar_binary returns 1 when binary missing"
+assert_eq "" "$(find "$UTILS_TMP/work" -mindepth 1 2>/dev/null)" "install_tar_binary cleans up temp dir on failure"
+
+PKG_LOG="$UTILS_TMP/pkg.log"
+: >"$PKG_LOG"
+(
+  export PATH="$UTILS_MOCK:$ORIG_PATH" PKG_LOG
+  has_cmd() { [[ "$1" == "apt-get" || "$1" == "sudo" ]]; }
+  pkg_install "fd" "apt=fd-find" "dnf=fd-find"
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "pkg_install apt override exits 0"
+assert_contains "$(cat "$PKG_LOG")" "apt-get install -y fd-find" "pkg_install apt uses override package"
+
+: >"$PKG_LOG"
+(
+  export PATH="$UTILS_MOCK:$ORIG_PATH" PKG_LOG
+  has_cmd() { [[ "$1" == "dnf" || "$1" == "sudo" ]]; }
+  pkg_install "ripgrep" "apt=ripgrep"
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "pkg_install dnf exits 0"
+assert_contains "$(cat "$PKG_LOG")" "dnf install -y ripgrep" "pkg_install dnf installs default package"
+
+: >"$PKG_LOG"
+(
+  export PATH="$UTILS_MOCK:$ORIG_PATH" PKG_LOG
+  has_cmd() { [[ "$1" == "brew" || "$1" == "sudo" ]]; }
+  pkg_install "ripgrep"
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "pkg_install brew exits 0"
+assert_contains "$(cat "$PKG_LOG")" "brew install ripgrep" "pkg_install brew installs package"
+
+(
+  export PATH="$UTILS_MOCK:$ORIG_PATH"
+  has_cmd() { [[ "$1" == "apt-get" || "$1" == "sudo" ]]; }
+  pkg_install "eza" "apt="
+) && rc=0 || rc=$?
+assert_eq 2 "$rc" "pkg_install empty override returns 2"
+
+: >"$PKG_LOG"
+(
+  export PATH="$UTILS_MOCK:$ORIG_PATH" PKG_LOG
+  has_cmd() { [[ "$1" == "curl" || "$1" == "sudo" || "$1" == "apt-get" ]]; }
+  add_apt_repo "https://x/key" "$UTILS_HOME/apt/test.gpg" "deb [signed-by=$UTILS_HOME/apt/test.gpg] https://x/deb stable main" "$UTILS_HOME/apt/test.list"
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "add_apt_repo exits 0"
+assert_eq "KEYDATA" "$(cat "$UTILS_HOME/apt/test.gpg")" "add_apt_repo writes keyring"
+assert_contains "$(cat "$UTILS_HOME/apt/test.list")" "deb [signed-by=$UTILS_HOME/apt/test.gpg]" "add_apt_repo writes source list"
+assert_contains "$(cat "$PKG_LOG")" "apt-get update -qq" "add_apt_repo runs apt-get update"
+
+# 13. workspacectl.sh
+echo "==> workspacectl.sh"
+WS_HOME="$TMP_ROOT/ws_home"
+WS_MOCK="$TMP_ROOT/ws_mock"
+WS_GIT_LOG="$TMP_ROOT/ws_git.log"
+mkdir -p "$WS_HOME/proj" "$WS_MOCK"
+: >"$WS_GIT_LOG"
+
+cat >"$WS_MOCK/curl" <<'EOF'
+#!/usr/bin/env bash
+case "$*" in
+  *api.github.com*) echo '{"login":"octocat","id":583231}' ;;
+  *gitlab.com*) echo '[{"id":12345,"username":"gluser"}]' ;;
+  *) echo '{}' ;;
+esac
+EOF
+chmod +x "$WS_MOCK/curl"
+
+cat >"$WS_MOCK/git" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${WS_GIT_LOG}"
+if [[ "$1" == "config" && "$2" == "--global" && "$3" == "user.email" && $# -eq 3 ]]; then
+  printf '%s' "${MOCK_GIT_EMAIL:-}"
+fi
+EOF
+chmod +x "$WS_MOCK/git"
+
+(
+  set -euo pipefail
+  export HOME="$WS_HOME"
+  unset PROJECT_WORKSPACE GEMINI_API_KEY
+  # shellcheck source=/dev/null
+  source "$REPO_DIR/configs/bash_scripts/workspacectl.sh"
+
+  ! wsctl get-workspace >/dev/null 2>&1
+  wsctl set-workspace "$WS_HOME/proj" >/dev/null
+  # shellcheck source=/dev/null
+  source "$WS_HOME/.workspace"
+  [[ "$(wsctl get-workspace)" == "$WS_HOME/proj" ]]
+
+  ! wsctl set-gemini-api "" >/dev/null 2>&1
+  wsctl set-gemini-api "test-api-key" >/dev/null
+  mode="$(stat -c '%a' "$WS_HOME/.gemini_api" 2>/dev/null || stat -f '%Lp' "$WS_HOME/.gemini_api")"
+  [[ "$mode" == "600" ]]
+  grep -qF "test-api-key" "$WS_HOME/.gemini_api"
+
+  export GEMINI_API_KEY="test-api-key"
+  wsctl --reset
+  [[ ! -e "$WS_HOME/.workspace" && ! -e "$WS_HOME/.gemini_api" ]]
+  [[ -z "${PROJECT_WORKSPACE:-}" && -z "${GEMINI_API_KEY:-}" ]]
+
+  [[ "$(_wsctl_extract_id '{"login":"octocat","id":583231}')" == "583231" ]]
+  [[ "$(_wsctl_extract_id '[{"id":12345,"username":"gluser"}]')" == "12345" ]]
+  [[ -z "$(_wsctl_extract_id '{}')" ]]
+
+  export PATH="$WS_MOCK:$ORIG_PATH" WS_GIT_LOG
+  MOCK_GIT_EMAIL="" _wsctl_configure_provider "GitHub" "github.com" "users.noreply.github.com" "+" "https://api.github.com/users/" <<<$'octocat\ny' >/dev/null
+  MOCK_GIT_EMAIL="existing@example.com" _wsctl_configure_provider "Codeberg" "codeberg.org" "noreply.codeberg.org" <<<$'cbuser\ny' >/dev/null
+) && rc=0 || rc=$?
+assert_eq 0 "$rc" "workspacectl.sh set/get-workspace, gemini-api 0600, --reset, and _wsctl_extract_id passed"
+assert_contains "$(cat "$WS_GIT_LOG")" "config --global includeIf.hasconfig:remote.*.url:**/*github.com/**.email 583231+octocat@users.noreply.github.com" "_wsctl_configure_provider sets GitHub includeIf email"
+assert_contains "$(cat "$WS_GIT_LOG")" "config --global user.email 583231+octocat@users.noreply.github.com" "_wsctl_configure_provider sets fallback user.email"
+assert_contains "$(cat "$WS_GIT_LOG")" "config --global includeIf.hasconfig:remote.*.url:**/*codeberg.org/**.email cbuser@noreply.codeberg.org" "_wsctl_configure_provider sets Codeberg includeIf email"
+if grep -qF "config --global user.email cbuser@noreply.codeberg.org" "$WS_GIT_LOG"; then
+  fail "_wsctl_configure_provider overwrote existing user.email"
+else
+  pass "_wsctl_configure_provider preserves existing user.email"
+fi
 
 echo ""
 echo "Results: ${PASSED} passed, ${FAILED} failed"

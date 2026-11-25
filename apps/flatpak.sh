@@ -44,30 +44,10 @@ fi
 # Install Flatpak Runtime
 # ------------------------------------------------------------------------------
 log_info "Installing Flatpak runtime..."
-PKG="$(detect_pkg_manager)"
-
-case "$PKG" in
-apt)
-  run_privileged apt-get update -qq
-  run_privileged apt-get install -y flatpak
-  ;;
-pacman)
-  run_privileged pacman -Sy --noconfirm flatpak
-  ;;
-dnf)
-  run_privileged dnf install -y flatpak
-  ;;
-apk)
-  run_privileged apk add flatpak
-  ;;
-zypper)
-  run_privileged zypper install -y flatpak
-  ;;
-*)
-  log_error "Unsupported package manager for Flatpak installation."
+if ! pkg_install flatpak brew=; then
+  log_error "Unsupported package manager or failed to install Flatpak."
   exit 1
-  ;;
-esac
+fi
 
 # ------------------------------------------------------------------------------
 # Post-Installation Setup

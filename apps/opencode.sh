@@ -39,24 +39,12 @@ LATEST_VERSION="$(get_latest_opencode_version)"
 # ------------------------------------------------------------------------------
 # Check if opencode is already installed and up to date
 # ------------------------------------------------------------------------------
-if has_cmd opencode || [[ -x "$INSTALL_DIR/opencode" ]] || [[ -x "$LOCAL_BIN/opencode" ]]; then
-    CURRENT_VERSION="$((opencode --version 2>/dev/null || "$INSTALL_DIR/opencode" --version 2>/dev/null || "$LOCAL_BIN/opencode" --version 2>/dev/null) | head -n 1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"
-    if [[ -n "$CURRENT_VERSION" && -n "$LATEST_VERSION" && "${OPENCODE_FORCE_INSTALL:-0}" != "1" ]]; then
-        if version_ge "$CURRENT_VERSION" "$LATEST_VERSION"; then
-            log_success "OpenCode is already at the latest version (v${CURRENT_VERSION})"
-            # Ensure local bin symlink exists
-            if [[ -x "$INSTALL_DIR/opencode" ]]; then
-                ensure_dir "$LOCAL_BIN"
-                ln -sf "$INSTALL_DIR/opencode" "$LOCAL_BIN/opencode"
-            fi
-            exit 0
-        else
-            log_info "Current OpenCode (v${CURRENT_VERSION}) is outdated. Upgrading to latest version (v${LATEST_VERSION})..."
-        fi
-    elif [[ -n "$CURRENT_VERSION" && "${OPENCODE_FORCE_INSTALL:-0}" != "1" ]]; then
-        log_success "OpenCode is already installed (v${CURRENT_VERSION})"
-        exit 0
+if [[ "${OPENCODE_FORCE_INSTALL:-0}" != "1" ]] && is_cmd_up_to_date "OpenCode" "$LATEST_VERSION" --keep-if-offline opencode "$INSTALL_DIR/opencode" "$LOCAL_BIN/opencode"; then
+    if [[ -x "$INSTALL_DIR/opencode" ]]; then
+        ensure_dir "$LOCAL_BIN"
+        ln -sf "$INSTALL_DIR/opencode" "$LOCAL_BIN/opencode"
     fi
+    exit 0
 fi
 
 log_info "Installing OpenCode (v${LATEST_VERSION})..."
@@ -130,7 +118,7 @@ fi
 # ------------------------------------------------------------------------------
 # Method 2: Official OpenCode v2 Bootstrapper Script
 # ------------------------------------------------------------------------------
-if [[ "$INSTALLED" != "true" ]] && has_cmd curl; then
+if [[ "$INSTALLED" != "true" ]] && { has_cmd curl || has_cmd wget; }; then
     log_info "Installing via official OpenCode v2 installer script..."
     if run_remote_script bash https://opencode.ai/v2/install --no-modify-path; then
         INSTALLED=true
@@ -142,31 +130,21 @@ fi
 # ------------------------------------------------------------------------------
 # Method 3: Direct Prebuilt Package from NPM Registry
 # ------------------------------------------------------------------------------
-if [[ "$INSTALLED" != "true" ]]; then
+if [[ "$INSTALLED" != "true" ]] && has_cmd tar; then
     log_info "Downloading OpenCode prebuilt binary from npm registry (target: ${TARGET})..."
-    TMP_DIR="$(mktemp -d)"
-    trap 'rm -rf "$TMP_DIR"' EXIT
-    PACKAGE_NAME="@opencode/cli-${TARGET}"
-    TAR_URL="https://registry.npmjs.org/${PACKAGE_NAME}/-/cli-${TARGET}-${LATEST_VERSION}.tgz"
-
-    DOWNLOAD_OK=false
-    if has_cmd curl && curl -fsSL "$TAR_URL" -o "$TMP_DIR/opencode.tgz" 2>/dev/null; then
-        DOWNLOAD_OK=true
-    elif has_cmd wget && wget -qO "$TMP_DIR/opencode.tgz" "$TAR_URL" 2>/dev/null; then
-        DOWNLOAD_OK=true
+    if (
+        tmp_dir="$(mktemp -d)" || exit 1
+        trap 'rm -rf "$tmp_dir"' EXIT
+        package_name="@opencode/cli-${TARGET}"
+        tar_url="https://registry.npmjs.org/${package_name}/-/cli-${TARGET}-${LATEST_VERSION}.tgz"
+        download_file "$tmp_dir/opencode.tgz" "$tar_url" || exit 1
+        tar -xzf "$tmp_dir/opencode.tgz" -C "$tmp_dir" 2>/dev/null || exit 1
+        bin_found="$(find "$tmp_dir" -type f -name "opencode" 2>/dev/null | head -n 1)"
+        [[ -n "$bin_found" && -f "$bin_found" ]] || exit 1
+        install_binary "$bin_found" "opencode" "$INSTALL_DIR"
+    ); then
+        INSTALLED=true
     fi
-
-    if [[ "$DOWNLOAD_OK" == "true" ]] && has_cmd tar; then
-        if tar -xzf "$TMP_DIR/opencode.tgz" -C "$TMP_DIR" 2>/dev/null; then
-            BIN_FOUND="$(find "$TMP_DIR" -type f -name "opencode" 2>/dev/null | head -n 1)"
-            if [[ -n "$BIN_FOUND" && -f "$BIN_FOUND" ]]; then
-                ensure_dir "$INSTALL_DIR"
-                install -m 755 "$BIN_FOUND" "$INSTALL_DIR/opencode"
-                INSTALLED=true
-            fi
-        fi
-    fi
-    rm -rf "$TMP_DIR"
 fi
 
 # ------------------------------------------------------------------------------
