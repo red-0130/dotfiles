@@ -37,6 +37,8 @@ dotfiles/
 │   ├── antigravity.sh
 │   ├── bat.sh
 │   ├── bun.sh
+│   ├── devsy-cli.sh
+│   ├── devsy.sh
 │   ├── eza.sh
 │   ├── fd.sh
 │   ├── flatpak.sh
