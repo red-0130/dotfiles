@@ -14,7 +14,7 @@ if has_cmd bat || has_cmd batcat; then
     # Ensure 'bat' symlink exists if installed as 'batcat' (Debian/Ubuntu)
     if ! has_cmd bat && has_cmd batcat; then
         ensure_dir "$HOME/.local/bin"
-        ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
+        ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
     fi
     exit 0
 fi
@@ -28,7 +28,7 @@ case "$PKG" in
         run_privileged apt-get install -y bat
         ensure_dir "$HOME/.local/bin"
         if has_cmd batcat && ! has_cmd bat; then
-            ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
+            ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
         fi
         ;;
     brew)

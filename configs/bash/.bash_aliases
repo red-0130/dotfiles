@@ -65,8 +65,8 @@ alias workspace='cd "${PROJECT_WORKSPACE:-/workspaces}"'
 
 # podman commands
 if command -v podman &>/dev/null && command -v fzf &>/dev/null; then
-  alias image-rm='podman image rm $(podman image ls | fzf --accept-nth=3)'
-  alias container-rm='podman rm $(podman ps -a | fzf --accept-nth=1)'
+  alias image-rm='podman image ls | fzf --header-lines=1 --accept-nth=3 | xargs -r podman image rm'
+  alias container-rm='podman ps -a | fzf --header-lines=1 --accept-nth=1 | xargs -r podman rm'
 fi
 
 # coder commands
