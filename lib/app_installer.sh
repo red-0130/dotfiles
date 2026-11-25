@@ -142,5 +142,6 @@ install_apps() {
     log_success "Completed: Installed ${count} application(s) successfully!"
   else
     log_warn "Finished with ${failed} failure(s). ${count} app(s) installed successfully."
+    return 1
   fi
 }

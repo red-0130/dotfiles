@@ -128,7 +128,7 @@ main() {
     log_info "Detected environment: ${COLOR_BOLD}${env_type}${COLOR_RESET}"
     log_info "No flags provided. Installing predefined configs: ${COLOR_GREEN}${PREDEFINED_CONFIGS[*]}${COLOR_RESET}"
     install_configs "${PREDEFINED_CONFIGS[@]}"
-    exit 0
+    return
   fi
 
   local interactive_config=false
@@ -186,16 +186,18 @@ main() {
     esac
   done
 
+  local rc=0
+
   # 1. Handle explicit config installations
   if [[ ${#explicit_configs[@]} -gt 0 ]]; then
-    install_configs "${explicit_configs[@]}"
+    install_configs "${explicit_configs[@]}" || rc=1
   fi
 
   # 2. Handle --all configs
   if $install_all_configs; then
     local all_configs=()
     readarray -t all_configs < <(get_available_configs)
-    install_configs "${all_configs[@]}"
+    install_configs "${all_configs[@]}" || rc=1
   fi
 
   # 3. Handle interactive config selection
@@ -216,7 +218,7 @@ main() {
 
       if [[ $menu_status -eq 0 && -n "$menu_out" ]]; then
         readarray -t selected_configs <<<"$menu_out"
-        install_configs "${selected_configs[@]}"
+        install_configs "${selected_configs[@]}" || rc=1
       elif [[ $menu_status -eq 2 || $menu_status -eq 0 ]]; then
         log_warn "No configurations selected."
       else
@@ -227,7 +229,7 @@ main() {
 
   # 4. Handle explicit app installations
   if [[ ${#explicit_apps[@]} -gt 0 ]]; then
-    install_apps "${explicit_apps[@]}"
+    install_apps "${explicit_apps[@]}" || rc=1
   fi
 
   # 5. Handle interactive app selection
@@ -247,7 +249,7 @@ main() {
 
       if [[ $menu_status -eq 0 && -n "$menu_out" ]]; then
         readarray -t selected_apps <<<"$menu_out"
-        install_apps "${selected_apps[@]}"
+        install_apps "${selected_apps[@]}" || rc=1
       elif [[ $menu_status -eq 2 || $menu_status -eq 0 ]]; then
         log_warn "No applications selected."
       else
@@ -255,6 +257,8 @@ main() {
       fi
     fi
   fi
+
+  return "$rc"
 }
 
 main "$@"

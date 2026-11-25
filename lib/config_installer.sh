@@ -65,6 +65,7 @@ install_single_config() {
 
   # 2. Custom .target file
   if [[ -f "$src/.target" ]]; then
+    local rc=0
     while IFS= read -r line || [[ -n "$line" ]]; do
       # Trim whitespace
       line="$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
@@ -74,12 +75,12 @@ install_single_config() {
       if [[ "$line" == *":"* ]]; then
         local sub_src="${line%%:*}"
         local target="${line#*:}"
-        safe_symlink "$src/$sub_src" "$target"
+        safe_symlink "$src/$sub_src" "$target" || rc=1
       else
-        safe_symlink "$src" "$line"
+        safe_symlink "$src" "$line" || rc=1
       fi
-    done <"$src/.target"
-    return 0
+    done <"$src/.target" || rc=1
+    return "$rc"
   fi
 
   # 3. Known application-specific link conventions
@@ -87,11 +88,12 @@ install_single_config() {
   bash)
     local linked_any=false
     local linked_files=()
+    local rc=0
 
     # First check common bash config files without dot
     for bf in bashrc bash_aliases bash_profile; do
       if [[ -f "$src/$bf" ]]; then
-        safe_symlink "$src/$bf" "$HOME/.$bf"
+        safe_symlink "$src/$bf" "$HOME/.$bf" || rc=1
         linked_any=true
         linked_files+=("$bf")
       fi
@@ -102,66 +104,71 @@ install_single_config() {
     for f in "$src"/.*; do
       local fname="$(basename "$f")"
       [[ "$fname" == "." || "$fname" == ".." || "$fname" == ".target" || "$fname" == ".description" ]] && continue
-      safe_symlink "$f" "$HOME/$fname"
+      safe_symlink "$f" "$HOME/$fname" || rc=1
       linked_any=true
     done
     shopt -u nullglob
-    $linked_any && return 0
+    if $linked_any; then
+      return "$rc"
+    fi
     ;;
 
   git)
     local linked_any=false
+    local rc=0
     if [[ -f "$src/.gitconfig" ]]; then
-      safe_symlink "$src/.gitconfig" "$HOME/.gitconfig"
+      safe_symlink "$src/.gitconfig" "$HOME/.gitconfig" || rc=1
       linked_any=true
     elif [[ -f "$src/gitconfig" ]]; then
-      safe_symlink "$src/gitconfig" "$HOME/.gitconfig"
+      safe_symlink "$src/gitconfig" "$HOME/.gitconfig" || rc=1
       linked_any=true
     elif [[ -f "$src/config" ]]; then
-      safe_symlink "$src/config" "$HOME/.gitconfig"
+      safe_symlink "$src/config" "$HOME/.gitconfig" || rc=1
       linked_any=true
     fi
 
     if [[ -f "$src/.gitignore_global" ]]; then
-      safe_symlink "$src/.gitignore_global" "$HOME/.gitignore_global"
+      safe_symlink "$src/.gitignore_global" "$HOME/.gitignore_global" || rc=1
       linked_any=true
     elif [[ -f "$src/gitignore_global" ]]; then
-      safe_symlink "$src/gitignore_global" "$HOME/.gitignore_global"
+      safe_symlink "$src/gitignore_global" "$HOME/.gitignore_global" || rc=1
       linked_any=true
     elif [[ -f "$src/ignore" ]]; then
-      safe_symlink "$src/ignore" "$HOME/.gitignore_global"
+      safe_symlink "$src/ignore" "$HOME/.gitignore_global" || rc=1
       linked_any=true
     fi
-    $linked_any && return 0
+    if $linked_any; then
+      return "$rc"
+    fi
     ;;
 
   tmux)
     if [[ -f "$src/.tmux.conf" ]]; then
       safe_symlink "$src/.tmux.conf" "$HOME/.tmux.conf"
-      return 0
+      return $?
     elif [[ -f "$src/tmux.conf" ]]; then
       safe_symlink "$src/tmux.conf" "$HOME/.tmux.conf"
-      return 0
+      return $?
     fi
     ;;
 
   zsh)
     if [[ -f "$src/.zshrc" ]]; then
       safe_symlink "$src/.zshrc" "$HOME/.zshrc"
-      return 0
+      return $?
     elif [[ -f "$src/zshrc" ]]; then
       safe_symlink "$src/zshrc" "$HOME/.zshrc"
-      return 0
+      return $?
     fi
     ;;
 
   vim)
     if [[ -f "$src/.vimrc" ]]; then
       safe_symlink "$src/.vimrc" "$HOME/.vimrc"
-      return 0
+      return $?
     elif [[ -f "$src/vimrc" ]]; then
       safe_symlink "$src/vimrc" "$HOME/.vimrc"
-      return 0
+      return $?
     fi
     ;;
 
@@ -169,7 +176,7 @@ install_single_config() {
     if [[ -f "$src/starship.toml" ]]; then
       ensure_dir "$HOME/.config"
       safe_symlink "$src/starship.toml" "$HOME/.config/starship.toml"
-      return 0
+      return $?
     fi
     ;;
   esac
@@ -188,10 +195,11 @@ install_single_config() {
     shopt -u nullglob
 
     if [[ ${#dotfiles[@]} -gt 0 ]]; then
+      local rc=0
       for f in "${dotfiles[@]}"; do
-        safe_symlink "$f" "$HOME/$(basename "$f")"
+        safe_symlink "$f" "$HOME/$(basename "$f")" || rc=1
       done
-      return 0
+      return "$rc"
     else
       # Link entire directory to ~/.config/<app>
       ensure_dir "$HOME/.config"
@@ -230,5 +238,6 @@ install_configs() {
     log_success "Completed: Installed/updated ${count} config(s) successfully!"
   else
     log_warn "Finished with ${failed} failure(s). ${count} config(s) installed successfully."
+    return 1
   fi
 }
