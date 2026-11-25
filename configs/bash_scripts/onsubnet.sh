@@ -5,18 +5,18 @@ onsubnet() {
     printf "Note:\n\tThe partial-ip-address must match starting at the first\n"
     printf "\tcharacter of the ip-address, therefore the first example\n"
     printf "\tabove will match 10.10.10.1 but not 110.10.10.1\n"
-    exit 0
+    return 0
   fi
 
-  on=0
-  off=1
+  local on=0
+  local off=1
   if [[ "$1" == "--not" ]]; then
     shift
     on=1
     off=0
   fi
 
-  regexp="^$(sed 's/\./\\./g' <<<"$1")"
+  local regexp="^$(sed 's/\./\\./g' <<<"$1")"
 
   if [[ "$(uname)" == "Darwin" ]]; then
     ifconfig | grep -F 'inet ' | grep -Fv 127.0.0. | cut -d ' ' -f 2 | grep -Eq "$regexp"
@@ -25,11 +25,11 @@ onsubnet() {
   fi
 
   if [[ $? == 0 ]]; then
-    exit $on
+    return $on
   elif [[ "$(whoami)" == "coder" ]]; then
-    exit $on
+    return $on
   else
-    exit $off
+    return $off
   fi
 }
 

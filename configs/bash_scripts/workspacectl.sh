@@ -26,7 +26,7 @@ wsctl() {
   }
 
   get-workspace() {
-    [ -z "$PROJECT_WORKSPACE" ] && echo "Default workspace is not set" && exit 1
+    [ -z "$PROJECT_WORKSPACE" ] && echo "Default workspace is not set" && return 1
     echo "$PROJECT_WORKSPACE"
   }
 
