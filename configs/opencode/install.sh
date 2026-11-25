@@ -40,10 +40,15 @@ fi
 # Ensure destination directory exists (whether it previously existed or not)
 mkdir -p "$TARGET_DIR"
 
-# If target file exists and differs from source, create a backup
-if [[ -f "$TARGET_FILE" ]] && ! cmp -s "$SRC_CONFIG" "$TARGET_FILE"; then
-  if declare -f backup_target >/dev/null 2>&1; then
-    backup_target "$TARGET_FILE"
+# If target exists (including symlinks) and differs, back it up; remove any remaining symlink before cp
+if [[ -e "$TARGET_FILE" || -L "$TARGET_FILE" ]]; then
+  if [[ -L "$TARGET_FILE" ]] || ! cmp -s "$SRC_CONFIG" "$TARGET_FILE"; then
+    if declare -f backup_target >/dev/null 2>&1; then
+      backup_target "$TARGET_FILE"
+    fi
+  fi
+  if [[ -L "$TARGET_FILE" ]]; then
+    rm -f "$TARGET_FILE"
   fi
 fi
 

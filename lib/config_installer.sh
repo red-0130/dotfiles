@@ -184,17 +184,20 @@ install_single_config() {
   # 4. Standard XDG or fallback
   # If it's a directory:
   if [[ -d "$src" ]]; then
-    # Check if it has leading dot files
+    # Symlink dotfiles to $HOME only when directory contains no non-dot entries
     local dotfiles=()
+    local regular_files=()
     shopt -s nullglob
     for f in "$src"/.*; do
-      local bn="$(basename "$f")"
+      local bn
+      bn="$(basename "$f")"
       [[ "$bn" == "." || "$bn" == ".." || "$bn" == ".target" || "$bn" == ".description" ]] && continue
       dotfiles+=("$f")
     done
+    regular_files=("$src"/*)
     shopt -u nullglob
 
-    if [[ ${#dotfiles[@]} -gt 0 ]]; then
+    if [[ ${#dotfiles[@]} -gt 0 && ${#regular_files[@]} -eq 0 ]]; then
       local rc=0
       for f in "${dotfiles[@]}"; do
         safe_symlink "$f" "$HOME/$(basename "$f")" || rc=1
