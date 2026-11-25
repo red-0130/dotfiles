@@ -9,7 +9,7 @@ wsctl() {
       WORKSPACE="$PWD"
     fi
     echo "Setting PROJECT_WORKSPACE to $WORKSPACE"
-    echo "PROJECT_WORKSPACE=$WORKSPACE" >"$HOME/.workspace"
+    printf 'PROJECT_WORKSPACE=%q\n' "$WORKSPACE" >"$HOME/.workspace"
   }
 
   set-gemini-api() {
@@ -19,7 +19,7 @@ wsctl() {
       return 1
     else
       echo "Setting GEMINI CLI API..."
-      echo "export GEMINI_API_KEY=$API" >"$HOME/.gemini_api"
+      ( umask 077 && touch "$HOME/.gemini_api" && chmod 600 "$HOME/.gemini_api" && printf 'export GEMINI_API_KEY=%q\n' "$API" >"$HOME/.gemini_api" ) || return 1
       echo "Done."
       return 0
     fi
