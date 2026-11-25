@@ -71,6 +71,7 @@ install_ghostty_ubuntu_community() {
             arch="$(dpkg --print-architecture 2>/dev/null || echo 'amd64')"
             local tmp_dir
             tmp_dir="$(mktemp -d)"
+            trap "rm -rf '$tmp_dir'" EXIT
             local deb_url
             deb_url="$(curl -fsSL https://api.github.com/repos/mkasberg/ghostty-ubuntu/releases/latest 2>/dev/null | grep -E "browser_download_url.*_${arch}\.deb" | head -n 1 | cut -d '"' -f 4)"
 

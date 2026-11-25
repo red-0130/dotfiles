@@ -292,6 +292,66 @@ MAGIC_OUT="$(
 assert_eq 0 "$rc" "magic-shell.sh handles all git states without leaking globals"
 assert_eq "ok" "$MAGIC_OUT" "magic-shell.sh prompt markers and scope check passed"
 
+# 10. Interactive UI viewport scrolling on short terminals
+echo "==> Interactive UI viewport scrolling"
+if command -v python3 >/dev/null 2>&1; then
+  ui_out="$(python3 - "$REPO_DIR" <<'PY'
+import fcntl, os, pty, re, select, struct, subprocess, sys, termios, time
+
+repo = sys.argv[1]
+
+def run_ui(rows, keys):
+    master, slave = pty.openpty()
+    fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", rows, 80, 0, 0))
+    cmd = [
+        "bash", "-c",
+        f'set -euo pipefail; source "{repo}/lib/utils.sh"; source "{repo}/lib/ui.sh"; '
+        'get_app_description() { echo "desc $1"; }; is_app_installed() { return 1; }; '
+        'items=(); for i in $(seq -w 1 28); do items+=("app$i"); done; '
+        'run_interactive_checklist "Apps" "app" "${items[@]}"'
+    ]
+    env = os.environ.copy()
+    env["TERM"] = "xterm-256color"
+    proc = subprocess.Popen(cmd, stdin=slave, stdout=slave, stderr=slave, env=env, close_fds=True)
+    os.close(slave)
+    out = bytearray()
+    def drain(wait=0.25):
+        end = time.time() + wait
+        while time.time() < end:
+            r, _, _ = select.select([master], [], [], 0.03)
+            if r:
+                try:
+                    chunk = os.read(master, 4096)
+                    if not chunk:
+                        break
+                    out.extend(chunk)
+                except OSError:
+                    break
+    drain(0.35)
+    for k in keys:
+        os.write(master, k)
+        drain(0.08)
+    proc.wait(timeout=5)
+    os.close(master)
+    return out.decode("utf-8", errors="replace"), proc.returncode
+
+for rows, keys, expect_range in ((10, [b"k", b" ", b"\r"], "27-28/28"), (24, [b"j"]*15 + [b"q"], "8-23/28")):
+    text, rc = run_ui(rows, keys)
+    clean = re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", "", text)
+    ups = [int(m) for m in re.findall(r"\x1b\[(\d+)A", text)]
+    assert ups and all(u < rows for u in ups), f"rows={rows} cursor-up overflow: {ups}"
+    assert expect_range in clean, f"rows={rows} missing viewport {expect_range}"
+    if b"\r" in keys:
+        assert rc == 0 and "app28" in clean.splitlines()[-1], f"rows={rows} selection failed: rc={rc}"
+print("viewport ok")
+PY
+  )" && rc=0 || rc=$?
+  assert_eq 0 "$rc" "interactive checklist scrolls cleanly at 10 and 24 rows"
+  assert_contains "$ui_out" "viewport ok" "interactive checklist viewport ranges and selection verified"
+else
+  echo "  SKIP: python3 not installed"
+fi
+
 echo ""
 echo "Results: ${PASSED} passed, ${FAILED} failed"
 [[ "$FAILED" -eq 0 ]]

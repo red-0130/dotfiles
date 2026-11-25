@@ -113,6 +113,7 @@ if ! has_cmd curl || ! has_cmd tar; then
 fi
 
 TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 TAR_FILE="$TMP_DIR/superfile.tar.gz"
 
 # Query GitHub API for download URL if available

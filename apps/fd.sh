@@ -73,6 +73,7 @@ zypper)
       ;;
     esac
     TMP_DIR="$(mktemp -d)"
+    trap 'rm -rf "$TMP_DIR"' EXIT
     LATEST_TAG="$(curl -fsSL https://api.github.com/repos/sharkdp/fd/releases/latest 2>/dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' || echo "v10.2.0")"
     if [[ -z "$LATEST_TAG" ]]; then
       LATEST_TAG="v10.2.0"

@@ -153,6 +153,7 @@ if ! has_cmd curl && ! has_cmd wget; then
 fi
 
 TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 # Query GitHub API for download URL
 RELEASE_JSON="$(curl -fsSL https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null || true)"

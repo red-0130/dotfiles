@@ -203,8 +203,27 @@ run_interactive_checklist() {
             fi
         done
 
-        # Render list of items
-        for ((i=0; i<total_items; i++)); do
+        # Render list of items within terminal height
+        local term_lines
+        term_lines="$(tput lines 2>/dev/null || echo 24)"
+        [[ "$term_lines" =~ ^[0-9]+$ ]] && (( term_lines > 0 )) || term_lines=24
+
+        # 5 header + 2 footer + 1 trailing cursor row so redraws never scroll
+        local max_visible=$((term_lines - 8))
+        (( max_visible < 1 )) && max_visible=1
+
+        local start=0
+        local end=$total_items
+        if (( total_items > max_visible )); then
+            start=$(( current - max_visible / 2 ))
+            (( start < 0 )) && start=0
+            if (( start + max_visible > total_items )); then
+                start=$(( total_items - max_visible ))
+            fi
+            end=$(( start + max_visible ))
+        fi
+
+        for ((i=start; i<end; i++)); do
             local marker=" "
             local cursor_prefix="   "
             local color_name="${COLOR_RESET}"
@@ -240,11 +259,17 @@ run_interactive_checklist() {
             lines=$((lines + 1))
         done
 
+        local range_hint=""
+        if (( total_items > max_visible )); then
+            range_hint=" (${COLOR_CYAN}$((start + 1))-${end}${COLOR_RESET}/${total_items})"
+        fi
+
         # Footer
         buffer+="\033[2K\r\n"
         lines=$((lines + 1))
-        buffer+="\033[2K\r ${COLOR_BOLD}Selected: ${COLOR_GREEN}${sel_count}${COLOR_RESET}${COLOR_BOLD}/${total_items}${COLOR_RESET} items. ${COLOR_DIM}Press ${COLOR_RESET}${COLOR_BOLD}[Enter]${COLOR_RESET}${COLOR_DIM} to proceed, ${COLOR_RESET}${COLOR_BOLD}[q]${COLOR_RESET}${COLOR_DIM} to cancel.${COLOR_RESET}\n"
+        buffer+="\033[2K\r ${COLOR_BOLD}Selected: ${COLOR_GREEN}${sel_count}${COLOR_RESET}${COLOR_BOLD}/${total_items}${COLOR_RESET} items${range_hint}. ${COLOR_DIM}Press ${COLOR_RESET}${COLOR_BOLD}[Enter]${COLOR_RESET}${COLOR_DIM} to proceed, ${COLOR_RESET}${COLOR_BOLD}[q]${COLOR_RESET}${COLOR_DIM} to cancel.${COLOR_RESET}\n"
         lines=$((lines + 1))
+        buffer+="\033[J"
 
         rendered_lines=$lines
         echo -ne "$buffer" > "$tty_out"

@@ -67,6 +67,7 @@ apt)
       ;;
     esac
     TMP_DIR="$(mktemp -d)"
+    trap 'rm -rf "$TMP_DIR"' EXIT
     curl -fsSL "https://github.com/eza-community/eza/releases/latest/download/eza_${EZA_ARCH}.tar.gz" -o "$TMP_DIR/eza.tar.gz"
     tar -xzf "$TMP_DIR/eza.tar.gz" -C "$TMP_DIR"
     install -m 755 "$TMP_DIR/eza" "$HOME/.local/bin/eza"

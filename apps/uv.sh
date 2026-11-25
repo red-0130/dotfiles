@@ -114,6 +114,7 @@ if ! has_cmd curl && ! has_cmd wget; then
 fi
 
 TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 TAR_FILE="$TMP_DIR/uv-${TARGET}.tar.gz"
 
 DOWNLOAD_URLS=(

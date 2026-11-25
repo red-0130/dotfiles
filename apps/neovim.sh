@@ -111,6 +111,7 @@ if ! has_cmd curl || ! has_cmd tar; then
 fi
 
 TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 TAR_FILE="$TMP_DIR/$ASSET_NAME"
 DOWNLOAD_URL="https://github.com/neovim/neovim/releases/download/v${LATEST_VERSION}/${ASSET_NAME}"
 

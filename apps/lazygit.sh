@@ -105,6 +105,7 @@ install_lazygit_binary() {
 
     local tmp_dir
     tmp_dir="$(mktemp -d)"
+    trap "rm -rf '$tmp_dir'" EXIT
     local tar_url="https://github.com/jesseduffield/lazygit/releases/download/v${version}/lazygit_${version}_${os}_${lazygit_arch}.tar.gz"
 
     if ! curl -fsSL "$tar_url" -o "$tmp_dir/lazygit.tar.gz" 2>/dev/null; then

@@ -155,6 +155,7 @@ fi
 if [[ "$INSTALLED" != "true" ]]; then
     log_info "Downloading OpenCode prebuilt binary from npm registry (target: ${TARGET})..."
     TMP_DIR="$(mktemp -d)"
+    trap 'rm -rf "$TMP_DIR"' EXIT
     PACKAGE_NAME="@opencode/cli-${TARGET}"
     TAR_URL="https://registry.npmjs.org/${PACKAGE_NAME}/-/cli-${TARGET}-${LATEST_VERSION}.tgz"
 

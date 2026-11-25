@@ -65,6 +65,7 @@ log_info "Installing / updating Node Version Manager (nvm) to v${LATEST_VERSION}
 # ------------------------------------------------------------------------------
 INSTALL_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v${LATEST_VERSION}/install.sh"
 TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 TMP_SCRIPT="$TMP_DIR/install.sh"
 
 if has_cmd curl; then

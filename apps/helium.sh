@@ -160,13 +160,14 @@ case "$PKG" in
             local dmg_url
             dmg_url="$(echo "$mac_json" | grep -E "browser_download_url.*\.dmg" | head -n 1 | cut -d '"' -f 4)"
             if [[ -n "$dmg_url" ]]; then
-                local tmp_dmg
-                tmp_dmg="$(mktemp -d)/helium.dmg"
+                TMP_DIR="$(mktemp -d)"
+                trap 'rm -rf "$TMP_DIR"' EXIT
+                tmp_dmg="$TMP_DIR/helium.dmg"
                 curl -fsSL "$dmg_url" -o "$tmp_dmg"
                 hdiutil attach "$tmp_dmg" -nobrowse -quiet
                 cp -R /Volumes/*[Hh]elium*/*.app /Applications/ 2>/dev/null || true
                 hdiutil detach /Volumes/*[Hh]elium* -quiet 2>/dev/null || true
-                rm -f "$tmp_dmg"
+                rm -rf "$TMP_DIR"
                 ensure_dir "$HOME/.local/bin"
                 ln -sf "/Applications/Helium.app/Contents/MacOS/Helium" "$HOME/.local/bin/helium" 2>/dev/null || true
             else

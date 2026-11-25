@@ -176,6 +176,7 @@ else
 fi
 
 TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 ARCHIVE="$TMP_DIR/antigravity.tar.gz"
 
 log_info "Downloading Antigravity 2.0 (linux-${ARCH_SLUG})..."

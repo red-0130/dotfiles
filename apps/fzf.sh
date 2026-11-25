@@ -48,6 +48,7 @@ install_fzf_github_binary() {
 
   local tmp_dir
   tmp_dir="$(mktemp -d)"
+  trap "rm -rf '$tmp_dir'" EXIT
   local tar_url="https://github.com/junegunn/fzf/releases/download/v${version}/fzf-${version}-${fzf_arch}.tar.gz"
 
   if curl -fsSL "$tar_url" -o "$tmp_dir/fzf.tar.gz"; then

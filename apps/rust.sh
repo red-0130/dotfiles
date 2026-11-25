@@ -94,6 +94,7 @@ if ! has_cmd curl && ! has_cmd wget; then
 fi
 
 TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 RUSTUP_INIT="$TMP_DIR/rustup-init.sh"
 
 if has_cmd curl; then

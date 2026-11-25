@@ -92,6 +92,7 @@ install_ripgrep_github_binary() {
 
     ensure_dir "$HOME/.local/bin"
     local tmp_dir="$(mktemp -d)"
+    trap "rm -rf '$tmp_dir'" EXIT
 
     log_info "Downloading: $download_url"
     if ! curl -fsSL "$download_url" -o "$tmp_dir/$tar_file" 2>/dev/null; then
