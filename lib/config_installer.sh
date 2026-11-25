@@ -17,7 +17,9 @@ get_available_configs() {
       configs+=("$name")
     done
   fi
-  printf '%s\n' "${configs[@]}"
+  if (( ${#configs[@]} > 0 )); then
+    printf '%s\n' "${configs[@]}"
+  fi
 }
 
 get_config_description() {
@@ -39,7 +41,12 @@ get_config_description() {
 }
 
 install_single_config() {
-  local app="$1"
+  local app="${1:-}"
+  if [[ -z "$app" || "$app" == "." || "$app" == ".." || "$app" == */* ]]; then
+    log_error "Invalid config name: '$app'"
+    return 1
+  fi
+
   local src="$CONFIG_DIR/$app"
 
   if [[ ! -e "$src" ]]; then

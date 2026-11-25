@@ -7,7 +7,7 @@
 get_tty_out() {
     if [[ -t 2 ]]; then
         echo "/dev/stderr"
-    elif [[ -w /dev/tty ]]; then
+    elif ( : > /dev/tty ) 2>/dev/null; then
         echo "/dev/tty"
     else
         echo "/dev/stderr"
@@ -15,13 +15,7 @@ get_tty_out() {
 }
 
 get_tty_in() {
-    if [[ -t 0 ]]; then
-        echo "/dev/stdin"
-    elif [[ -r /dev/tty ]]; then
-        echo "/dev/tty"
-    else
-        echo "/dev/stdin"
-    fi
+    echo "/dev/stdin"
 }
 
 # ------------------------------------------------------------------------------
@@ -31,6 +25,10 @@ fallback_selector() {
     local title="$1"
     shift
     local items=("$@")
+    if [[ ${#items[@]} -eq 0 ]]; then
+        return 2
+    fi
+
     local tty_out="$(get_tty_out)"
     local tty_in="$(get_tty_in)"
 
@@ -48,7 +46,7 @@ fallback_selector() {
 
     local choice=""
     echo -n "Selection > " > "$tty_out"
-    read -r choice < "$tty_in" || choice="q"
+    read -r choice < "$tty_in" || true
 
     if [[ "$choice" == "q" || "$choice" == "Q" || -z "$choice" ]]; then
         return 1
@@ -61,12 +59,16 @@ fallback_selector() {
         return 0
     fi
 
+    local any_selected=false
     for num in $choice; do
-        if [[ "$num" =~ ^[0-9]+$ ]] && (( num >= 1 && num <= ${#items[@]} )); then
-            echo "${items[$((num-1))]}"
+        if [[ "$num" =~ ^[0-9]+$ ]] && (( 10#$num >= 1 && 10#$num <= ${#items[@]} )); then
+            echo "${items[$((10#$num - 1))]}"
+            any_selected=true
         fi
     done
-    return 0
+
+    $any_selected && return 0
+    return 2
 }
 
 # ------------------------------------------------------------------------------
@@ -90,7 +92,7 @@ run_interactive_checklist() {
     local tty_in="$(get_tty_in)"
 
     # Check if we have an interactive terminal
-    if [[ ! -t 0 && ! -r /dev/tty ]] || [[ "${TERM:-}" == "dumb" ]]; then
+    if [[ ! -t 0 ]] || [[ "${TERM:-}" == "dumb" ]]; then
         fallback_selector "$title" "${items[@]}"
         return $?
     fi

@@ -17,7 +17,9 @@ get_available_apps() {
       apps+=("$name")
     done
   fi
-  printf '%s\n' "${apps[@]}"
+  if (( ${#apps[@]} > 0 )); then
+    printf '%s\n' "${apps[@]}"
+  fi
 }
 
 get_app_script_path() {

@@ -214,10 +214,10 @@ main() {
       local menu_status=$?
       set -e
 
-      if [[ $menu_status -eq 0 ]]; then
+      if [[ $menu_status -eq 0 && -n "$menu_out" ]]; then
         readarray -t selected_configs <<<"$menu_out"
         install_configs "${selected_configs[@]}"
-      elif [[ $menu_status -eq 2 ]]; then
+      elif [[ $menu_status -eq 2 || $menu_status -eq 0 ]]; then
         log_warn "No configurations selected."
       else
         log_info "Configuration selection cancelled."
@@ -245,10 +245,10 @@ main() {
       local menu_status=$?
       set -e
 
-      if [[ $menu_status -eq 0 ]]; then
+      if [[ $menu_status -eq 0 && -n "$menu_out" ]]; then
         readarray -t selected_apps <<<"$menu_out"
         install_apps "${selected_apps[@]}"
-      elif [[ $menu_status -eq 2 ]]; then
+      elif [[ $menu_status -eq 2 || $menu_status -eq 0 ]]; then
         log_warn "No applications selected."
       else
         log_info "Application installation cancelled."
