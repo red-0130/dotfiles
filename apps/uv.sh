@@ -10,34 +10,10 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
-if [[ -d "$HOME/.cargo/bin" ]] && [[ ":$PATH:" != *":$HOME/.cargo/bin:"* ]]; then
-    export PATH="$HOME/.cargo/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
+prepend_path "$HOME/.cargo/bin"
 
-# ------------------------------------------------------------------------------
-# Helper: Fetch latest release tag from GitHub releases
-# ------------------------------------------------------------------------------
-get_latest_uv_version() {
-    local version=""
-    if has_cmd curl; then
-        version="$(curl -fsSL https://api.github.com/repos/astral-sh/uv/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-        if [[ -z "$version" ]]; then
-            version="$(curl -fsSIL "https://github.com/astral-sh/uv/releases/latest" 2>/dev/null | grep -i '^location:' | sed -E 's/.*\/tag\/v?([^ \r\n]+).*/\1/' || true)"
-        fi
-    fi
-    if [[ -z "$version" ]] && has_cmd wget; then
-        version="$(wget -qO- https://api.github.com/repos/astral-sh/uv/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-    fi
-    if [[ -z "$version" ]]; then
-        version="0.6.5"
-    fi
-    echo "$version"
-}
-
-LATEST_VERSION="$(get_latest_uv_version)"
+LATEST_VERSION="$(get_github_latest_version "astral-sh/uv" "0.6.5")"
 
 # ------------------------------------------------------------------------------
 # Check if uv is already installed and up to date
@@ -184,9 +160,7 @@ fi
 # ------------------------------------------------------------------------------
 # Generate shell completions
 # ------------------------------------------------------------------------------
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 if has_cmd uv; then
     if ensure_dir "$HOME/.local/share/bash-completion/completions" 2>/dev/null; then

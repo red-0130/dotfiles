@@ -18,27 +18,7 @@ if [[ -s "$NVM_DIR/nvm.sh" ]]; then
     source "$NVM_DIR/nvm.sh"
 fi
 
-# ------------------------------------------------------------------------------
-# Helper: Fetch latest tag from GitHub releases
-# ------------------------------------------------------------------------------
-get_latest_nvm_version() {
-    local version=""
-    if has_cmd curl; then
-        version="$(curl -fsSL https://api.github.com/repos/nvm-sh/nvm/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-        if [[ -z "$version" ]]; then
-            version="$(curl -fsSIL "https://github.com/nvm-sh/nvm/releases/latest" 2>/dev/null | grep -i '^location:' | sed -E 's/.*\/tag\/v?([^ \r\n]+).*/\1/' || true)"
-        fi
-    fi
-    if [[ -z "$version" ]] && has_cmd wget; then
-        version="$(wget -qO- https://api.github.com/repos/nvm-sh/nvm/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-    fi
-    if [[ -z "$version" ]]; then
-        version="0.40.8"
-    fi
-    echo "$version"
-}
-
-LATEST_VERSION="$(get_latest_nvm_version)"
+LATEST_VERSION="$(get_github_latest_version "nvm-sh/nvm" "0.40.8")"
 
 # ------------------------------------------------------------------------------
 # Check if nvm is already installed and up to date

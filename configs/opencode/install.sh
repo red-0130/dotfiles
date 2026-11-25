@@ -7,21 +7,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
-# Source library utilities if available
-if [[ -f "$DOTFILES_DIR/lib/utils.sh" ]]; then
-  # shellcheck source=/dev/null
-  source "$DOTFILES_DIR/lib/utils.sh"
-else
-  log_info() { echo "  ℹ $*"; }
-  log_success() { echo "  ✔ $*"; }
-  log_warn() { echo "  ⚠ $*" >&2; }
-  log_error() { echo "  ✖ $*" >&2; }
-fi
-
-if [[ -f "$DOTFILES_DIR/lib/backup.sh" ]]; then
-  # shellcheck source=/dev/null
-  source "$DOTFILES_DIR/lib/backup.sh"
-fi
+source "$DOTFILES_DIR/lib/utils.sh"
+source "$DOTFILES_DIR/lib/backup.sh"
 
 SRC_CONFIG="${SCRIPT_DIR}/opencode.json"
 TARGET_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
@@ -43,9 +30,7 @@ mkdir -p "$TARGET_DIR"
 # If target exists (including symlinks) and differs, back it up; remove any remaining symlink before cp
 if [[ -e "$TARGET_FILE" || -L "$TARGET_FILE" ]]; then
   if [[ -L "$TARGET_FILE" ]] || ! cmp -s "$SRC_CONFIG" "$TARGET_FILE"; then
-    if declare -f backup_target >/dev/null 2>&1; then
-      backup_target "$TARGET_FILE"
-    fi
+    backup_target "$TARGET_FILE"
   fi
   if [[ -L "$TARGET_FILE" ]]; then
     rm -f "$TARGET_FILE"

@@ -7,31 +7,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
-# Source library utilities if available
-if [[ -f "$DOTFILES_DIR/lib/utils.sh" ]]; then
-  # shellcheck source=/dev/null
-  source "$DOTFILES_DIR/lib/utils.sh"
-else
-  log_info() { echo "  ℹ $*"; }
-  log_success() { echo "  ✔ $*"; }
-  log_warn() { echo "  ⚠ $*" >&2; }
-  log_error() { echo "  ✖ $*" >&2; }
-  log_dim() { echo "    $*"; }
-fi
-
-if ! declare -f ensure_dir >/dev/null 2>&1; then
-  ensure_dir() { mkdir -p "$1"; }
-fi
-
-if [[ -f "$DOTFILES_DIR/lib/backup.sh" ]]; then
-  # shellcheck source=/dev/null
-  source "$DOTFILES_DIR/lib/backup.sh"
-fi
-
-if [[ -f "$DOTFILES_DIR/lib/link.sh" ]]; then
-  # shellcheck source=/dev/null
-  source "$DOTFILES_DIR/lib/link.sh"
-fi
+source "$DOTFILES_DIR/lib/utils.sh"
+source "$DOTFILES_DIR/lib/backup.sh"
+source "$DOTFILES_DIR/lib/link.sh"
 
 SRC_CONFIG="${SCRIPT_DIR}/config"
 XDG_SSH_DIR="${HOME}/.config/ssh"
@@ -52,16 +30,7 @@ fi
 ensure_dir "$XDG_SSH_DIR"
 chmod 700 "$XDG_SSH_DIR"
 
-if command -v safe_symlink >/dev/null 2>&1; then
-  safe_symlink "$SRC_CONFIG" "$XDG_SSH_CONFIG"
-else
-  if [[ -L "$XDG_SSH_CONFIG" && "$(readlink "$XDG_SSH_CONFIG")" == "$SRC_CONFIG" ]]; then
-    log_info "Already linked: ~/.config/ssh/config"
-  else
-    ln -sf "$SRC_CONFIG" "$XDG_SSH_CONFIG"
-    log_success "Linked: ~/.config/ssh/config -> $SRC_CONFIG"
-  fi
-fi
+safe_symlink "$SRC_CONFIG" "$XDG_SSH_CONFIG"
 chmod 600 "$XDG_SSH_CONFIG" 2>/dev/null || true
 
 # Ensure ~/.ssh directory exists with strict permissions (0700)

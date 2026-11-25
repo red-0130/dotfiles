@@ -10,16 +10,7 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
-
-get_latest_devsy_version() {
-    local url="https://github.com/devsy-org/devsy/releases/latest"
-    if has_cmd curl; then
-        curl -fsSI "$url" 2>/dev/null | grep -iE '^location:.*/tag/' | sed -E 's/.*\/tag\/v?([^ \r\n]+).*/\1/' | head -n 1 || true
-    fi
-}
+prepend_path "$HOME/.local/bin"
 
 download_asset() {
     local asset="$1"
@@ -86,7 +77,7 @@ if ! has_cmd curl; then
     exit 1
 fi
 
-LATEST_VERSION="$(get_latest_devsy_version)"
+LATEST_VERSION="$(get_github_latest_version "devsy-org/devsy" "")"
 APPIMAGE_PATH="$HOME/.local/bin/devsy-desktop"
 APPIMAGE_VER_FILE="$HOME/.local/share/devsy-desktop.version"
 

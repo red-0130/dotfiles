@@ -11,15 +11,9 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
 # Ensure target directories are included in PATH for execution
-if [[ -d "$HOME/.opencode/bin" ]] && [[ ":$PATH:" != *":$HOME/.opencode/bin:"* ]]; then
-    export PATH="$HOME/.opencode/bin:$PATH"
-fi
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
-if [[ -d "/usr/local/bin" ]] && [[ ":$PATH:" != *":/usr/local/bin:"* ]]; then
-    export PATH="/usr/local/bin:$PATH"
-fi
+prepend_path "$HOME/.opencode/bin"
+prepend_path "$HOME/.local/bin"
+prepend_path "/usr/local/bin"
 
 INSTALL_DIR="$HOME/.opencode/bin"
 LOCAL_BIN="$HOME/.local/bin"
@@ -31,15 +25,11 @@ get_latest_opencode_version() {
     local version=""
     if has_cmd curl; then
         version="$(curl -fsSL https://opencode.ai/update/api/latest/cli/npm 2>/dev/null | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' || true)"
-        if [[ -z "$version" ]]; then
-            version="$(curl -fsSL https://api.github.com/repos/anomalyco/opencode/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-        fi
-    fi
-    if [[ -z "$version" ]] && has_cmd wget; then
+    elif has_cmd wget; then
         version="$(wget -qO- https://opencode.ai/update/api/latest/cli/npm 2>/dev/null | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' || true)"
     fi
     if [[ -z "$version" ]]; then
-        version="2.2.5"
+        version="$(get_github_latest_version "anomalyco/opencode" "2.2.5")"
     fi
     echo "$version"
 }
@@ -238,9 +228,7 @@ fi
 # ------------------------------------------------------------------------------
 # Verification
 # ------------------------------------------------------------------------------
-if [[ -d "$LOCAL_BIN" ]] && [[ ":$PATH:" != *":$LOCAL_BIN:"* ]]; then
-    export PATH="$LOCAL_BIN:$PATH"
-fi
+prepend_path "$LOCAL_BIN"
 
 if has_cmd opencode || [[ -x "$LOCAL_BIN/opencode" ]]; then
     VER_OUTPUT="$((opencode --version 2>/dev/null || "$LOCAL_BIN/opencode" --version 2>/dev/null) | head -n 1 || echo 'opencode in PATH')"

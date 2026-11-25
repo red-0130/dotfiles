@@ -142,6 +142,37 @@ ensure_dir() {
     fi
 }
 
+prepend_path() {
+    local dir="${1:-}"
+    if [[ -n "$dir" && -d "$dir" && ":$PATH:" != *":$dir:"* ]]; then
+        export PATH="${dir}${PATH:+:$PATH}"
+    fi
+}
+
+# Fetch latest release tag (without leading 'v') from GitHub, with optional fallback.
+get_github_latest_version() {
+    local repo="${1:?repo required (owner/repo)}"
+    local fallback="${2:-}"
+    local version=""
+
+    if has_cmd curl; then
+        version="$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" 2>/dev/null | grep -m 1 '"tag_name":' | sed -nE 's/.*"tag_name":[[:space:]]*"v?([^"]+)".*/\1/p' || true)"
+        if [[ -z "$version" ]]; then
+            version="$(curl -fsSIL "https://github.com/${repo}/releases/latest" 2>/dev/null | tr -d '\r' | grep -iE '^location:.*/tag/' | head -n 1 | sed -nE 's/.*\/tag\/v?([^[:space:]]+).*/\1/p' || true)"
+        fi
+    fi
+
+    if [[ -z "$version" ]] && has_cmd wget; then
+        version="$(wget -qO- "https://api.github.com/repos/${repo}/releases/latest" 2>/dev/null | grep -m 1 '"tag_name":' | sed -nE 's/.*"tag_name":[[:space:]]*"v?([^"]+)".*/\1/p' || true)"
+    fi
+
+    if [[ -z "$version" ]]; then
+        version="$fallback"
+    fi
+
+    echo "$version"
+}
+
 # Download a remote script to a temp file and execute it only after a clean, non-empty fetch.
 run_remote_script() {
     local shell_bin="$1" url="$2"

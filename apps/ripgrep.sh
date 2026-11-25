@@ -10,31 +10,9 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
-# ------------------------------------------------------------------------------
-# Helper: Fetch latest tag from GitHub releases
-# ------------------------------------------------------------------------------
-get_latest_ripgrep_version() {
-    local version=""
-    if has_cmd curl; then
-        version="$(curl -fsSL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-        if [[ -z "$version" ]]; then
-            version="$(curl -fsSIL "https://github.com/BurntSushi/ripgrep/releases/latest" 2>/dev/null | grep -i '^location:' | sed -E 's/.*\/tag\/v?([^ \r\n]+).*/\1/' || true)"
-        fi
-    fi
-    if [[ -z "$version" ]] && has_cmd wget; then
-        version="$(wget -qO- https://api.github.com/repos/BurntSushi/ripgrep/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-    fi
-    if [[ -z "$version" ]]; then
-        version="14.1.1"
-    fi
-    echo "$version"
-}
-
-LATEST_VERSION="$(get_latest_ripgrep_version)"
+LATEST_VERSION="$(get_github_latest_version "BurntSushi/ripgrep" "14.1.1")"
 
 # ------------------------------------------------------------------------------
 # Check if Ripgrep is already installed and up to date
@@ -184,9 +162,7 @@ esac
 # ------------------------------------------------------------------------------
 # Verify installation
 # ------------------------------------------------------------------------------
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 if has_cmd rg; then
     log_success "ripgrep installed successfully: $(rg --version 2>/dev/null | head -n 1 || echo 'rg in PATH')"

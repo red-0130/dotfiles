@@ -10,31 +10,9 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
-# ------------------------------------------------------------------------------
-# Helper: Fetch latest release tag from GitHub releases
-# ------------------------------------------------------------------------------
-get_latest_treesitter_version() {
-    local version=""
-    if has_cmd curl; then
-        version="$(curl -fsSL https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-        if [[ -z "$version" ]]; then
-            version="$(curl -fsSIL "https://github.com/tree-sitter/tree-sitter/releases/latest" 2>/dev/null | grep -i '^location:' | sed -E 's/.*\/tag\/v?([^ \r\n]+).*/\1/' || true)"
-        fi
-    fi
-    if [[ -z "$version" ]] && has_cmd wget; then
-        version="$(wget -qO- https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-    fi
-    if [[ -z "$version" ]]; then
-        version="0.25.3"
-    fi
-    echo "$version"
-}
-
-LATEST_VERSION="$(get_latest_treesitter_version)"
+LATEST_VERSION="$(get_github_latest_version "tree-sitter/tree-sitter" "0.25.3")"
 
 # ------------------------------------------------------------------------------
 # Check if tree-sitter is already installed and up to date
@@ -258,9 +236,7 @@ rm -rf "$TMP_DIR"
 # ------------------------------------------------------------------------------
 # Verify installation
 # ------------------------------------------------------------------------------
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 if has_cmd tree-sitter || has_cmd tree-sitter-cli; then
     log_success "tree-sitter CLI installed successfully: $((tree-sitter --version || tree-sitter-cli --version) 2>/dev/null | head -n 1 || echo 'tree-sitter in PATH')"

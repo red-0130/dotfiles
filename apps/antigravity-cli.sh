@@ -10,12 +10,8 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  export PATH="$HOME/.local/bin:$PATH"
-fi
-if [[ -d "/usr/local/bin" ]] && [[ ":$PATH:" != *":/usr/local/bin:"* ]]; then
-  export PATH="/usr/local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
+prepend_path "/usr/local/bin"
 
 TARGET_DIR="${AGY_INSTALL_DIR:-$HOME/.local/bin}"
 BINARY_PATH="$TARGET_DIR/agy"

@@ -11,21 +11,10 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
 TARGET_DIR="${DEVSY_INSTALL_DIR:-$HOME/.local/bin}"
-if [[ -d "$TARGET_DIR" ]] && [[ ":$PATH:" != *":$TARGET_DIR:"* ]]; then
-    export PATH="$TARGET_DIR:$PATH"
-fi
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$TARGET_DIR"
+prepend_path "$HOME/.local/bin"
 
-get_latest_devsy_version() {
-    local url="https://github.com/devsy-org/devsy/releases/latest"
-    if has_cmd curl; then
-        curl -fsSIL "$url" 2>/dev/null | grep -i '^location:' | sed -E 's/.*\/tag\/v?([^ \r\n]+).*/\1/' | head -n 1 || true
-    fi
-}
-
-LATEST_VERSION="$(get_latest_devsy_version)"
+LATEST_VERSION="$(get_github_latest_version "devsy-org/devsy" "")"
 
 if has_cmd devsy; then
     CURRENT_VERSION="$(devsy --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo '')"

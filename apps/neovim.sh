@@ -10,28 +10,9 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DIR/lib/utils.sh"
 
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
-# ------------------------------------------------------------------------------
-# Helper: Fetch latest release tag from GitHub releases
-# ------------------------------------------------------------------------------
-get_latest_neovim_version() {
-    local version=""
-    if has_cmd curl; then
-        version="$(curl -fsSL https://api.github.com/repos/neovim/neovim/releases/latest 2>/dev/null | grep -m 1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
-        if [[ -z "$version" ]]; then
-            version="$(curl -fsSIL "https://github.com/neovim/neovim/releases/latest" 2>/dev/null | grep -i '^location:' | sed -E 's/.*\/tag\/v?([^ \r\n]+).*/\1/' || true)"
-        fi
-    fi
-    if [[ -z "$version" ]]; then
-        version="0.12.6"
-    fi
-    echo "$version"
-}
-
-LATEST_VERSION="$(get_latest_neovim_version)"
+LATEST_VERSION="$(get_github_latest_version "neovim/neovim" "0.12.6")"
 
 # ------------------------------------------------------------------------------
 # Check if Neovim is already installed and up to date
@@ -173,9 +154,7 @@ rm -rf "$TMP_DIR"
 # ------------------------------------------------------------------------------
 # Verify installation
 # ------------------------------------------------------------------------------
-if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path "$HOME/.local/bin"
 
 if has_cmd nvim; then
     log_success "Neovim installed successfully: $(nvim --version 2>/dev/null | head -n 1 || echo 'nvim in PATH')"

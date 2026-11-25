@@ -352,6 +352,60 @@ else
   echo "  SKIP: python3 not installed"
 fi
 
+# 11. lib/utils.sh helpers and .target symlink verification
+echo "==> Helper functions and .target symlink checks"
+# shellcheck source=/dev/null
+source "$REPO_DIR/lib/utils.sh"
+
+PATH_DIR="$TMP_ROOT/bin_test"
+mkdir -p "$PATH_DIR"
+ORIG_PATH="$PATH"
+PATH="/usr/bin"
+prepend_path "$PATH_DIR"
+assert_eq "$PATH_DIR:/usr/bin" "$PATH" "prepend_path adds existing directory"
+prepend_path "$PATH_DIR"
+assert_eq "$PATH_DIR:/usr/bin" "$PATH" "prepend_path is idempotent"
+prepend_path "$TMP_ROOT/does_not_exist"
+assert_eq "$PATH_DIR:/usr/bin" "$PATH" "prepend_path ignores missing directory"
+PATH=""
+prepend_path "$PATH_DIR"
+assert_eq "$PATH_DIR" "$PATH" "prepend_path avoids trailing colon on empty PATH"
+PATH="$ORIG_PATH"
+
+# Verify get_github_latest_version with mocked curl/wget
+MOCK_BIN="$TMP_ROOT/mock_bin"
+mkdir -p "$MOCK_BIN"
+cat >"$MOCK_BIN/curl" <<'EOF'
+#!/usr/bin/env bash
+case "${MOCK_CURL_MODE:-api}" in
+  api) echo '{"tag_name": "v1.2.3"}' ;;
+  loc) printf 'HTTP/2 302\r\nlocation: https://github.com/o/r/releases/tag/v2.4.0-rc1\r\n' ;;
+  empty) ;;
+esac
+EOF
+chmod +x "$MOCK_BIN/curl"
+cat >"$MOCK_BIN/wget" <<'EOF'
+#!/usr/bin/env bash
+if [[ "${MOCK_WGET_MODE:-fail}" == "ok" ]]; then
+  echo '{"tag_name": "v3.0.1"}'
+fi
+EOF
+chmod +x "$MOCK_BIN/wget"
+
+ver="$(PATH="$MOCK_BIN:$ORIG_PATH" MOCK_CURL_MODE=api get_github_latest_version "o/r" "0.0.1")"
+assert_eq "1.2.3" "$ver" "get_github_latest_version parses API tag_name"
+ver="$(PATH="$MOCK_BIN:$ORIG_PATH" MOCK_CURL_MODE=loc get_github_latest_version "o/r" "0.0.1")"
+assert_eq "2.4.0-rc1" "$ver" "get_github_latest_version parses Location header"
+ver="$(PATH="$MOCK_BIN:$ORIG_PATH" MOCK_CURL_MODE=empty MOCK_WGET_MODE=ok get_github_latest_version "o/r" "0.0.1")"
+assert_eq "3.0.1" "$ver" "get_github_latest_version falls back to wget"
+ver="$(PATH="$MOCK_BIN:$ORIG_PATH" MOCK_CURL_MODE=empty MOCK_WGET_MODE=fail get_github_latest_version "o/r" "9.9.9")"
+assert_eq "9.9.9" "$ver" "get_github_latest_version uses fallback when offline"
+ver="$(PATH="$MOCK_BIN:$ORIG_PATH" MOCK_CURL_MODE=empty MOCK_WGET_MODE=fail get_github_latest_version "o/r")"
+assert_eq "" "$ver" "get_github_latest_version returns empty when fallback omitted"
+
+# Verify configs/neovim/.target symlink target
+assert_eq "$REPO_DIR/configs/neovim/nvim" "$(readlink "$DEF_HOME/.config/nvim")" ".target links ~/.config/nvim to configs/neovim/nvim"
+
 echo ""
 echo "Results: ${PASSED} passed, ${FAILED} failed"
 [[ "$FAILED" -eq 0 ]]
