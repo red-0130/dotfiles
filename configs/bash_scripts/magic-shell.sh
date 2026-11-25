@@ -1,61 +1,47 @@
 # get current branch in git repo
 function parse_git_branch() {
-  BRANCH=$(git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
-  if [ ! "${BRANCH}" == "" ]; then
-    STAT=$(parse_git_dirty)
-    echo " [${BRANCH}${STAT}]"
+  local branch stat
+  branch=$(git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/' || true)
+  if [[ -n "$branch" ]]; then
+    stat=$(parse_git_dirty)
+    echo " [${branch}${stat}]"
   else
     echo ""
   fi
 }
 
 function parse_git_dirty {
-  # get current status of git repo
-  status=$(git status 2>&1 | tee)
-  dirty=$(
-    echo -n "${status}" 2>/dev/null | grep "modified:" &>/dev/null
-    echo "$?"
-  )
-  untracked=$(
-    echo -n "${status}" 2>/dev/null | grep "Untracked files" &>/dev/null
-    echo "$?"
-  )
-  ahead=$(
-    echo -n "${status}" 2>/dev/null | grep "Your branch is ahead of" &>/dev/null
-    echo "$?"
-  )
-  newfile=$(
-    echo -n "${status}" 2>/dev/null | grep "new file:" &>/dev/null
-    echo "$?"
-  )
-  renamed=$(
-    echo -n "${status}" 2>/dev/null | grep "renamed:" &>/dev/null
-    echo "$?"
-  )
-  deleted=$(
-    echo -n "${status}" 2>/dev/null | grep "deleted:" &>/dev/null
-    echo "$?"
-  )
-  bits=''
-  if [ "${renamed}" == "0" ]; then
-    bits=">${bits}"
-  fi
-  if [ "${ahead}" == "0" ]; then
-    bits="*${bits}"
-  fi
-  if [ "${newfile}" == "0" ]; then
-    bits="+${bits}"
-  fi
-  if [ "${untracked}" == "0" ]; then
-    bits="?${bits}"
-  fi
-  if [ "${deleted}" == "0" ]; then
-    bits="x${bits}"
-  fi
-  if [ "${dirty}" == "0" ]; then
-    bits="!${bits}"
-  fi
-  if [ ! "${bits}" == "" ]; then
+  local line xy ch
+  local dirty=0 untracked=0 ahead=0 newfile=0 renamed=0 deleted=0
+  local bits=''
+
+  while IFS= read -r line; do
+    if [[ "$line" == "## "* ]]; then
+      [[ "$line" == *"["*ahead\ [0-9]*"]" ]] && ahead=1
+      continue
+    fi
+    xy="${line:0:2}"
+    if [[ "$xy" == "??" ]]; then
+      untracked=1
+      continue
+    fi
+    for ch in "${xy:0:1}" "${xy:1:1}"; do
+      case "$ch" in
+        M) dirty=1 ;;
+        A) newfile=1 ;;
+        R) renamed=1 ;;
+        D) deleted=1 ;;
+      esac
+    done
+  done < <(git status --porcelain=v1 --branch 2>/dev/null)
+
+  [[ "$renamed" -eq 1 ]] && bits=">${bits}"
+  [[ "$ahead" -eq 1 ]] && bits="*${bits}"
+  [[ "$newfile" -eq 1 ]] && bits="+${bits}"
+  [[ "$untracked" -eq 1 ]] && bits="?${bits}"
+  [[ "$deleted" -eq 1 ]] && bits="x${bits}"
+  [[ "$dirty" -eq 1 ]] && bits="!${bits}"
+  if [[ -n "${bits}" ]]; then
     echo " ${bits}"
   else
     echo ""

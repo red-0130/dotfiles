@@ -251,6 +251,47 @@ assert_eq 0 "$rc" "is_app_installed nvm true with XDG_CONFIG_HOME/nvm/nvm.sh"
 ) && rc=0 || rc=$?
 assert_eq 1 "$rc" "is_app_installed nvm respects explicit NVM_DIR"
 
+# 9. magic-shell.sh git prompt states and scope hygiene
+echo "==> magic-shell.sh git prompt"
+MAGIC_OUT="$(
+  set -euo pipefail
+  # shellcheck source=/dev/null
+  source "$REPO_DIR/configs/bash_scripts/magic-shell.sh"
+  git init -q --bare "$TMP_ROOT/magic_remote.git"
+  git init -q -b main "$TMP_ROOT/magic_repo"
+  cd "$TMP_ROOT/magic_repo"
+  git config user.email "t@example.com"
+  git config user.name "Test"
+  echo "1" >f1 && echo "2" >f2 && echo "3" >f3
+  git add f1 f2 f3 && git commit -q -m "init"
+  git remote add origin "$TMP_ROOT/magic_remote.git"
+  git push -q -u origin main
+
+  [[ "$(LC_ALL=C parse_git_branch)" == " [main]" ]] || { echo "clean:$(parse_git_branch)"; exit 1; }
+  echo "u" >untracked.txt
+  [[ "$(LC_ALL=C parse_git_branch)" == " [main ?]" ]] || { echo "untracked:$(parse_git_branch)"; exit 1; }
+  echo "m" >>f1
+  [[ "$(LC_ALL=C parse_git_branch)" == " [main !?]" ]] || { echo "modified:$(parse_git_branch)"; exit 1; }
+  echo "n" >new.txt && git add new.txt
+  [[ "$(LC_ALL=C parse_git_branch)" == " [main !?+]" ]] || { echo "staged:$(parse_git_branch)"; exit 1; }
+  rm f2
+  [[ "$(LC_ALL=C parse_git_branch)" == " [main !x?+]" ]] || { echo "deleted:$(parse_git_branch)"; exit 1; }
+  git mv f3 f3_ren
+  [[ "$(LC_ALL=C parse_git_branch)" == " [main !x?+>]" ]] || { echo "renamed:$(parse_git_branch)"; exit 1; }
+  rm untracked.txt && git commit -q -am "ahead"
+  [[ "$(LC_ALL=C parse_git_branch)" == " [main *]" ]] || { echo "ahead:$(parse_git_branch)"; exit 1; }
+
+  BRANCH="keep" status="keep" dirty="keep" bits="keep"
+  parse_git_branch >/dev/null
+  [[ "$BRANCH:$status:$dirty:$bits" == "keep:keep:keep:keep" ]] || { echo "leaked"; exit 1; }
+  for v in STAT untracked ahead newfile renamed deleted line xy ch branch stat; do
+    [[ ! -v "$v" ]] || { echo "leaked:$v"; exit 1; }
+  done
+  echo "ok"
+)" && rc=0 || rc=$?
+assert_eq 0 "$rc" "magic-shell.sh handles all git states without leaking globals"
+assert_eq "ok" "$MAGIC_OUT" "magic-shell.sh prompt markers and scope check passed"
+
 echo ""
 echo "Results: ${PASSED} passed, ${FAILED} failed"
 [[ "$FAILED" -eq 0 ]]
