@@ -42,7 +42,7 @@ apt)
     # Add official eza apt repository for older Debian/Ubuntu
     log_info "Adding official eza apt repository..."
     install_apt_keyring https://raw.githubusercontent.com/eza-community/eza/main/deb.asc /etc/apt/keyrings/gierens.gpg --dearmor
-    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | run_privileged tee /etc/apt/sources.list.d/gierens.list >/dev/null
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] https://deb.gierens.de stable main" | run_privileged tee /etc/apt/sources.list.d/gierens.list >/dev/null
     run_privileged chmod 644 /etc/apt/sources.list.d/gierens.list
     run_privileged apt-get update -qq
     run_privileged apt-get install -y eza
