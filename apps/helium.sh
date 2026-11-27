@@ -120,7 +120,7 @@ case "$PKG" in
                 run_privileged ln -sf /etc/apt/keyrings/helium.gpg /usr/share/keyrings/helium.gpg 2>/dev/null || true
             fi
 
-            local arch
+            arch
             arch="$(dpkg --print-architecture 2>/dev/null || echo 'amd64')"
             echo "deb [arch=${arch} signed-by=/etc/apt/keyrings/helium.gpg] https://pkg.helium.computer/deb stable main" | run_privileged tee /etc/apt/sources.list.d/helium.list > /dev/null
             run_privileged chmod 644 /etc/apt/sources.list.d/helium.list
